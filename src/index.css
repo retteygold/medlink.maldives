@@ -1,0 +1,85 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Dhivehi Font */
+@font-face {
+  font-family: 'Dhivehi';
+  src: url('/fonts/Dhivehi.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  * {
+    @apply box-border;
+  }
+  
+  html {
+    @apply antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+  }
+  
+  body {
+    @apply bg-gray-50 text-gray-900;
+    overscroll-behavior-y: none;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-medical-500 hover:bg-medical-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-medical-500/30 active:scale-95 flex items-center justify-center gap-2;
+  }
+  
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-xl border-2 border-gray-200 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+  }
+  
+  .card {
+    @apply bg-white rounded-2xl shadow-lg shadow-gray-200/50 p-4 transition-all duration-200 hover:shadow-xl;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-medical-500 focus:outline-none transition-colors text-base;
+  }
+  
+  .gradient-header {
+    @apply bg-gradient-to-r from-medical-600 to-medical-500 text-white;
+  }
+  
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+  
+  /* Dhivehi font classes */
+  .dhivehi-font {
+    font-family: 'Dhivehi', 'MV Faseyha', 'Faruma', sans-serif;
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .dhivehi-text {
+    line-height: 1.8;
+    letter-spacing: 0.02em;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  .text-balance {
+    text-wrap: balance;
+  }
+}

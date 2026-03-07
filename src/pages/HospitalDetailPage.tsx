@@ -1,0 +1,197 @@
+import { useState, useEffect } from 'react'
+import { useParams } from 'react-router-dom'
+import { MapPin, Star, Phone, Mail, Clock, ChevronLeft, Globe, Building2, Siren, Pill, FlaskConical, Stethoscope } from 'lucide-react'
+import type { Hospital, Doctor } from '../types'
+import { getHospitalById, getDoctors } from '../lib/dataService'
+
+export default function HospitalDetailPage() {
+  const { id } = useParams<{ id: string }>()
+  const [hospital, setHospital] = useState<Hospital | null>(null)
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadHospitalData()
+  }, [id])
+
+  async function loadHospitalData() {
+    if (!id) return
+    
+    const hospitalData = await getHospitalById(id)
+    setHospital(hospitalData || null)
+    
+    const allDoctors = await getDoctors()
+    const hospitalDoctors = allDoctors.filter(d => 
+      d.hospital_name.toLowerCase().includes(hospitalData?.name.toLowerCase() || '')
+    )
+    setDoctors(hospitalDoctors)
+    setLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">Loading hospital details...</div>
+      </div>
+    )
+  }
+
+  if (!hospital) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">Hospital not found</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50 pb-20">
+      <div className="gradient-header px-4 pt-12 pb-6">
+        <button onClick={() => window.history.back()} className="flex items-center gap-2 text-white/80 mb-4">
+          <ChevronLeft size={20} /> Back
+        </button>
+        <div className="flex items-center gap-4">
+          <div className="w-20 h-20 bg-white/20 rounded-xl flex items-center justify-center">
+            <Building2 size={36} className="text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-white">{hospital.name}</h1>
+            <p className="text-white/80">{hospital.category}</p>
+            <div className="flex items-center gap-1 mt-1">
+              <Star size={16} className="text-yellow-300 fill-yellow-300" />
+              <span className="text-white">{hospital.rating?.toFixed(1) || '4.0'}</span>
+              <span className="text-white/60">({hospital.review_count || 0} reviews)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 -mt-4 space-y-3">
+        <div className="card p-4 flex gap-3">
+          <a href={`tel:${hospital.contact_phone || '+960 331-3553'}`} className="btn-primary flex-1">
+            <Phone size={18} /> Call Now
+          </a>
+          <a href={hospital.website || '#'} target="_blank" rel="noopener noreferrer" className="btn-secondary px-4">
+            <Globe size={18} />
+          </a>
+        </div>
+
+        <div className="card p-4">
+          <h3 className="font-bold text-gray-800 mb-2">About</h3>
+          <p className="text-gray-600 text-sm">
+            {hospital.description || `${hospital.name} is a registered healthcare facility in the Maldives providing ${hospital.category.toLowerCase()} services.`}
+          </p>
+        </div>
+
+        <div className="card p-4">
+          <h3 className="font-bold text-gray-800 mb-3">Facilities</h3>
+          <div className="grid grid-cols-2 gap-3">
+            {hospital.has_emergency && (
+              <div className="flex items-center gap-2 p-3 bg-red-50 rounded-lg">
+                <Siren size={20} className="text-red-600" />
+                <span className="text-sm font-medium text-red-700">24/7 Emergency</span>
+              </div>
+            )}
+            {hospital.has_pharmacy && (
+              <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                <Pill size={20} className="text-blue-600" />
+                <span className="text-sm font-medium text-blue-700">Pharmacy</span>
+              </div>
+            )}
+            {hospital.has_laboratory && (
+              <div className="flex items-center gap-2 p-3 bg-green-50 rounded-lg">
+                <FlaskConical size={20} className="text-green-600" />
+                <span className="text-sm font-medium text-green-700">Laboratory</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="card p-4">
+          <div className="flex items-start gap-3">
+            <Clock size={20} className="text-medical-600 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-gray-800">Opening Hours</h3>
+              <p className="text-medical-600 font-medium mt-1">{hospital.opening_hours || 'Contact for hours'}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card p-4">
+          <div className="flex items-start gap-3">
+            <MapPin size={20} className="text-medical-600 mt-0.5" />
+            <div>
+              <h3 className="font-bold text-gray-800">Address</h3>
+              <p className="text-gray-600 text-sm mt-1">{hospital.address}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="card p-4">
+          <h3 className="font-bold text-gray-800 mb-3">Contact</h3>
+          <a href={`tel:${hospital.contact_phone || ''}`} className="flex items-center gap-3 py-2">
+            <Phone size={20} className="text-medical-600" />
+            <span className="text-gray-700">{hospital.contact_phone || 'Contact via email'}</span>
+          </a>
+          <a href={`mailto:${hospital.email || ''}`} className="flex items-center gap-3 py-2">
+            <Mail size={20} className="text-medical-600" />
+            <span className="text-gray-700">{hospital.email || 'Not available'}</span>
+          </a>
+        </div>
+
+        {/* Doctors at this Hospital */}
+        <div className="card p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Stethoscope size={20} className="text-medical-600" />
+            <h3 className="font-bold text-gray-800">
+              Doctors at {hospital.name} ({doctors.length})
+            </h3>
+          </div>
+          
+          {doctors.length > 0 ? (
+            <div className="space-y-3">
+              {doctors.slice(0, 5).map((doctor) => (
+                <a
+                  key={doctor.id}
+                  href={`/doctor/${doctor.id}`}
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="w-12 h-12 bg-gradient-to-br from-medical-100 to-medical-200 rounded-full flex items-center justify-center">
+                    <span className="text-medical-700 text-sm font-bold">
+                      {doctor.name.split(' ').map(n => n[0]).join('')}
+                    </span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-bold text-gray-800 truncate">{doctor.name}</h4>
+                    <p className="text-medical-600 text-sm">{doctor.specialty}</p>
+                    {doctor.qualifications && doctor.qualifications.length > 0 && (
+                      <p className="text-gray-500 text-xs mt-0.5">{doctor.qualifications[0]}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Star size={14} className="text-yellow-500 fill-yellow-500" />
+                    <span className="text-sm font-bold text-gray-700">{doctor.rating?.toFixed(1) || '4.0'}</span>
+                  </div>
+                </a>
+              ))}
+              {doctors.length > 5 && (
+                <a 
+                  href={`/doctors?hospital=${encodeURIComponent(hospital.name)}`}
+                  className="block text-center text-medical-600 font-medium py-2 hover:bg-medical-50 rounded-lg transition-colors"
+                >
+                  View all {doctors.length} doctors →
+                </a>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-6">
+              <Stethoscope size={40} className="text-gray-300 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm">No doctors listed for this hospital yet.</p>
+              <p className="text-gray-400 text-xs mt-1">Contact the hospital directly for doctor information.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
