@@ -22,6 +22,7 @@ type SymptomCheckResponse = {
   redFlags: string[]
   selfCare: string[]
   firstAid: string[]
+  avoidList: string[]
   exercises: string[]
   recommendedSpecialties: string[]
   urgency: 'low' | 'medium' | 'high' | 'emergency'
@@ -141,6 +142,7 @@ export default function SmartMatcherPage() {
         redFlags: ['If symptoms are severe, worsening, or you have trouble breathing / chest pain / fainting, seek emergency care.'],
         selfCare: [],
         firstAid: [],
+        avoidList: ['Avoid alcohol and smoking. If symptoms worsen or you develop red flags, seek urgent care.'],
         exercises: [],
         recommendedSpecialties: Array.from(matchedSpecs),
         urgency: maxUrgency
@@ -325,6 +327,7 @@ export default function SmartMatcherPage() {
           <Section title="Red flags (seek urgent care)" items={analysis.redFlags} />
           <Section title="Self-care / home remedies" items={analysis.selfCare} />
           <Section title="First aid" items={analysis.firstAid} />
+          <Section title="Avoid" items={analysis.avoidList} />
           <Section title="Exercises" items={analysis.exercises} />
 
           {recommendedDoctors.length > 0 && (

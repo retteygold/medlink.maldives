@@ -5,6 +5,7 @@ type SymptomCheckResponse = {
   redFlags: string[]
   selfCare: string[]
   firstAid: string[]
+  avoidList: string[]
   exercises: string[]
   recommendedSpecialties: string[]
   urgency: 'low' | 'medium' | 'high' | 'emergency'
@@ -56,6 +57,10 @@ function clampUrgency(value: unknown): SymptomCheckResponse['urgency'] {
   return 'medium'
 }
 
+function fallbackList(items: string[], fallback: string[]): string[] {
+  return items.length ? items : fallback
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
@@ -73,7 +78,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   const system =
-    'You are a careful medical triage assistant. You do NOT diagnose. Provide general educational information and safe self-care. Always include red flags for emergencies. Output ONLY valid JSON matching the schema.'
+    'You are a careful medical triage assistant. You do NOT diagnose. Provide general educational information and safe self-care. Always include red flags for emergencies. Always include: selfCare, firstAid, avoidList. Exercises can be empty if not appropriate. Output ONLY valid JSON matching the schema.'
 
   const user = {
     schema: {
@@ -83,6 +88,7 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       redFlags: 'string[] (max 8, include emergency warning signs)',
       selfCare: 'string[] (max 8, safe home care)',
       firstAid: 'string[] (max 6, safe general steps)',
+      avoidList: 'string[] (max 8, what to avoid / what can worsen symptoms / safety warnings)',
       exercises: 'string[] (max 6, safe general suggestions if appropriate; otherwise empty)',
       recommendedSpecialties: 'string[] (max 5, use common specialties like General Medicine, Cardiology, Neurology, Pediatrics, Orthopedics, ENT, Dermatology, Gastroenterology, Gynecology, Ophthalmology, Dental)',
       urgency: 'one of: low, medium, high, emergency'
@@ -132,10 +138,28 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     redFlags: normalizeArray(parsed.redFlags),
     selfCare: normalizeArray(parsed.selfCare),
     firstAid: normalizeArray(parsed.firstAid),
+    avoidList: normalizeArray((parsed as any).avoidList),
     exercises: normalizeArray(parsed.exercises),
     recommendedSpecialties: normalizeArray(parsed.recommendedSpecialties),
     urgency: clampUrgency(parsed.urgency)
   }
+
+  result.selfCare = fallbackList(result.selfCare, [
+    'Drink fluids and rest.',
+    'Monitor symptoms and seek care if worsening.',
+    'Use simple foods if stomach upset (if tolerated).'
+  ])
+
+  result.firstAid = fallbackList(result.firstAid, [
+    'If severe symptoms develop (trouble breathing, chest pain, fainting), seek emergency care.',
+    'If high fever or dehydration signs occur, get urgent medical help.'
+  ])
+
+  result.avoidList = fallbackList(result.avoidList, [
+    'Avoid alcohol and smoking.',
+    'Avoid strenuous exercise if you feel weak, dizzy, or short of breath.',
+    'Avoid self-medicating with antibiotics unless prescribed.'
+  ])
 
   return res.status(200).json(result)
 }
