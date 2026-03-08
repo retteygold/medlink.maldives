@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Sparkles, MapPin, Star } from 'lucide-react'
-import type { Doctor, Hospital } from '../types'
+import { Sparkles, MapPin, Star, AlertTriangle } from 'lucide-react'
+import type { Doctor } from '../types'
+import { getDoctors } from '../lib/dataService'
 
-const symptomKeywords: Record<string, { specialties: string[], urgency: string, description: string }> = {
+const symptomKeywords: Record<string, { specialties: string[]; urgency: string; description: string }> = {
   'chest pain': { specialties: ['Cardiology'], urgency: 'emergency', description: 'Chest pain requires immediate cardiac evaluation' },
   'headache': { specialties: ['Neurology', 'General Medicine'], urgency: 'medium', description: 'Persistent headaches may need neurological evaluation' },
   'fever': { specialties: ['General Medicine', 'Pediatrics'], urgency: 'medium', description: 'General physicians can evaluate fever causes' },
@@ -14,36 +15,64 @@ const symptomKeywords: Record<string, { specialties: string[], urgency: string, 
   'child': { specialties: ['Pediatrics'], urgency: 'medium', description: 'Children should see a pediatric specialist' },
 }
 
-const mockDoctors: Doctor[] = [
-  { id: '1', name: 'Dr. Ahmed Naseem', specialty: 'Cardiology', hospital_id: '1', hospital_name: 'ADK Hospital', rating: 4.8, review_count: 124, is_active: true, created_at: '2024-01-01' },
-  { id: '2', name: 'Dr. Aminath Shah', specialty: 'Pediatrics', hospital_id: '2', hospital_name: 'TreeTop Hospital', rating: 4.9, review_count: 89, is_active: true, created_at: '2024-01-01' },
-  { id: '3', name: 'Dr. Mohamed Rafeeu', specialty: 'Orthopedics', hospital_id: '1', hospital_name: 'ADK Hospital', rating: 4.7, review_count: 156, is_active: true, created_at: '2024-01-01' },
-]
-
-const mockHospitals: Hospital[] = [
-  { id: '1', name: 'ADK Hospital', address: 'Male\', Maldives', category: 'Private Hospital', location_type: 'Male', has_emergency: true, has_pharmacy: true, has_laboratory: true, has_radiology: true, rating: 4.7, review_count: 523, is_active: true, created_at: '2024-01-01' },
-  { id: '2', name: 'TreeTop Hospital', address: 'Hulhumale\', Maldives', category: 'Private Hospital', location_type: 'Hulhumale', has_emergency: true, has_pharmacy: true, has_laboratory: true, has_radiology: true, rating: 4.6, review_count: 412, is_active: true, created_at: '2024-01-01' },
-]
+type SymptomCheckResponse = {
+  summary: string
+  possibleConditions: string[]
+  commonSymptoms: string[]
+  redFlags: string[]
+  selfCare: string[]
+  firstAid: string[]
+  exercises: string[]
+  recommendedSpecialties: string[]
+  urgency: 'low' | 'medium' | 'high' | 'emergency'
+}
 
 export default function SmartMatcherPage() {
   const navigate = useNavigate()
   const [symptoms, setSymptoms] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [results, setResults] = useState<{
-    matchedSpecialties: string[]
-    urgency: string
-    description: string
-    doctors: Doctor[]
-    hospitals: Hospital[]
-  } | null>(null)
+  const [analysis, setAnalysis] = useState<SymptomCheckResponse | null>(null)
+  const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([])
+  const [error, setError] = useState<string | null>(null)
 
-  const analyzeSymptoms = () => {
+  const analyzeSymptoms = async () => {
+    const input = symptoms.trim()
+    if (!input) return
+
     setIsAnalyzing(true)
-    setTimeout(() => {
-      const symptomLower = symptoms.toLowerCase()
+    setError(null)
+    setAnalysis(null)
+    setRecommendedDoctors([])
+
+    try {
+      const resp = await fetch('/api/symptom-check', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ symptoms: input })
+      })
+
+      if (!resp.ok) {
+        const msg = await resp.text()
+        throw new Error(msg || 'Failed to analyze symptoms')
+      }
+
+      const data = (await resp.json()) as SymptomCheckResponse
+      setAnalysis(data)
+
+      const doctors = await getDoctors()
+      const specialtySet = new Set((data.recommendedSpecialties || []).map(s => s.toLowerCase().trim()).filter(Boolean))
+
+      const matched = specialtySet.size
+        ? doctors.filter(d => specialtySet.has((d.specialty || '').toLowerCase().trim()))
+        : doctors
+
+      const sorted = [...matched].sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      setRecommendedDoctors(sorted.slice(0, 10))
+    } catch {
+      const symptomLower = input.toLowerCase()
       const matchedSpecs = new Set<string>()
-      let maxUrgency = 'low'
-      let descriptions: string[] = []
+      let maxUrgency: SymptomCheckResponse['urgency'] = 'medium'
+      const descriptions: string[] = []
 
       Object.entries(symptomKeywords).forEach(([keyword, data]) => {
         if (symptomLower.includes(keyword)) {
@@ -51,23 +80,35 @@ export default function SmartMatcherPage() {
           descriptions.push(data.description)
           if (data.urgency === 'emergency') maxUrgency = 'emergency'
           else if (data.urgency === 'high' && maxUrgency !== 'emergency') maxUrgency = 'high'
+          else if (data.urgency === 'low' && maxUrgency !== 'emergency' && maxUrgency !== 'high') maxUrgency = 'low'
         }
       })
 
-      const matchedSpecialties = Array.from(matchedSpecs)
-      const matchedDoctors = matchedSpecialties.length > 0 
-        ? mockDoctors.filter(doc => matchedSpecialties.includes(doc.specialty))
-        : mockDoctors
+      const fallback: SymptomCheckResponse = {
+        summary: descriptions[0] || 'Based on your symptoms, we recommend consulting a doctor for proper evaluation.',
+        possibleConditions: [],
+        commonSymptoms: [],
+        redFlags: ['If symptoms are severe, worsening, or you have trouble breathing / chest pain / fainting, seek emergency care.'],
+        selfCare: [],
+        firstAid: [],
+        exercises: [],
+        recommendedSpecialties: Array.from(matchedSpecs),
+        urgency: maxUrgency
+      }
 
-      setResults({
-        matchedSpecialties,
-        urgency: maxUrgency,
-        description: descriptions[0] || 'Based on your symptoms, we recommend consulting with these specialists.',
-        doctors: matchedDoctors,
-        hospitals: mockHospitals
-      })
+      setError('AI service is temporarily unavailable. Showing basic recommendations.')
+      setAnalysis(fallback)
+
+      const doctors = await getDoctors()
+      const specialtySet = new Set(fallback.recommendedSpecialties.map(s => s.toLowerCase().trim()).filter(Boolean))
+      const matched = specialtySet.size
+        ? doctors.filter(d => specialtySet.has((d.specialty || '').toLowerCase().trim()))
+        : doctors
+      const sorted = [...matched].sort((a, b) => (b.rating || 0) - (a.rating || 0))
+      setRecommendedDoctors(sorted.slice(0, 10))
+    } finally {
       setIsAnalyzing(false)
-    }, 1500)
+    }
   }
 
   const getUrgencyColor = (urgency: string) => {
@@ -77,6 +118,20 @@ export default function SmartMatcherPage() {
       case 'medium': return 'bg-yellow-500 text-white'
       default: return 'bg-green-500 text-white'
     }
+  }
+
+  function Section({ title, items }: { title: string; items: string[] }) {
+    if (!items || items.length === 0) return null
+    return (
+      <div className="card p-4">
+        <h3 className="font-bold text-gray-800 mb-2">{title}</h3>
+        <div className="space-y-2">
+          {items.map((it, idx) => (
+            <div key={idx} className="text-sm text-gray-600">• {it}</div>
+          ))}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -139,23 +194,48 @@ export default function SmartMatcherPage() {
         </div>
       </div>
 
-      {results && (
+      {error && (
+        <div className="px-4 mt-4">
+          <div className="card p-4 bg-yellow-50 border border-yellow-200">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="text-yellow-700 mt-0.5" size={18} />
+              <div className="text-sm text-yellow-800">{error}</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {analysis && (
         <div className="px-4 mt-4 space-y-4">
+          <div className="card p-4 bg-red-50 border border-red-200">
+            <h3 className="font-bold text-red-800 mb-2">Medical disclaimer</h3>
+            <p className="text-sm text-red-700">
+              This feature provides general health information and is not a medical diagnosis. If you have severe symptoms, worsening symptoms, or emergency warning signs, seek urgent medical care.
+            </p>
+          </div>
+
           <div className="card p-4">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-bold text-gray-800">Analysis Results</h3>
-              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${getUrgencyColor(results.urgency)}`}>
-                {results.urgency}
+              <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${getUrgencyColor(analysis.urgency)}`}>
+                {analysis.urgency}
               </span>
             </div>
-            <p className="text-gray-600 text-sm">{results.description}</p>
+            <p className="text-gray-600 text-sm">{analysis.summary}</p>
           </div>
 
-          {results.doctors.length > 0 && (
+          <Section title="Possible conditions (not a diagnosis)" items={analysis.possibleConditions} />
+          <Section title="Common symptoms" items={analysis.commonSymptoms} />
+          <Section title="Red flags (seek urgent care)" items={analysis.redFlags} />
+          <Section title="Self-care / home remedies" items={analysis.selfCare} />
+          <Section title="First aid" items={analysis.firstAid} />
+          <Section title="Exercises" items={analysis.exercises} />
+
+          {recommendedDoctors.length > 0 && (
             <div>
               <h3 className="font-bold text-gray-800 mb-3">Recommended Doctors</h3>
               <div className="space-y-3">
-                {results.doctors.map((doctor) => (
+                {recommendedDoctors.map((doctor) => (
                   <Link key={doctor.id} to={`/doctor/${doctor.id}`} className="card flex items-center gap-4 p-4">
                     <div className="w-14 h-14 bg-medical-100 rounded-full flex items-center justify-center">
                       <span className="text-medical-700 font-bold">
@@ -171,7 +251,7 @@ export default function SmartMatcherPage() {
                     </div>
                     <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
                       <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                      <span className="text-sm font-bold text-yellow-700">{doctor.rating}</span>
+                      <span className="text-sm font-bold text-yellow-700">{doctor.rating || '—'}</span>
                     </div>
                   </Link>
                 ))}

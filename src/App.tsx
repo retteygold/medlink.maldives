@@ -1,4 +1,4 @@
-import { Routes, Route, useLocation } from 'react-router-dom'
+import { Link, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { Home, Search, User, MessageCircle } from 'lucide-react'
 import HomePage from './pages/HomePage'
 import SearchPage from './pages/SearchPage'
@@ -22,6 +22,7 @@ import { Footer } from './components/Footer'
 
 function App() {
   const location = useLocation()
+  const navigate = useNavigate()
 
   const hideNavPaths = ['/doctor/', '/hospital/', '/smart-match', '/admin', '/community', '/ask']
   const showNav = !hideNavPaths.some(path => location.pathname.startsWith(path))
@@ -72,7 +73,7 @@ function App() {
             <NavLink to="/" icon={<Home size={24} />} label="Home" />
             <NavLink to="/search" icon={<Search size={24} />} label="Search" />
             <button
-              onClick={() => window.location.href = '/smart-match'}
+              onClick={() => navigate('/smart-match')}
               className="bg-medical-500 text-white rounded-full p-3 shadow-lg shadow-medical-500/40 hover:bg-medical-600 transition-all active:scale-95"
             >
               <img src="/images/logo.png" alt="Smart Match" className="w-6 h-6" />
@@ -91,15 +92,15 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
   const isActive = location.pathname === to
 
   return (
-    <a
-      href={to}
+    <Link
+      to={to}
       className={`flex flex-col items-center justify-center w-16 h-full transition-colors ${
         isActive ? 'text-medical-600' : 'text-gray-400 hover:text-gray-600'
       }`}
     >
       {icon}
       <span className="text-xs mt-1 font-medium">{label}</span>
-    </a>
+    </Link>
   )
 }
 
