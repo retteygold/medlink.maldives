@@ -13,6 +13,9 @@ import SmartMatcherPage from './pages/SmartMatcherPage'
 import CommunityPage from './pages/CommunityPage'
 import AskQuestionPage from './pages/AskQuestionPage'
 import QuestionDetailPage from './pages/QuestionDetailPage'
+import MedicineHelpPage from './pages/MedicineHelpPage'
+import MedicineHelpNewPage from './pages/MedicineHelpNewPage'
+import MedicineHelpDetailPage from './pages/MedicineHelpDetailPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminHospitals from './pages/admin/AdminHospitals'
 import AdminDoctors from './pages/admin/AdminDoctors'
@@ -54,9 +57,9 @@ function App() {
 
           {/* Medicine Help (requires user login) */}
           <Route element={<RequireAuth />}>
-            <Route path="/medicine-help" element={<div />} />
-            <Route path="/medicine-help/new" element={<div />} />
-            <Route path="/medicine-help/:id" element={<div />} />
+            <Route path="/medicine-help" element={<MedicineHelpPage />} />
+            <Route path="/medicine-help/new" element={<MedicineHelpNewPage />} />
+            <Route path="/medicine-help/:id" element={<MedicineHelpDetailPage />} />
           </Route>
           
           {/* Admin Routes */}

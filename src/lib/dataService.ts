@@ -28,6 +28,43 @@ interface DBHospital {
   review_count: number
 }
 
+// Medicine Help (must match Supabase schema)
+type MedicineRequestStatus = 'open' | 'in_progress' | 'fulfilled' | 'cancelled'
+
+interface DBMedicineRequest {
+  id: string
+  created_at: string
+  updated_at: string
+  user_id: string
+  title: string | null
+  medicine_name: string | null
+  dosage: string | null
+  quantity: number | null
+  needed_by: string | null
+  notes: string | null
+  location_type: string | null
+  atoll: string | null
+  prescription_image_path: string | null
+  previous_medicine_image_path: string | null
+  status: MedicineRequestStatus
+}
+
+interface DBMedicineConversation {
+  id: string
+  created_at: string
+  request_id: string
+  requester_id: string
+  helper_id: string
+}
+
+interface DBMedicineMessage {
+  id: string
+  created_at: string
+  conversation_id: string
+  sender_id: string
+  message: string
+}
+
 interface DBDoctor {
   id: string
   name: string
@@ -345,6 +382,189 @@ export async function searchDoctors(query: string): Promise<Doctor[]> {
   } catch (err) {
     console.error('Error searching doctors:', err)
     return []
+  }
+}
+
+// =====================
+// Medicine Help
+// =====================
+
+export async function listMedicineRequests(): Promise<DBMedicineRequest[]> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_requests')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error listing medicine requests:', err)
+    return []
+  }
+}
+
+export async function getMedicineRequestById(id: string): Promise<DBMedicineRequest | undefined> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_requests')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error fetching medicine request:', err)
+    return undefined
+  }
+}
+
+export async function createMedicineRequest(payload: {
+  title?: string
+  medicine_name?: string
+  dosage?: string
+  quantity?: number | null
+  needed_by?: string | null
+  notes?: string
+  location_type?: string | null
+  atoll?: string | null
+  prescription_image_path?: string | null
+  previous_medicine_image_path?: string | null
+}): Promise<DBMedicineRequest | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const insertPayload: any = {
+      user_id: user.id,
+      title: payload.title || null,
+      medicine_name: payload.medicine_name || null,
+      dosage: payload.dosage || null,
+      quantity: typeof payload.quantity === 'number' ? payload.quantity : null,
+      needed_by: payload.needed_by || null,
+      notes: payload.notes || null,
+      location_type: payload.location_type || null,
+      atoll: payload.atoll || null,
+      prescription_image_path: payload.prescription_image_path || null,
+      previous_medicine_image_path: payload.previous_medicine_image_path || null,
+      status: 'open'
+    }
+
+    const { data, error } = await supabase
+      .from('medicine_requests')
+      .insert(insertPayload)
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error creating medicine request:', err)
+    return undefined
+  }
+}
+
+export async function uploadMedicineRequestImage(file: File): Promise<string> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError) throw sessionError
+  const user = sessionData.session?.user
+  if (!user) throw new Error('Not authenticated')
+
+  const safeName = (file.name || 'image').replace(/[^a-zA-Z0-9._-]+/g, '-')
+  const path = `${user.id}/${Date.now()}-${safeName}`
+
+  const { error } = await supabase.storage.from('medicine-requests').upload(path, file, {
+    upsert: false,
+    contentType: file.type || undefined
+  })
+  if (error) throw error
+  return path
+}
+
+export async function getSignedMedicineRequestImageUrl(path: string, expiresInSeconds = 60 * 60): Promise<string> {
+  const { data, error } = await supabase.storage
+    .from('medicine-requests')
+    .createSignedUrl(path, expiresInSeconds)
+  if (error) throw error
+  if (!data?.signedUrl) throw new Error('Failed to create signed URL')
+  return data.signedUrl
+}
+
+export async function listMedicineConversationsForRequest(requestId: string): Promise<DBMedicineConversation[]> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_conversations')
+      .select('*')
+      .eq('request_id', requestId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error listing medicine conversations:', err)
+    return []
+  }
+}
+
+export async function createOrGetMedicineConversation(payload: {
+  request_id: string
+  requester_id: string
+  helper_id: string
+}): Promise<DBMedicineConversation | undefined> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_conversations')
+      .upsert(payload, { onConflict: 'request_id,requester_id,helper_id' })
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error creating medicine conversation:', err)
+    return undefined
+  }
+}
+
+export async function listMedicineMessages(conversationId: string): Promise<DBMedicineMessage[]> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_messages')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .order('created_at', { ascending: true })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error listing medicine messages:', err)
+    return []
+  }
+}
+
+export async function sendMedicineMessage(payload: {
+  conversation_id: string
+  message: string
+}): Promise<DBMedicineMessage | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const insertPayload: any = {
+      conversation_id: payload.conversation_id,
+      sender_id: user.id,
+      message: payload.message
+    }
+
+    const { data, error } = await supabase
+      .from('medicine_messages')
+      .insert(insertPayload)
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error sending medicine message:', err)
+    return undefined
   }
 }
 
