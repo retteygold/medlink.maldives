@@ -30,10 +30,60 @@ type SymptomCheckResponse = {
 export default function SmartMatcherPage() {
   const navigate = useNavigate()
   const [symptoms, setSymptoms] = useState('')
+  const [symptomDraft, setSymptomDraft] = useState('')
+  const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysis, setAnalysis] = useState<SymptomCheckResponse | null>(null)
   const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([])
   const [error, setError] = useState<string | null>(null)
+
+  const commonSymptomOptions = [
+    'Running nose',
+    'Sneezing',
+    'Sore throat',
+    'Cough',
+    'Fever',
+    'Headache',
+    'Body aches',
+    'Fatigue',
+    'Nausea',
+    'Vomiting',
+    'Diarrhea',
+    'Stomach pain',
+    'Chest pain',
+    'Shortness of breath',
+    'Dizziness',
+    'Back pain',
+    'Joint pain',
+    'Tooth pain',
+    'Eye pain',
+    'Skin rash'
+  ]
+
+  const syncSymptomsText = (nextSelected: string[]) => {
+    const trimmed = symptoms.trim()
+    const next = nextSelected.length ? nextSelected.join(', ') : ''
+    if (!trimmed || trimmed === selectedSymptoms.join(', ')) {
+      setSymptoms(next)
+    }
+  }
+
+  const addSymptomFromDraft = () => {
+    const s = symptomDraft.trim()
+    if (!s) return
+
+    const exists = selectedSymptoms.some(x => x.toLowerCase().trim() === s.toLowerCase())
+    const nextSelected = exists ? selectedSymptoms : [...selectedSymptoms, s]
+    setSelectedSymptoms(nextSelected)
+    setSymptomDraft('')
+    syncSymptomsText(nextSelected)
+  }
+
+  const removeSelectedSymptom = (value: string) => {
+    const nextSelected = selectedSymptoms.filter(s => s !== value)
+    setSelectedSymptoms(nextSelected)
+    syncSymptomsText(nextSelected)
+  }
 
   const analyzeSymptoms = async () => {
     const input = symptoms.trim()
@@ -174,6 +224,52 @@ export default function SmartMatcherPage() {
           <label className="block text-sm font-medium text-gray-700 mb-2">
             What symptoms are you experiencing?
           </label>
+          <div className="flex gap-2 mb-3">
+            <div className="flex-1">
+              <input
+                value={symptomDraft}
+                onChange={(e) => setSymptomDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault()
+                    addSymptomFromDraft()
+                  }
+                }}
+                list="symptom-options"
+                placeholder="Select a symptom (dropdown)"
+                className="input-field"
+              />
+              <datalist id="symptom-options">
+                {commonSymptomOptions.map((opt) => (
+                  <option key={opt} value={opt} />
+                ))}
+              </datalist>
+            </div>
+            <button
+              type="button"
+              onClick={addSymptomFromDraft}
+              className="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold"
+            >
+              Add
+            </button>
+          </div>
+
+          {selectedSymptoms.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-3">
+              {selectedSymptoms.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => removeSelectedSymptom(s)}
+                  className="px-3 py-1 rounded-full bg-medical-50 text-medical-700 text-xs font-semibold border border-medical-100"
+                  title="Click to remove"
+                >
+                  {s} ×
+                </button>
+              ))}
+            </div>
+          )}
+
           <textarea
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}

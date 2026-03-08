@@ -29,6 +29,19 @@ function safeJsonParse<T>(value: string): T | null {
   }
 }
 
+function extractFirstJsonObject(value: string): string | null {
+  const trimmed = value.trim()
+  const withoutFences = trimmed
+    .replace(/^```(json)?/i, '')
+    .replace(/```$/i, '')
+    .trim()
+
+  const start = withoutFences.indexOf('{')
+  const end = withoutFences.lastIndexOf('}')
+  if (start === -1 || end === -1 || end <= start) return null
+  return withoutFences.slice(start, end + 1)
+}
+
 function normalizeArray(value: unknown): string[] {
   if (!Array.isArray(value)) return []
   return value
@@ -106,7 +119,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(502).json({ error: 'Invalid Groq response' })
   }
 
-  const parsed = safeJsonParse<Partial<SymptomCheckResponse>>(content)
+  const jsonCandidate = extractFirstJsonObject(content) ?? content
+  const parsed = safeJsonParse<Partial<SymptomCheckResponse>>(jsonCandidate)
   if (!parsed) {
     return res.status(502).json({ error: 'Model did not return valid JSON', raw: content })
   }
