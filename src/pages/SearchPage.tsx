@@ -3,9 +3,12 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Search, Users, Building2, ChevronRight, Home } from 'lucide-react'
 import { searchDoctors, searchHospitals } from '../lib/dataService'
 import type { Doctor, Hospital } from '../types'
+import { useLanguage } from '../lib/languageContext'
+import { transliterateToDhivehi } from '../lib/transliteration'
 
 export default function SearchPage() {
   const navigate = useNavigate()
+  const { language } = useLanguage()
   const [searchParams] = useSearchParams()
   const q = useMemo(() => (searchParams.get('q') || '').trim(), [searchParams])
 
@@ -111,8 +114,12 @@ export default function SearchPage() {
             {hospitals.slice(0, 10).map((h) => (
               <Link key={h.id} to={`/hospital/${h.id}`} className="card p-4 flex items-center justify-between">
                 <div className="min-w-0">
-                  <div className="font-bold text-gray-800 truncate">{h.name}</div>
-                  <div className="text-sm text-gray-500 truncate">{h.category} • {h.address}</div>
+                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {language === 'dv' ? transliterateToDhivehi(h.name) : h.name}
+                  </div>
+                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {(language === 'dv' ? transliterateToDhivehi(h.category) : h.category)} • {(language === 'dv' ? transliterateToDhivehi(h.address) : h.address)}
+                  </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
               </Link>
@@ -136,8 +143,12 @@ export default function SearchPage() {
             {doctors.slice(0, 10).map((d) => (
               <Link key={d.id} to={`/doctor/${d.id}`} className="card p-4 flex items-center justify-between">
                 <div className="min-w-0">
-                  <div className="font-bold text-gray-800 truncate">{d.name}</div>
-                  <div className="text-sm text-gray-500 truncate">{d.specialty} • {d.hospital_name}</div>
+                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {language === 'dv' ? transliterateToDhivehi(d.name) : d.name}
+                  </div>
+                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {(language === 'dv' ? transliterateToDhivehi(d.specialty) : d.specialty)} • {(language === 'dv' ? transliterateToDhivehi(d.hospital_name) : d.hospital_name)}
+                  </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
               </Link>

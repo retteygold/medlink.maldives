@@ -4,6 +4,7 @@ import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { getDoctors, getHospitals } from '../lib/dataService'
+import { transliterateToDhivehi } from '../lib/transliteration'
 import type { Doctor, Hospital } from '../types'
 
 const specialties = [
@@ -142,7 +143,9 @@ export default function HomePage() {
               <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${specialty.color}`}>
                 <specialty.icon size={24} />
               </div>
-              <span className="text-xs text-center font-medium text-gray-700">{specialty.name}</span>
+              <span className={`text-xs text-center font-medium text-gray-700 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                {language === 'dv' ? transliterateToDhivehi(specialty.name) : specialty.name}
+              </span>
             </Link>
           ))}
         </div>
@@ -167,8 +170,12 @@ export default function HomePage() {
                 className="card p-4 flex items-center justify-between"
               >
                 <div className="min-w-0">
-                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{doctor.name}</div>
-                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{doctor.specialty} • {doctor.hospital_name}</div>
+                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name}
+                  </div>
+                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {(language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty)} • {(language === 'dv' ? transliterateToDhivehi(doctor.hospital_name) : doctor.hospital_name)}
+                  </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
               </Link>
@@ -196,8 +203,12 @@ export default function HomePage() {
                 className="card p-4 flex items-center justify-between"
               >
                 <div className="min-w-0">
-                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{hospital.name}</div>
-                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{hospital.category} • {hospital.address}</div>
+                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {language === 'dv' ? transliterateToDhivehi(hospital.name) : hospital.name}
+                  </div>
+                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {(language === 'dv' ? transliterateToDhivehi(hospital.category) : hospital.category)} • {(language === 'dv' ? transliterateToDhivehi(hospital.address) : hospital.address)}
+                  </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
               </Link>
