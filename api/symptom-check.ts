@@ -61,6 +61,112 @@ function fallbackList(items: string[], fallback: string[]): string[] {
   return items.length ? items : fallback
 }
 
+function buildSymptomBasedFallback(symptoms: string) {
+  const s = symptoms.toLowerCase()
+
+  if (s.includes('chest') || s.includes('shortness of breath') || s.includes('breath') || s.includes('pressure')) {
+    return {
+      selfCare: [
+        'Stop exertion and rest in a comfortable position.',
+        'Avoid driving yourself if you feel unwell; ask someone to assist you.',
+        'If symptoms are mild but persistent, arrange urgent medical evaluation.'
+      ],
+      firstAid: [
+        'If chest pain is severe, lasts more than a few minutes, or comes with sweating/nausea/fainting, call emergency services immediately.',
+        'If breathing is difficult, sit upright and seek emergency care now.'
+      ],
+      avoidList: [
+        'Avoid strenuous activity.',
+        'Avoid smoking or vaping.',
+        'Avoid delaying care if symptoms are new, severe, or worsening.'
+      ],
+      exercises: [] as string[]
+    }
+  }
+
+  if (s.includes('fever') || s.includes('cough') || s.includes('sore throat') || s.includes('runny') || s.includes('running nose') || s.includes('sneez')) {
+    return {
+      selfCare: [
+        'Drink warm fluids and rest.',
+        'Use saline spray or steam inhalation for a blocked/runny nose.',
+        'Gargle warm salt water for sore throat (if appropriate).'
+      ],
+      firstAid: [
+        'Seek urgent care if you have trouble breathing, chest pain, blue lips, confusion, or severe weakness.',
+        'Seek care if fever is very high or lasts more than 3 days, or if you are pregnant/elderly/immune-compromised.'
+      ],
+      avoidList: [
+        'Avoid dehydration (do not skip fluids).',
+        'Avoid smoking and secondhand smoke.',
+        'Avoid antibiotics unless prescribed by a clinician.'
+      ],
+      exercises: [
+        'Light walking and gentle stretching only if you feel stable; rest if symptoms worsen.'
+      ]
+    }
+  }
+
+  if (s.includes('diarr') || s.includes('vomit') || s.includes('nausea') || s.includes('stomach') || s.includes('abdomen')) {
+    return {
+      selfCare: [
+        'Sip oral rehydration solution (ORS) or clear fluids frequently.',
+        'Eat bland foods (rice/banana/toast) if tolerated.',
+        'Rest and monitor urine output (dehydration warning sign).'
+      ],
+      firstAid: [
+        'Seek urgent care if there is blood in stool/vomit, severe abdominal pain, fainting, or signs of dehydration.',
+        'Seek care if symptoms persist beyond 24–48 hours or you cannot keep fluids down.'
+      ],
+      avoidList: [
+        'Avoid alcohol, very spicy foods, and high-fat foods.',
+        'Avoid unclean water or street food while recovering.',
+        'Avoid anti-diarrheal medicine if there is fever or blood in stool unless a clinician advises.'
+      ],
+      exercises: [] as string[]
+    }
+  }
+
+  if (s.includes('headache') || s.includes('migraine')) {
+    return {
+      selfCare: [
+        'Hydrate and rest in a dark, quiet room.',
+        'Use a cold or warm compress on the forehead/neck.',
+        'Track triggers like sleep loss, dehydration, or skipped meals.'
+      ],
+      firstAid: [
+        'Seek urgent care if headache is sudden and severe, with weakness, confusion, fainting, stiff neck, or vision changes.',
+        'Seek care if headache is worsening over days or after a head injury.'
+      ],
+      avoidList: [
+        'Avoid dehydration and skipping meals.',
+        'Avoid excessive caffeine and alcohol.',
+        'Avoid overusing pain medicines (can worsen headaches).' 
+      ],
+      exercises: [
+        'Gentle neck/shoulder stretches and posture breaks if it feels like tension headache.'
+      ]
+    }
+  }
+
+  return {
+    selfCare: [
+      'Drink fluids and rest.',
+      'Monitor symptoms and seek care if worsening.',
+      'Use simple foods if stomach upset (if tolerated).'
+    ],
+    firstAid: [
+      'If severe symptoms develop (trouble breathing, chest pain, fainting), seek emergency care.',
+      'If high fever or dehydration signs occur, get urgent medical help.'
+    ],
+    avoidList: [
+      'Avoid alcohol and smoking.',
+      'Avoid strenuous exercise if you feel weak, dizzy, or short of breath.',
+      'Avoid self-medicating with antibiotics unless prescribed.'
+    ],
+    exercises: [] as string[]
+  }
+}
+
 export default async function handler(req: ApiRequest, res: ApiResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST')
@@ -144,22 +250,12 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     urgency: clampUrgency(parsed.urgency)
   }
 
-  result.selfCare = fallbackList(result.selfCare, [
-    'Drink fluids and rest.',
-    'Monitor symptoms and seek care if worsening.',
-    'Use simple foods if stomach upset (if tolerated).'
-  ])
-
-  result.firstAid = fallbackList(result.firstAid, [
-    'If severe symptoms develop (trouble breathing, chest pain, fainting), seek emergency care.',
-    'If high fever or dehydration signs occur, get urgent medical help.'
-  ])
-
-  result.avoidList = fallbackList(result.avoidList, [
-    'Avoid alcohol and smoking.',
-    'Avoid strenuous exercise if you feel weak, dizzy, or short of breath.',
-    'Avoid self-medicating with antibiotics unless prescribed.'
-  ])
+  const symptomFallback = buildSymptomBasedFallback(symptoms)
+  result.summary = result.summary || 'General guidance based on your symptoms. For a proper diagnosis and treatment plan, consult a licensed clinician.'
+  result.selfCare = fallbackList(result.selfCare, symptomFallback.selfCare)
+  result.firstAid = fallbackList(result.firstAid, symptomFallback.firstAid)
+  result.avoidList = fallbackList(result.avoidList, symptomFallback.avoidList)
+  result.exercises = fallbackList(result.exercises, symptomFallback.exercises)
 
   return res.status(200).json(result)
 }
