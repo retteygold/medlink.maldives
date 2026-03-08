@@ -129,6 +129,86 @@ export async function getHospitals(): Promise<Hospital[]> {
   }
 }
 
+export async function createHospital(payload: {
+  name: string
+  category: Hospital['category']
+  address?: string
+  contact_phone?: string
+  email?: string
+  website?: string
+  opening_hours?: string
+  image_url?: string
+}): Promise<Hospital | undefined> {
+  try {
+    const insertPayload: any = {
+      name: payload.name,
+      category: payload.category,
+      address: payload.address || '',
+      contact_phone: payload.contact_phone || null,
+      email: payload.email || null,
+      website: payload.website || null,
+      opening_hours: payload.opening_hours || null,
+      image_url: payload.image_url || null,
+      location_type: 'Male',
+      has_emergency: false,
+      has_pharmacy: false,
+      has_laboratory: false,
+      has_radiology: false,
+      is_active: true
+    }
+
+    const { data, error } = await supabase
+      .from('hospitals')
+      .insert(insertPayload)
+      .select('*')
+      .single()
+    if (error) throw error
+    return transformHospital(data)
+  } catch (err) {
+    console.error('Error creating hospital:', err)
+    return undefined
+  }
+}
+
+export async function updateHospital(
+  id: string,
+  payload: {
+    name: string
+    category: Hospital['category']
+    address?: string
+    contact_phone?: string
+    email?: string
+    website?: string
+    opening_hours?: string
+    image_url?: string
+  }
+): Promise<Hospital | undefined> {
+  try {
+    const updatePayload: any = {
+      name: payload.name,
+      category: payload.category,
+      address: payload.address || '',
+      contact_phone: payload.contact_phone || null,
+      email: payload.email || null,
+      website: payload.website || null,
+      opening_hours: payload.opening_hours || null,
+      image_url: payload.image_url || null
+    }
+
+    const { data, error } = await supabase
+      .from('hospitals')
+      .update(updatePayload)
+      .eq('id', id)
+      .select('*')
+      .single()
+    if (error) throw error
+    return transformHospital(data)
+  } catch (err) {
+    console.error('Error updating hospital:', err)
+    return undefined
+  }
+}
+
 export async function getHospitalById(id: string): Promise<Hospital | undefined> {
   try {
     const { data, error } = await supabase

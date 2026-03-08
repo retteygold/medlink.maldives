@@ -13,7 +13,7 @@ import {
   X,
   Save
 } from 'lucide-react'
-import { getHospitals } from '../../lib/dataService'
+import { createHospital, getHospitals, updateHospital } from '../../lib/dataService'
 import type { Hospital } from '../../types'
 
 export default function AdminHospitals() {
@@ -22,6 +22,8 @@ export default function AdminHospitals() {
   const [searchQuery, setSearchQuery] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingHospital, setEditingHospital] = useState<Hospital | null>(null)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [formData, setFormData] = useState({
     name: '',
     category: 'General Clinic',
@@ -48,6 +50,7 @@ export default function AdminHospitals() {
 
   function handleEdit(hospital: Hospital) {
     setEditingHospital(hospital)
+    setError(null)
     setFormData({
       name: hospital.name,
       category: hospital.category,
@@ -61,22 +64,55 @@ export default function AdminHospitals() {
     setShowForm(true)
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    // TODO: Save hospital to database
-    console.log('Saving hospital:', formData)
-    setShowForm(false)
-    setEditingHospital(null)
-    setFormData({
-      name: '',
-      category: 'General Clinic',
-      address: '',
-      contact_phone: '',
-      email: '',
-      website: '',
-      opening_hours: '',
-      image_url: ''
-    })
+    setSaving(true)
+    setError(null)
+
+    try {
+      const payload = {
+        name: formData.name.trim(),
+        category: formData.category as Hospital['category'],
+        address: formData.address,
+        contact_phone: formData.contact_phone,
+        email: formData.email,
+        website: formData.website,
+        opening_hours: formData.opening_hours,
+        image_url: formData.image_url
+      }
+
+      if (!payload.name) return
+
+      if (editingHospital?.id) {
+        const updated = await updateHospital(editingHospital.id, payload)
+        if (!updated) throw new Error('Update failed')
+        setHospitals((prev) => prev.map((h) => (h.id === updated.id ? updated : h)))
+      } else {
+        const created = await createHospital(payload)
+        if (!created) throw new Error('Create failed')
+        setHospitals((prev) => [created, ...prev])
+      }
+
+      setShowForm(false)
+      setEditingHospital(null)
+      setFormData({
+        name: '',
+        category: 'General Clinic',
+        address: '',
+        contact_phone: '',
+        email: '',
+        website: '',
+        opening_hours: '',
+        image_url: ''
+      })
+
+      await loadHospitals()
+    } catch (err: any) {
+      const msg = typeof err?.message === 'string' ? err.message : 'Failed to save hospital'
+      setError(msg)
+    } finally {
+      setSaving(false)
+    }
   }
 
   function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
@@ -111,6 +147,11 @@ export default function AdminHospitals() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="px-4 py-6 space-y-4">
+          {error && (
+            <div className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 text-sm">
+              {error}
+            </div>
+          )}
           {/* Image Upload */}
           <div className="bg-white rounded-xl p-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -273,10 +314,11 @@ export default function AdminHospitals() {
             </button>
             <button
               type="submit"
+              disabled={saving}
               className="flex-1 btn-primary flex items-center justify-center gap-2"
             >
               <Save size={18} />
-              {editingHospital ? 'Update' : 'Save'}
+              {saving ? 'Saving...' : editingHospital ? 'Update' : 'Save'}
             </button>
           </div>
         </form>
