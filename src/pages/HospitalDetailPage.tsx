@@ -33,6 +33,7 @@ export default function HospitalDetailPage() {
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [loading, setLoading] = useState(true)
   const [imageFailed, setImageFailed] = useState(false)
+  const [doctorSearch, setDoctorSearch] = useState('')
 
   useEffect(() => {
     loadHospitalData()
@@ -59,6 +60,27 @@ export default function HospitalDetailPage() {
     })
     setDoctors(hospitalDoctors)
     setLoading(false)
+  }
+
+  const filteredDoctorSuggestions = doctors
+    .filter(d => {
+      const q = (doctorSearch || '').toLowerCase().trim()
+      if (!q) return true
+      return d.name.toLowerCase().includes(q)
+    })
+    .slice(0, 10)
+
+  function submitDoctorSearch(e: React.FormEvent) {
+    e.preventDefault()
+    const q = (doctorSearch || '').toLowerCase().trim()
+    if (!q) return
+
+    const exact = doctors.find(d => d.name.toLowerCase().trim() === q)
+    const firstMatch = doctors.find(d => d.name.toLowerCase().includes(q))
+    const target = exact || firstMatch
+    if (target) {
+      navigate(`/doctor/${target.id}`)
+    }
   }
 
   if (loading) {
@@ -213,6 +235,43 @@ export default function HospitalDetailPage() {
               Doctors at {hospital.name} ({doctors.length})
             </h3>
           </div>
+
+          <form onSubmit={submitDoctorSearch} className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Search a doctor in this hospital
+            </label>
+            <div className="relative">
+              <input
+                type="text"
+                value={doctorSearch}
+                onChange={(e) => setDoctorSearch(e.target.value)}
+                className="input-field"
+                placeholder="Type doctor name..."
+                list="hospital-doctor-suggestions"
+              />
+              <datalist id="hospital-doctor-suggestions">
+                {filteredDoctorSuggestions.map((d) => (
+                  <option key={d.id} value={d.name} />
+                ))}
+              </datalist>
+            </div>
+
+            {doctorSearch.trim().length > 0 && filteredDoctorSuggestions.length > 0 && (
+              <div className="mt-2 bg-white border border-gray-200 rounded-xl overflow-hidden">
+                {filteredDoctorSuggestions.map((d) => (
+                  <button
+                    key={d.id}
+                    type="button"
+                    onClick={() => navigate(`/doctor/${d.id}`)}
+                    className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                  >
+                    <div className="font-medium text-gray-800">{d.name}</div>
+                    <div className="text-xs text-gray-500">{d.specialty}</div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </form>
           
           {doctors.length > 0 ? (
             <div className="space-y-3">
