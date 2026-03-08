@@ -82,6 +82,13 @@ function transformHospital(db: DBHospital): Hospital {
   }
 }
 
+function extractMissingColumnFromPostgrestError(err: any): string | null {
+  const message = typeof err?.message === 'string' ? err.message : ''
+  const m = message.match(/Could not find the '([^']+)' column of '([^']+)'/i)
+  if (!m) return null
+  return m[1] || null
+}
+
 // Transform DBDoctor to Doctor interface
 function transformDoctor(db: DBDoctor): Doctor {
   return {
@@ -157,11 +164,24 @@ export async function createHospital(payload: {
       is_active: true
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('hospitals')
       .insert(insertPayload)
       .select('*')
       .single()
+
+    if (error) {
+      const missing = extractMissingColumnFromPostgrestError(error)
+      if (missing && missing in insertPayload) {
+        delete insertPayload[missing]
+        ;({ data, error } = await supabase
+          .from('hospitals')
+          .insert(insertPayload)
+          .select('*')
+          .single())
+      }
+    }
+
     if (error) throw error
     return transformHospital(data)
   } catch (err) {
@@ -195,12 +215,26 @@ export async function updateHospital(
       image_url: payload.image_url || null
     }
 
-    const { data, error } = await supabase
+    let { data, error } = await supabase
       .from('hospitals')
       .update(updatePayload)
       .eq('id', id)
       .select('*')
       .single()
+
+    if (error) {
+      const missing = extractMissingColumnFromPostgrestError(error)
+      if (missing && missing in updatePayload) {
+        delete updatePayload[missing]
+        ;({ data, error } = await supabase
+          .from('hospitals')
+          .update(updatePayload)
+          .eq('id', id)
+          .select('*')
+          .single())
+      }
+    }
+
     if (error) throw error
     return transformHospital(data)
   } catch (err) {
