@@ -11,6 +11,7 @@ import {
   Clock,
   ChevronRight
 } from 'lucide-react'
+import { getQuestions } from '../lib/dataService'
 
 interface Question {
   id: string
@@ -30,57 +31,43 @@ export default function CommunityPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
 
-  // Mock questions data
-  const mockQuestions: Question[] = [
-    {
-      id: '1',
-      title: 'Best hospital for cardiology in Malé?',
-      content: 'Looking for recommendations for a good cardiologist. My father has been experiencing chest pain...',
-      author: 'Ahmed Naseem',
-      date: '2 hours ago',
-      category: 'Recommendations',
-      answers_count: 5,
-      views: 124,
-      likes: 12
-    },
-    {
-      id: '2',
-      title: 'What are the visiting hours at IGMH?',
-      content: 'Planning to visit a relative and want to know the exact visiting hours for general wards...',
-      author: 'Fatima Hassan',
-      date: '5 hours ago',
-      category: 'General',
-      answers_count: 3,
-      views: 89,
-      likes: 8
-    },
-    {
-      id: '3',
-      title: 'Experience with Dr. Ahmed at ADK Hospital?',
-      content: 'Has anyone consulted Dr. Ahmed for orthopedic issues? Would appreciate any feedback...',
-      author: 'Mohamed Ali',
-      date: '1 day ago',
-      category: 'Doctor Reviews',
-      answers_count: 8,
-      views: 256,
-      likes: 23
-    },
-    {
-      id: '4',
-      title: 'Emergency dental care available 24/7?',
-      content: 'Need urgent dental care late at night. Which clinics are open?',
-      author: 'Aisha Rauf',
-      date: '2 days ago',
-      category: 'Emergency',
-      answers_count: 4,
-      views: 167,
-      likes: 15
-    }
-  ]
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setQuestions(mockQuestions)
+    loadQuestions()
   }, [])
+
+  async function loadQuestions() {
+    try {
+      setLoading(true)
+      setError(null)
+      const data = await getQuestions()
+
+      const mapped: Question[] = (data || []).map((q: any) => {
+        const createdAt = q.created_at ? new Date(q.created_at) : null
+        return {
+          id: String(q.id),
+          title: String(q.title || ''),
+          content: String(q.content || ''),
+          author: String(q.author_name || q.author || 'Anonymous'),
+          date: createdAt ? createdAt.toLocaleDateString() : '',
+          category: String(q.category || 'General'),
+          answers_count: Number(q.answers_count || 0),
+          views: Number(q.views || 0),
+          likes: Number(q.likes || 0)
+        }
+      })
+
+      setQuestions(mapped)
+    } catch (err) {
+      console.error('Failed to load questions:', err)
+      setError('Failed to load questions. Please try again.')
+      setQuestions([])
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const categories = ['All', 'Recommendations', 'Doctor Reviews', 'Emergency', 'General', 'Insurance']
 
@@ -166,54 +153,65 @@ export default function CommunityPage() {
 
       {/* Questions List */}
       <div className="px-4 space-y-4">
-        {filteredQuestions.map((question) => (
-          <button
-            key={question.id}
-            onClick={() => navigate(`/question/${question.id}`)}
-            className="w-full bg-white rounded-xl p-4 text-left shadow-sm hover:shadow-md transition-all"
-          >
-            {/* Category & Author */}
-            <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs bg-medical-50 text-medical-600 px-2 py-1 rounded-full font-medium">
-                {question.category}
-              </span>
-              <span className="text-xs text-gray-400">•</span>
-              <span className="text-xs text-gray-500 flex items-center gap-1">
-                <User size={12} />
-                {question.author}
-              </span>
-            </div>
-
-            {/* Title */}
-            <h3 className="font-bold text-gray-800 mb-2 line-clamp-2">{question.title}</h3>
-            
-            {/* Preview */}
-            <p className="text-sm text-gray-600 line-clamp-2 mb-3">{question.content}</p>
-
-            {/* Stats */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 text-sm text-gray-500">
-                <span className="flex items-center gap-1">
-                  <MessageSquare size={14} />
-                  {question.answers_count} answers
+        {loading ? (
+          <div className="text-sm text-gray-500">Loading...</div>
+        ) : error ? (
+          <div className="flex flex-col gap-2">
+            <div className="text-sm text-red-600">{error}</div>
+            <button onClick={loadQuestions} className="text-sm text-medical-600 font-medium underline">
+              Retry
+            </button>
+          </div>
+        ) : (
+          filteredQuestions.map((question) => (
+            <button
+              key={question.id}
+              onClick={() => navigate(`/question/${question.id}`)}
+              className="w-full bg-white rounded-xl p-4 text-left shadow-sm hover:shadow-md transition-all"
+            >
+              {/* Category & Author */}
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-xs bg-medical-50 text-medical-600 px-2 py-1 rounded-full font-medium">
+                  {question.category}
                 </span>
-                <span className="flex items-center gap-1">
-                  <ThumbsUp size={14} />
-                  {question.likes} likes
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock size={14} />
-                  {question.date}
+                <span className="text-xs text-gray-400">•</span>
+                <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <User size={12} />
+                  {question.author}
                 </span>
               </div>
-              <ChevronRight size={20} className="text-gray-400" />
-            </div>
-          </button>
-        ))}
+
+              {/* Title */}
+              <h3 className="font-bold text-gray-800 mb-2 line-clamp-2">{question.title}</h3>
+              
+              {/* Preview */}
+              <p className="text-sm text-gray-600 line-clamp-2 mb-3">{question.content}</p>
+
+              {/* Stats */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <MessageSquare size={14} />
+                    {question.answers_count} answers
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <ThumbsUp size={14} />
+                    {question.likes} likes
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Clock size={14} />
+                    {question.date}
+                  </span>
+                </div>
+                <ChevronRight size={20} className="text-gray-400" />
+              </div>
+            </button>
+          ))
+        )}
       </div>
 
       {/* Empty State */}
-      {filteredQuestions.length === 0 && (
+      {!loading && !error && filteredQuestions.length === 0 && (
         <div className="px-4 py-12 text-center">
           <MessageCircle size={48} className="text-gray-300 mx-auto mb-4" />
           <p className="text-gray-500">No questions found</p>

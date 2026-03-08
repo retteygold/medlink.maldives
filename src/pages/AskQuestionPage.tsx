@@ -6,6 +6,7 @@ import {
   Camera,
   Image as ImageIcon
 } from 'lucide-react'
+import { createQuestion } from '../lib/dataService'
 
 export default function AskQuestionPage() {
   const navigate = useNavigate()
@@ -13,6 +14,7 @@ export default function AskQuestionPage() {
   const [content, setContent] = useState('')
   const [category, setCategory] = useState('General')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const categories = [
     'Recommendations',
@@ -24,20 +26,27 @@ export default function AskQuestionPage() {
     'Symptoms'
   ]
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!title.trim() || !content.trim()) return
 
     setIsSubmitting(true)
-    
-    // TODO: Save question to database
-    console.log('Submitting question:', { title, content, category })
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
+    setError(null)
+
+    try {
+      await createQuestion({
+        title: title.trim(),
+        content: content.trim(),
+        category,
+        author_name: 'Anonymous'
+      })
       navigate('/community')
-    }, 1000)
+    } catch (err) {
+      console.error('Failed to post question:', err)
+      setError('Failed to post question. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -60,6 +69,11 @@ export default function AskQuestionPage() {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="px-4 py-6 space-y-4">
+        {error && (
+          <div className="bg-red-50 text-red-700 border border-red-200 rounded-xl p-3 text-sm">
+            {error}
+          </div>
+        )}
         {/* Category */}
         <div className="bg-white rounded-xl p-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">

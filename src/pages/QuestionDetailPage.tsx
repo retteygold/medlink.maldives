@@ -11,6 +11,7 @@ import {
   Flag,
   MoreVertical
 } from 'lucide-react'
+import { createAnswer, getAnswersForQuestion, getQuestionById } from '../lib/dataService'
 
 interface Answer {
   id: string
@@ -42,78 +43,83 @@ export default function QuestionDetailPage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [liked, setLiked] = useState(false)
 
-  // Mock question data
-  const mockQuestion: Question = {
-    id: id || '1',
-    title: 'Best hospital for cardiology in Malé?',
-    content: 'Looking for recommendations for a good cardiologist. My father has been experiencing chest pain and shortness of breath. We visited a local clinic but they recommended seeing a specialist. Has anyone had a good experience with a cardiologist at IGMH or ADK? What about the waiting times and costs? Any advice would be greatly appreciated!',
-    author: 'Ahmed Naseem',
-    date: '2 hours ago',
-    category: 'Recommendations',
-    views: 124,
-    likes: 12,
-    answers: [
-      {
-        id: '1',
-        content: 'I highly recommend Dr. Ibrahim at IGMH. He diagnosed my father\'s heart condition accurately and the treatment was excellent. The waiting time was about 30 minutes but worth it. Consultation fee was around MVR 300.',
-        author: 'Mohamed Ali',
-        author_type: 'patient',
-        date: '1 hour ago',
-        likes: 8,
-        is_accepted: true
-      },
-      {
-        id: '2',
-        content: 'ADK Hospital also has a good cardiology department. Dr. Fathimath is very experienced. You can book appointments online which saves waiting time.',
-        author: 'Fatima Hassan',
-        author_type: 'patient',
-        date: '45 minutes ago',
-        likes: 5,
-        is_accepted: false
-      },
-      {
-        id: '3',
-        content: 'For chest pain and breathing difficulties, please seek immediate medical attention if symptoms worsen. Both IGMH and ADK have 24/7 emergency services. If you\'re experiencing severe chest pain, call 102 for ambulance.',
-        author: 'Dr. Ahmed (Cardiologist)',
-        author_type: 'doctor',
-        date: '30 minutes ago',
-        likes: 15,
-        is_accepted: false
-      }
-    ]
-  }
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    // TODO: Load question from database
-    setQuestion(mockQuestion)
+    load()
   }, [id])
 
-  function handleSubmitAnswer(e: React.FormEvent) {
+  async function load() {
+    if (!id) return
+    try {
+      setLoading(true)
+      setError(null)
+
+      const [q, answers] = await Promise.all([getQuestionById(id), getAnswersForQuestion(id)])
+
+      if (!q) {
+        setQuestion(null)
+        setError('Question not found.')
+        return
+      }
+
+      const createdAt = q.created_at ? new Date(q.created_at) : null
+
+      const mappedAnswers: Answer[] = (answers || []).map((a: any) => {
+        const aCreatedAt = a.created_at ? new Date(a.created_at) : null
+        return {
+          id: String(a.id),
+          content: String(a.content || ''),
+          author: String(a.author_name || a.author || 'Anonymous'),
+          author_type: (a.author_type as Answer['author_type']) || 'patient',
+          date: aCreatedAt ? aCreatedAt.toLocaleDateString() : '',
+          likes: Number(a.likes || 0),
+          is_accepted: Boolean(a.is_accepted)
+        }
+      })
+
+      setQuestion({
+        id: String(q.id),
+        title: String(q.title || ''),
+        content: String(q.content || ''),
+        author: String(q.author_name || q.author || 'Anonymous'),
+        date: createdAt ? createdAt.toLocaleDateString() : '',
+        category: String(q.category || 'General'),
+        views: Number(q.views || 0),
+        likes: Number(q.likes || 0),
+        answers: mappedAnswers
+      })
+    } catch (err) {
+      console.error('Failed to load question:', err)
+      setQuestion(null)
+      setError('Failed to load question. Please try again.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleSubmitAnswer(e: React.FormEvent) {
     e.preventDefault()
     if (!newAnswer.trim()) return
 
     setIsSubmitting(true)
-    
-    // Simulate API call
-    setTimeout(() => {
-      const answer: Answer = {
-        id: Date.now().toString(),
-        content: newAnswer,
-        author: 'You',
-        author_type: 'patient',
-        date: 'Just now',
-        likes: 0,
-        is_accepted: false
-      }
-      
-      setQuestion(prev => prev ? {
-        ...prev,
-        answers: [...prev.answers, answer]
-      } : null)
-      
+
+    try {
+      if (!id) return
+      await createAnswer({
+        question_id: id,
+        content: newAnswer.trim(),
+        author_name: 'Anonymous'
+      })
       setNewAnswer('')
+      await load()
+    } catch (err) {
+      console.error('Failed to post answer:', err)
+      setError('Failed to post answer. Please try again.')
+    } finally {
       setIsSubmitting(false)
-    }, 500)
+    }
   }
 
   function handleLike() {
@@ -124,10 +130,24 @@ export default function QuestionDetailPage() {
     } : null)
   }
 
-  if (!question) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <p className="text-gray-500">Loading...</p>
+      </div>
+    )
+  }
+
+  if (!question) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center gap-3 px-4">
+        <p className="text-gray-500 text-sm">{error || 'Question not found.'}</p>
+        <button
+          onClick={() => navigate('/community')}
+          className="text-sm text-medical-600 font-medium underline"
+        >
+          Back to Community
+        </button>
       </div>
     )
   }
