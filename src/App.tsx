@@ -5,6 +5,8 @@ import SearchPage from './pages/SearchPage'
 import DoctorsPage from './pages/DoctorsPage'
 import HospitalsPage from './pages/HospitalsPage'
 import ProfilePage from './pages/ProfilePage'
+import LoginPage from './pages/LoginPage'
+import SignupPage from './pages/SignupPage'
 import DoctorDetailPage from './pages/DoctorDetailPage'
 import HospitalDetailPage from './pages/HospitalDetailPage'
 import SmartMatcherPage from './pages/SmartMatcherPage'
@@ -18,6 +20,7 @@ import AdminReviews from './pages/admin/AdminReviews'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminCommunity from './pages/admin/AdminCommunity'
 import RequireAdmin from './components/RequireAdmin'
+import RequireAuth from './components/RequireAuth'
 import { Footer } from './components/Footer'
 
 function App() {
@@ -38,6 +41,8 @@ function App() {
           <Route path="/doctors" element={<DoctorsPage />} />
           <Route path="/hospitals" element={<HospitalsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
           <Route path="/doctor/:id" element={<DoctorDetailPage />} />
           <Route path="/hospital/:id" element={<HospitalDetailPage />} />
           <Route path="/smart-match" element={<SmartMatcherPage />} />
@@ -46,6 +51,13 @@ function App() {
           <Route path="/community" element={<CommunityPage />} />
           <Route path="/ask" element={<AskQuestionPage />} />
           <Route path="/question/:id" element={<QuestionDetailPage />} />
+
+          {/* Medicine Help (requires user login) */}
+          <Route element={<RequireAuth />}>
+            <Route path="/medicine-help" element={<div />} />
+            <Route path="/medicine-help/new" element={<div />} />
+            <Route path="/medicine-help/:id" element={<div />} />
+          </Route>
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
