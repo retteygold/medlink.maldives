@@ -2,6 +2,30 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 
+async function checkAdmin(uid: string): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('id', uid)
+      .maybeSingle()
+    if (error) throw error
+    return Boolean(data)
+  } catch (err: any) {
+    const message = typeof err?.message === 'string' ? err.message : ''
+    if (!/Could not find the 'id' column/i.test(message)) {
+      return false
+    }
+
+    const { data } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('user_id', uid)
+      .maybeSingle()
+    return Boolean(data)
+  }
+}
+
 export default function AdminLogin() {
   const navigate = useNavigate()
   const location = useLocation() as any
@@ -18,13 +42,9 @@ export default function AdminLogin() {
       const { data } = await supabase.auth.getSession()
       if (!mounted) return
       if (data.session?.user?.id) {
-        const { data: adminRow } = await supabase
-          .from('admin_users')
-          .select('id')
-          .eq('id', data.session.user.id)
-          .maybeSingle()
+        const ok = await checkAdmin(data.session.user.id)
         if (!mounted) return
-        if (adminRow) {
+        if (ok) {
           navigate('/admin', { replace: true })
           return
         }
@@ -64,13 +84,8 @@ export default function AdminLogin() {
       return
     }
 
-    const { data: adminRow } = await supabase
-      .from('admin_users')
-      .select('id')
-      .eq('id', uid)
-      .maybeSingle()
-
-    if (!adminRow) {
+    const ok = await checkAdmin(uid)
+    if (!ok) {
       await supabase.auth.signOut()
       setError('This account is not allowed to access admin.')
       setLoading(false)
