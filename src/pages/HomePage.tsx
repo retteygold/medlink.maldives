@@ -127,6 +127,27 @@ export default function HomePage() {
         </Link>
       </div>
 
+      {/* Medicine Help CTA */}
+      <div className="px-4 mt-4">
+        <Link
+          to="/medicine-help"
+          className="block bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl p-4 shadow-lg shadow-pink-500/20 text-white"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Activity size={24} />
+              </div>
+              <div>
+                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>Medicine Help</h3>
+                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>Need medicine from abroad? Upload prescription and request help.</p>
+              </div>
+            </div>
+            <ChevronRight size={24} />
+          </div>
+        </Link>
+      </div>
+
       {/* Specialties */}
       <div className="px-4 mt-6">
         <div className="flex justify-between items-center mb-3">
