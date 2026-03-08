@@ -1,29 +1,55 @@
+import { useEffect, useState } from 'react'
+import { useParams } from 'react-router-dom'
 import { Star, Phone, Mail, Clock, ChevronLeft, Calendar, Award } from 'lucide-react'
 import type { Doctor } from '../types'
+import { getDoctorById } from '../lib/dataService'
 
-const mockDoctor: Doctor = {
-  id: '1',
-  name: 'Dr. Ahmed Naseem',
-  specialty: 'Cardiology',
-  hospital_id: '1',
-  hospital_name: 'ADK Hospital',
-  qualifications: ['MBBS', 'MD (Cardiology)', 'FACC'],
-  experience_years: 15,
-  languages: ['English', 'Dhivehi'],
-  consultation_fee: 300,
-  available_days: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'],
-  available_times: ['9:00 AM - 1:00 PM', '5:00 PM - 8:00 PM'],
-  contact_phone: '+960 331-3553',
-  email: 'info@adkhospital.com',
-  about: 'Dr. Ahmed Naseem is a highly experienced cardiologist specializing in interventional cardiology and heart failure management.',
-  rating: 4.8,
-  review_count: 124,
-  is_active: true,
-  created_at: '2024-01-01'
+function slugifyFileName(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function getDoctorImageUrl(doctor: Doctor) {
+  const explicit = (doctor.image_url || '').trim()
+  if (explicit) return explicit
+  return `/images/doctors/${slugifyFileName(doctor.name)}.jpg`
 }
 
 export default function DoctorDetailPage() {
-  const doctor = mockDoctor
+  const { id } = useParams<{ id: string }>()
+  const [doctor, setDoctor] = useState<Doctor | null>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    load()
+  }, [id])
+
+  async function load() {
+    if (!id) return
+    setLoading(true)
+    const data = await getDoctorById(id)
+    setDoctor(data || null)
+    setLoading(false)
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">Loading doctor details...</div>
+      </div>
+    )
+  }
+
+  if (!doctor) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-gray-500">Doctor not found</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -32,18 +58,33 @@ export default function DoctorDetailPage() {
           <ChevronLeft size={20} /> Back
         </button>
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center">
-            <span className="text-white text-2xl font-bold">
-              {doctor.name.split(' ').map(n => n[0]).join('')}
-            </span>
+          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
+            <img
+              src={getDoctorImageUrl(doctor)}
+              alt={doctor.name}
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={(e) => {
+                const img = e.currentTarget
+                img.style.display = 'none'
+                const parent = img.parentElement
+                if (!parent) return
+                if (parent.querySelector('[data-fallback="initials"]')) return
+                const span = document.createElement('span')
+                span.setAttribute('data-fallback', 'initials')
+                span.className = 'text-white text-2xl font-bold'
+                span.textContent = doctor.name.split(' ').map(n => n[0]).join('')
+                parent.appendChild(span)
+              }}
+            />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">{doctor.name}</h1>
             <p className="text-white/80">{doctor.specialty}</p>
             <div className="flex items-center gap-1 mt-1">
               <Star size={16} className="text-yellow-300 fill-yellow-300" />
-              <span className="text-white">{doctor.rating}</span>
-              <span className="text-white/60">({doctor.review_count} reviews)</span>
+              <span className="text-white">{doctor.rating?.toFixed(1) || '4.0'}</span>
+              <span className="text-white/60">({doctor.review_count || 0} reviews)</span>
             </div>
           </div>
         </div>

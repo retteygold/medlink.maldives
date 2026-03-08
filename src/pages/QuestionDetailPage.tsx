@@ -224,7 +224,7 @@ export default function QuestionDetailPage() {
       </div>
 
       {/* Answers */}
-      <div className="px-4 space-y-4">
+      <div className="px-4 space-y-4 mb-32">
         <h3 className="font-bold text-gray-800 flex items-center gap-2">
           Answers 
           <span className="bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full text-sm">
@@ -283,14 +283,14 @@ export default function QuestionDetailPage() {
       </div>
 
       {/* Answer Input */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 safe-bottom max-w-md mx-auto">
+      <div className="fixed bottom-20 left-0 right-0 bg-white border-t border-gray-200 p-4 max-w-md mx-auto z-50">
         <form onSubmit={handleSubmitAnswer} className="flex gap-2">
           <input
             type="text"
             value={newAnswer}
             onChange={(e) => setNewAnswer(e.target.value)}
             placeholder="Write your answer..."
-            className="flex-1 input-field py-3"
+            className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-medical-500"
           />
           <button
             type="submit"

@@ -7,15 +7,18 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "seed:supabase": "node scripts/seed-supabase.js"
+    "seed:supabase": "node scripts/seed-supabase.js",
+    "generate:filenames": "node scripts/generate-image-filenames.js",
+    "generate:images": "node scripts/generate-sample-images.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "canvas": "^3.2.1",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.0",
-    "@supabase/supabase-js": "^2.38.0",
-    "lucide-react": "^0.294.0",
-    "clsx": "^2.0.0",
     "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
@@ -23,6 +26,7 @@
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.16",
+    "dotenv": "^17.3.1",
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.5",
     "typescript": "^5.2.2",

@@ -5,6 +5,44 @@ import { getHospitals } from '../lib/dataService'
 
 const categories = ['All', 'Private Hospital', 'General Clinic', 'Diagnostic Clinic', 'Speciality Clinic']
 
+function slugifyFileName(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function getHospitalImageUrl(hospital: Hospital) {
+  const explicit = (hospital.image_url || '').trim()
+  if (explicit) return explicit
+  return `/images/hospitals/${slugifyFileName(hospital.name)}.jpg`
+}
+
+function HospitalAvatar({ hospital }: { hospital: Hospital }) {
+  const [failed, setFailed] = useState(false)
+
+  if (failed) {
+    return (
+      <div className="w-14 h-14 bg-gradient-to-br from-medical-100 to-medical-200 rounded-xl flex items-center justify-center">
+        <Building2 size={28} className="text-medical-600" />
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-14 h-14 bg-gradient-to-br from-medical-100 to-medical-200 rounded-xl flex items-center justify-center overflow-hidden">
+      <img
+        src={getHospitalImageUrl(hospital)}
+        alt={hospital.name}
+        className="w-full h-full object-cover"
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+    </div>
+  )
+}
+
 export default function HospitalsPage() {
   const [hospitals, setHospitals] = useState<Hospital[]>([])
   const [loading, setLoading] = useState(true)
@@ -89,9 +127,7 @@ export default function HospitalsPage() {
             className="card p-4"
           >
             <div className="flex items-start gap-3">
-              <div className="w-14 h-14 bg-gradient-to-br from-medical-100 to-medical-200 rounded-xl flex items-center justify-center">
-                <Building2 size={28} className="text-medical-600" />
-              </div>
+              <HospitalAvatar hospital={hospital} />
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-gray-800">{hospital.name}</h3>
                 <p className="text-gray-500 text-sm">{hospital.address}</p>

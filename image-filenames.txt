@@ -1,0 +1,604 @@
+═══════════════════════════════════════════════════════════════
+                   DOCTOR IMAGE FILENAMES
+═══════════════════════════════════════════════════════════════
+Total Doctors: 256
+
+Filename                              | Doctor Name
+───────────────────────────────────────────────────────────────
+aminath-lamha-ali.jpg                 | Aminath Lamha Ali
+dr-a-f-m-rafatuzzaman.jpg             | Dr. A F M Rafatuzzaman
+dr-aamaal-najeeb.jpg                  | Dr. Aamaal Najeeb
+dr-abdikadir-hassan-hussein.jpg       | Dr. Abdikadir Hassan Hussein
+dr-abdulla-ahusan.jpg                 | Dr. Abdulla Ahusan
+dr-abdulla-nazim.jpg                  | Dr. Abdulla Nazim
+dr-abdulla-niyaf.jpg                  | Dr. Abdulla Niyaf
+dr-abdulla-ubaid.jpg                  | Dr. Abdulla Ubaid
+dr-abdullah-afnan-ahmed.jpg           | Dr. Abdullah Afnan Ahmed
+dr-adam-khaleel-yoosuf.jpg            | Dr. Adam Khaleel Yoosuf
+dr-afaaf-ahmed.jpg                    | Dr. Afaaf Ahmed
+dr-afla-suhail.jpg                    | Dr. Afla Suhail
+dr-ahmad-alkamel-hamed-mosa.jpg       | Dr. Ahmad Alkamel Hamed Mosa
+dr-ahmed-abdulla.jpg                  | Dr. Ahmed Abdulla
+dr-ahmed-faisal.jpg                   | Dr. Ahmed Faisal
+dr-ahmed-mahmoud-sami-ahmed-hussein.jpg | Dr. Ahmed Mahmoud Sami Ahmed Hussein
+dr-ahmed-migdhaadh.jpg                | Dr. Ahmed Migdhaadh
+dr-ahmed-nishan.jpg                   | Dr. Ahmed Nishan
+dr-ahmed-r-ragab-zubi.jpg             | Dr. Ahmed R Ragab Zubi
+dr-ahmed-rasheed.jpg                  | Dr. Ahmed Rasheed
+dr-ahmed-saif.jpg                     | Dr. Ahmed Saif
+dr-ahmed-shaheed.jpg                  | Dr. Ahmed Shaheed
+dr-ahmed-shifaz.jpg                   | Dr. Ahmed Shifaz
+dr-ahmed-ziyan.jpg                    | Dr. Ahmed Ziyan
+dr-ahmed-zooshan.jpg                  | Dr. Ahmed Zooshan
+dr-aishath-azna-ali.jpg               | Dr. Aishath Azna Ali
+dr-aishath-eleena.jpg                 | Dr. Aishath Eleena
+dr-aishath-ibna-adnan.jpg             | Dr. Aishath Ibna Adnan
+dr-aishath-jeneena-amir.jpg           | Dr. Aishath Jeneena Amir
+dr-aishath-maashy-ibrahim.jpg         | Dr. Aishath Maashy Ibrahim
+dr-aishath-neena-shareef.jpg          | Dr. Aishath Neena Shareef
+dr-aishath-reema.jpg                  | Dr. Aishath Reema
+dr-aishath-sa-aa-mohamed.jpg          | Dr. Aishath Sa'aa Mohamed
+dr-aishath-shaffaf-ahmed.jpg          | Dr. Aishath Shaffaf Ahmed
+dr-aishath-shibana-ahmed.jpg          | Dr. Aishath Shibana Ahmed
+dr-aishath-ziyan.jpg                  | Dr. Aishath Ziyan
+dr-alaa-hassan-ahmed-oraby.jpg        | Dr. Alaa Hassan Ahmed Oraby
+dr-ali-aafee.jpg                      | Dr. Ali Aafee
+dr-ali-abbas-murshed-abduabdullah.jpg | Dr. Ali Abbas Murshed Abduabdullah
+dr-ali-abdulla-latheef.jpg            | Dr. Ali Abdulla Latheef
+dr-ali-nazeem.jpg                     | Dr. Ali Nazeem
+dr-ali-shafeeq.jpg                    | Dr. Ali shafeeq
+dr-aminath-arifa.jpg                  | Dr. Aminath Arifa
+dr-aminath-eenas.jpg                  | Dr. Aminath Eenas
+dr-aminath-haifa.jpg                  | Dr. Aminath Haifa
+dr-aminath-ifasha-gasim.jpg           | Dr. Aminath Ifasha Gasim
+dr-aminath-ihusaana.jpg               | Dr. Aminath Ihusaana
+dr-aminath-limya.jpg                  | Dr. Aminath Limya
+dr-aminath-luhushan.jpg               | Dr. Aminath Luhushan
+dr-aminath-minna-hussain.jpg          | Dr. Aminath Minna Hussain
+dr-aminath-munaza.jpg                 | Dr. Aminath Munaza
+dr-aminath-nazaaha.jpg                | Dr. Aminath Nazaaha
+dr-aminath-nazeer.jpg                 | Dr. Aminath Nazeer
+dr-aminath-saleem.jpg                 | Dr. Aminath Saleem
+dr-aminath-samha.jpg                  | Dr. Aminath Samha
+dr-aminath-shanaz-adil.jpg            | Dr. Aminath Shanaz Adil
+dr-aminath-shaufa.jpg                 | Dr. Aminath Shaufa
+dr-aminath-zahra.jpg                  | Dr. Aminath Zahra
+dr-aminath-zeyba-ahmed.jpg            | Dr. Aminath Zeyba Ahmed
+dr-amr-reda-mohamed-badawy-mahmoud.jpg | Dr. Amr Reda Mohamed Badawy Mahmoud
+dr-anil-khadka.jpg                    | Dr. Anil Khadka
+dr-anisha-basnet.jpg                  | Dr. Anisha Basnet
+dr-anjali-poudel.jpg                  | Dr. Anjali Poudel
+dr-anjana-k-c.jpg                     | Dr. Anjana K C
+dr-anup-shrestha.jpg                  | Dr. Anup Shrestha
+dr-arif-mohamed.jpg                   | Dr. Arif Mohamed
+dr-asadh-mohamed-shaheed.jpg          | Dr. Asadh Mohamed Shaheed
+dr-ashish-kailashchandra-nema.jpg     | Dr. Ashish Kailashchandra Nema
+dr-basma-ibrahim-sobir.jpg            | Dr. Basma Ibrahim Sobir
+dr-bharat-mani-banjade.jpg            | Dr. Bharat Mani Banjade
+dr-bhumika-pradhan.jpg                | Dr. Bhumika Pradhan
+dr-binod-gautam.jpg                   | Dr. Binod Gautam
+dr-budhi-nath-adhikari-sudhin.jpg     | Dr. Budhi Nath Adhikari Sudhin
+dr-chandra-prasad-paneru.jpg          | Dr. Chandra Prasad Paneru
+dr-debashis-das.jpg                   | Dr. Debashis Das
+dr-deepak-kumar-sundaresh-bhyratae.jpg | Dr. Deepak Kumar Sundaresh Bhyratae
+dr-dharmesh-r-bhatti.jpg              | Dr. Dharmesh R Bhatti
+dr-dipak-muktan.jpg                   | Dr. Dipak Muktan
+dr-dusooma-abdul-razzag.jpg           | Dr. Dusooma Abdul Razzag
+dr-elena-bykova.jpg                   | Dr. Elena Bykova
+dr-farzana-shaugee.jpg                | Dr. Farzana Shaugee
+dr-fathimath-abdulla-zuhair.jpg       | Dr. Fathimath Abdulla Zuhair
+dr-fathimath-fahudha-sayd.jpg         | Dr. Fathimath Fahudha Sayd
+dr-fathimath-leeshiya-ahmed.jpg       | Dr. Fathimath Leeshiya Ahmed
+dr-fathimath-mufliha.jpg              | Dr. Fathimath Mufliha
+dr-fathimath-nasiha.jpg               | Dr. Fathimath Nasiha
+dr-fathimath-niuma-ahmed.jpg          | Dr. Fathimath Niuma Ahmed
+dr-fathimath-saazleen.jpg             | Dr. Fathimath Saazleen
+dr-fathimath-shaamaly-jaufar.jpg      | Dr. Fathimath Shaamaly Jaufar
+dr-fathimath-shazoo.jpg               | Dr. Fathimath Shazoo
+dr-fathimath-shoora.jpg               | Dr. Fathimath Shoora
+dr-fathimath-zuwaida.jpg              | Dr. Fathimath Zuwaida
+dr-fathmath-shudhfa-ibrahim.jpg       | Dr. Fathmath Shudhfa Ibrahim
+dr-fathmath-zail-azmeel.jpg           | Dr. Fathmath Zail Azmeel
+dr-fatimath-shazma-rameez.jpg         | Dr. Fatimath Shazma Rameez
+dr-firdhaus-rasheed.jpg               | Dr. Firdhaus Rasheed
+dr-gashshaanath-abdul-wahhab.jpg      | Dr. Gashshaanath Abdul Wahhab
+dr-hammad-adam.jpg                    | Dr. Hammad Adam
+dr-hana-nooh.jpg                      | Dr. Hana Nooh
+dr-hanaan-shafeeq.jpg                 | Dr. Hanaan Shafeeq
+dr-hawwa-ashfah.jpg                   | Dr. Hawwa Ashfah
+dr-hishama-abdulla.jpg                | Dr. Hishama Abdulla
+dr-hiyan-habeeb.jpg                   | Dr. Hiyan Habeeb
+dr-hussain-faisal.jpg                 | Dr. Hussain Faisal
+dr-hussain-hameed.jpg                 | Dr. Hussain Hameed
+dr-hussain-juman-jaleel.jpg           | Dr. Hussain Juman Jaleel
+dr-hussain-shakeel.jpg                | Dr. Hussain Shakeel
+dr-hussain-shakeel.jpg                | Dr. Hussain Shakeel
+dr-ibrahim-faisal.jpg                 | Dr. Ibrahim Faisal
+dr-ibrahim-shibl-ibrahim-shehabel-din.jpg | Dr. Ibrahim Shibl Ibrahim Shehabel Din
+dr-ibrahim-shiham.jpg                 | Dr. Ibrahim Shiham
+dr-ibrahim-sujau.jpg                  | Dr. Ibrahim Sujau
+dr-ishwor-raj-devkota.jpg             | Dr. Ishwor Raj Devkota
+dr-ismail-ejaz-ali.jpg                | Dr. Ismail Ejaz Ali
+dr-ismail-latheef.jpg                 | Dr. Ismail Latheef
+dr-ismail-zahir.jpg                   | Dr. Ismail Zahir
+dr-jabeen-ali-shareef.jpg             | Dr. Jabeen Ali Shareef
+dr-jahangir-ahmed-sheikh.jpg          | Dr. Jahangir Ahmed Sheikh
+dr-juwairiya-ahmed.jpg                | Dr. Juwairiya Ahmed
+dr-kanchan-dahal.jpg                  | Dr. Kanchan Dahal
+dr-khadheejath-saamira.jpg            | Dr. Khadheejath Saamira
+dr-kiran-aryal.jpg                    | Dr. Kiran Aryal
+dr-kiran-niraula.jpg                  | Dr. Kiran Niraula
+dr-leena-saleem.jpg                   | Dr. Leena Saleem
+dr-madheeh-mohamed-hussain.jpg        | Dr. Madheeh Mohamed Hussain
+dr-maeesha-solih.jpg                  | Dr. Maeesha Solih
+dr-mahaa-waheed.jpg                   | Dr. Mahaa Waheed
+dr-mahfooza-moosa.jpg                 | Dr. Mahfooza Moosa
+dr-mahmoud-abdelaziz-mohamed-elshahawy.jpg | Dr. Mahmoud Abdelaziz Mohamed Elshahawy
+dr-malay-halder-plabon.jpg            | Dr. Malay Halder Plabon
+dr-mamatha-chenchugalla.jpg           | Dr. Mamatha Chenchugalla
+dr-manoj-munirathinam.jpg             | Dr. Manoj Munirathinam
+dr-mariyam-ahmed.jpg                  | Dr. Mariyam Ahmed
+dr-mariyam-nashwa-naseem.jpg          | Dr. Mariyam Nashwa Naseem
+dr-mariyam-niyaz.jpg                  | Dr. Mariyam Niyaz
+dr-mariyam-shahana-mufeed.jpg         | Dr. Mariyam Shahana Mufeed
+dr-mariyam-shazna.jpg                 | Dr. Mariyam Shazna
+dr-mariyam-thooba-mohamed.jpg         | Dr. Mariyam Thooba Mohamed
+dr-mariyam-yoomy.jpg                  | Dr. Mariyam Yoomy
+dr-mauroof-wisam.jpg                  | Dr. Mauroof Wisam
+dr-mauroofa-abdul-latheef.jpg         | Dr. Mauroofa Abdul Latheef
+dr-meeza-haany.jpg                    | Dr. Meeza Haany
+dr-milza-abdul-muhsin.jpg             | Dr. Milza Abdul Muhsin
+dr-miqdhaadh-shareef.jpg              | Dr. Miqdhaadh Shareef
+dr-moataz-ayman-saleh-abdelaziz.jpg   | Dr. Moataz Ayman Saleh Abdelaziz
+dr-mohamed-aarish.jpg                 | Dr. Mohamed Aarish
+dr-mohamed-ali.jpg                    | Dr. Mohamed Ali
+dr-mohamed-amru-ahmed.jpg             | Dr. Mohamed Amru Ahmed
+dr-mohamed-areed-abdelwahab.jpg       | Dr. Mohamed Areed Abdelwahab
+dr-mohamed-aseel-jaleel.jpg           | Dr. Mohamed Aseel Jaleel
+dr-mohamed-elshaarawi-mohamed-youssif.jpg | Dr. Mohamed Elshaarawi Mohamed Youssif
+dr-mohamed-elshaarawi-mohamed-youssif.jpg | Dr. Mohamed Elshaarawi Mohamed Youssif
+dr-mohamed-faisham.jpg                | Dr. Mohamed Faisham
+dr-mohamed-haikal-abdul-rahman.jpg    | Dr. Mohamed Haikal Abdul Rahman
+dr-mohamed-hisan-hayyu.jpg            | Dr. Mohamed Hisan Hayyu
+dr-mohamed-ismail.jpg                 | Dr. Mohamed Ismail
+dr-mohamed-kamel-sobhi-mohamed.jpg    | Dr. Mohamed Kamel Sobhi Mohamed
+dr-mohamed-mausool-siraj.jpg          | Dr. Mohamed Mausool Siraj
+dr-mohamed-mazin-ilyas.jpg            | Dr. Mohamed Mazin Ilyas
+dr-mohamed-mishwaar-ashfaq.jpg        | Dr. Mohamed Mishwaar Ashfaq
+dr-mohamed-munshid.jpg                | Dr. Mohamed Munshid
+dr-mohamed-muthuim.jpg                | Dr. Mohamed Muthuim
+dr-mohamed-omar-abdelaleem-ahmed.jpg  | Dr. Mohamed Omar Abdelaleem Ahmed
+dr-mohamed-razzan-rameez.jpg          | Dr. Mohamed Razzan Rameez
+dr-mohamed-rifshan-ismail.jpg         | Dr. Mohamed Rifshan Ismail
+dr-mohamed-shaffaf-ismail.jpg         | Dr. Mohamed Shaffaf Ismail
+dr-mohamed-shafiu.jpg                 | Dr. Mohamed Shafiu
+dr-mohamed-shafraz.jpg                | Dr. Mohamed Shafraz
+dr-mohamed-sham.jpg                   | Dr. Mohamed Sham
+dr-mohamed-shaneez-najmy.jpg          | Dr. Mohamed Shaneez Najmy
+dr-mohamed-shareef-abdul-majeed.jpg   | Dr. Mohamed Shareef Abdul Majeed
+dr-mohamed-shifan.jpg                 | Dr. Mohamed Shifan
+dr-mohamed-siruhan.jpg                | Dr. Mohamed Siruhan
+dr-mohamed-waheed.jpg                 | Dr. Mohamed Waheed
+dr-mohamed-zaidan-adil.jpg            | Dr. Mohamed Zaidan Adil
+dr-moosa-murad.jpg                    | Dr. Moosa Murad
+dr-muaz-moosa.jpg                     | Dr. Muaz Moosa
+dr-mukesh-prasad-sah.jpg              | Dr. Mukesh Prasad Sah
+dr-murari-prasad-barakoti.jpg         | Dr. Murari Prasad Barakoti
+dr-nafeesa-abdul-latheef.jpg          | Dr. Nafeesa Abdul Latheef
+dr-nafha-abdulla.jpg                  | Dr. Nafha Abdulla
+dr-naflana-ameen.jpg                  | Dr. Naflana Ameen
+dr-najahath-ahmed.jpg                 | Dr. Najahath Ahmed
+dr-nasheeda-saeed.jpg                 | Dr. Nasheeda Saeed
+dr-nashwa-ahmed.jpg                   | Dr. Nashwa Ahmed
+dr-nazla-musthafa-luthfee.jpg         | Dr. Nazla Musthafa Luthfee
+dr-niyasha-ibrahim-mohamed.jpg        | Dr. Niyasha Ibrahim Mohamed
+dr-nusaiba-farouk-hassan.jpg          | Dr. Nusaiba Farouk Hassan
+dr-nuzha-mohamed.jpg                  | Dr. Nuzha Mohamed
+dr-piyush-niroula.jpg                 | Dr. Piyush Niroula
+dr-prabhaw-upadhyaya.jpg              | Dr. Prabhaw Upadhyaya
+dr-prajwol-thapa.jpg                  | Dr. Prajwol Thapa
+dr-praveen-jeya-chidambara-pandian.jpg | Dr. Praveen Jeya Chidambara Pandian
+dr-prem-raj-sigdel.jpg                | Dr. Prem Raj Sigdel
+dr-quraisha-haneef.jpg                | Dr. Quraisha Haneef
+dr-rajib-kumar-dey.jpg                | Dr. Rajib Kumar Dey
+dr-raju-bhandari.jpg                  | Dr. Raju Bhandari
+dr-ram-prasad-pokhrel.jpg             | Dr. Ram Prasad Pokhrel
+dr-ramprasad-ramalingam.jpg           | Dr. Ramprasad Ramalingam
+dr-ravi-kanodia.jpg                   | Dr. Ravi Kanodia
+dr-robin-bhattarai.jpg                | Dr. Robin Bhattarai
+dr-roshan-shrestha.jpg                | Dr. Roshan Shrestha
+dr-roshani-wagle.jpg                  | Dr. Roshani Wagle
+dr-sadhima-rasheed.jpg                | Dr. Sadhima Rasheed
+dr-samahath.jpg                       | Dr. Samahath
+dr-samyam-parajuli.jpg                | Dr. Samyam Parajuli
+dr-sandip-giri.jpg                    | Dr. Sandip Giri
+dr-sanju-sharma.jpg                   | Dr. Sanju Sharma
+dr-santosh-kumar-kalla.jpg            | Dr. Santosh Kumar Kalla
+dr-sariu-ali-didi.jpg                 | Dr. Sariu Ali Didi
+dr-sasi-seerappan.jpg                 | Dr. Sasi Seerappan
+dr-sathish-koirala.jpg                | Dr. Sathish Koirala
+dr-saurav-sunder-shrestha.jpg         | Dr. Saurav Sunder Shrestha
+dr-shafraz-mohamed-shaheid.jpg        | Dr. Shafraz Mohamed Shaheid
+dr-shaheela-mohamed-naseer.jpg        | Dr. Shaheela Mohamed Naseer
+dr-shahula-afeef.jpg                  | Dr. Shahula Afeef
+dr-shanaz-dole.jpg                    | Dr. Shanaz Dole
+dr-shanooha-mansoor.jpg               | Dr. Shanooha Mansoor
+dr-shanti-jaishi.jpg                  | Dr. Shanti Jaishi
+dr-shimal-thasneem.jpg                | Dr. Shimal Thasneem
+dr-shirish-shakti-maskay.jpg          | Dr. Shirish Shakti Maskay
+dr-shirmeen-mohamed.jpg               | Dr. Shirmeen Mohamed
+dr-shivir-sharma-dahal.jpg            | Dr. Shivir Sharma Dahal
+dr-shooga-moosa.jpg                   | Dr. Shooga Moosa
+dr-sinaanath-hussain.jpg              | Dr. Sinaanath Hussain
+dr-smriti-manandnar.jpg               | Dr. Smriti Manandnar
+dr-sohan-gupta.jpg                    | Dr. Sohan Gupta
+dr-soodh-antony.jpg                   | Dr. Soodh Antony
+dr-subash-bhatta.jpg                  | Dr. Subash Bhatta
+dr-suraj-dhaubhadel.jpg               | Dr. Suraj Dhaubhadel
+dr-swikriti-koirala.jpg               | Dr. Swikriti Koirala
+dr-syed-farhan-ali.jpg                | Dr. Syed Farhan Ali
+dr-thasneem-farooq.jpg                | Dr. Thasneem Farooq
+dr-thulapitiyage-nishara-priyanji-weerasinghe.jpg | Dr. Thulapitiyage Nishara Priyanji Weerasinghe
+dr-ubaidullah-hamoodh-rasheed.jpg     | Dr. Ubaidullah Hamoodh Rasheed
+dr-umme-salma-talukder.jpg            | Dr. Umme Salma Talukder
+dr-uzoehchi-eze-chikezie.jpg          | Dr. Uzoehchi Eze Chikezie
+dr-vivek-kumar-rauniyar.jpg           | Dr. Vivek Kumar Rauniyar
+dr-wishama-abdul-razzag.jpg           | Dr. Wishama Abdul Razzag
+dr-yasimin-mohamed-ahmed-elhanafy-shehate.jpg | Dr. Yasimin Mohamed Ahmed Elhanafy Shehate
+dr-yujan-sapkota.jpg                  | Dr. Yujan Sapkota
+dr-yusra-ali.jpg                      | Dr. Yusra Ali
+dr-zahiya-abdul-baree.jpg             | Dr. Zahiya Abdul Baree
+dr-zeena-mohamed-fuad.jpg             | Dr. Zeena Mohamed Fuad
+dr-zubair-mohamed-didi.jpg            | Dr. Zubair Mohamed Didi
+dr-zulaikha-maee.jpg                  | Dr. Zulaikha Maee
+dr-zulaikha-mohamed.jpg               | Dr. Zulaikha Mohamed
+dr-fathimath-seena.jpg                | Dr.Fathimath Seena
+mr-anil-rimal.jpg                     | Mr Anil Rimal
+mr-githin-george.jpg                  | Mr Githin George
+mr-ibrahim-irufaan.jpg                | Mr Ibrahim Irufaan
+mr-tharig-majeedh.jpg                 | Mr Tharig Majeedh
+ms-aishath-dhimna.jpg                 | Ms Aishath Dhimna
+ms-aishath-zimna-hussain.jpg          | Ms Aishath Zimna Hussain
+ms-mariyam-najla.jpg                  | Ms Mariyam Najla
+piumi-dilhara-vithana-paletiyana-vithanage.jpg | Piumi Dilhara Vithana Paletiyana Vithanage
+
+═══════════════════════════════════════════════════════════════
+                 HOSPITAL IMAGE FILENAMES
+═══════════════════════════════════════════════════════════════
+Total Hospitals: 321
+
+Filename                              | Hospital Name
+───────────────────────────────────────────────────────────────
+aahiyans-medical-clinic.jpg           | Aahiyans Medical Clinic
+aarah-clinic.jpg                      | Aarah Clinic
+abuharee-medical-centre.jpg           | Abuharee Medical Centre
+adk-hospital.jpg                      | ADK Hospital
+adk-hospital-reach-clinic-maaranfushi.jpg | ADK Hospital Reach Clinic, Maaranfushi
+advance-diagnostic-center.jpg         | Advance Diagnostic Center
+advance-eye-clinic.jpg                | Advance Eye Clinic
+advance-medical-clinic.jpg            | Advance Medical Clinic
+aims-diagnostic-care.jpg              | Aims Diagnostic Care
+alai-clinic.jpg                       | Alai Clinic
+alai-play-and-learn-therapy-center-hf-23-alp-pvt-705.jpg | Alai Play and Learn Therapy Center HF - 23/ALP/PVT/705
+ali-rasheed-dhivehi-beys-clinic.jpg   | Ali Rasheed Dhivehi Beys Clinic
+alimatha-clinic.jpg                   | Alimatha Clinic
+amdc-physiotherapy-department.jpg     | AMDC Physiotherapy Department
+amg-clinic.jpg                        | AMG Clinic
+amilla-sihhath.jpg                    | Amilla Sihhath
+amingiri-clinic.jpg                   | Amingiri Clinic
+ananatara-dhigu-clinic.jpg            | Ananatara Dhigu Clinic
+anantara-kihavah-villas-clinic.jpg    | Anantara Kihavah Villas Clinic
+angaga-medicals.jpg                   | Angaga Medicals
+angsana-velavaru-medical-centre.jpg   | Angsana Velavaru Medical Centre
+asisa-medical-center.jpg              | Asisa Medical Center
+athuruga-medical-clinic.jpg           | Athuruga Medical Clinic
+atoll-clinic.jpg                      | Atoll Clinic
+atoll-guest-clinic.jpg                | Atoll Guest Clinic
+avani-clinic.jpg                      | Avani Clinic
+ayada-maldives-resort-clinic.jpg      | Ayada Maldives Resort Clinic
+ayurvedic-therapy.jpg                 | Ayurvedic Therapy
+azmi-naeem-medical-diagnostic-centre.jpg | Azmi Naeem Medical & Diagnostic Centre
+baros-clinic.jpg                      | Baros Clinic
+bcare.jpg                             | BCare
+bliss-care.jpg                        | Bliss Care
+blyss-multi-speciality-therapy-centre.jpg | Blyss Multi-Speciality Therapy Centre
+bolifushi-clinic.jpg                  | Bolifushi Clinic
+bulbul-multi-rehab-clinic.jpg         | Bulbul Multi Rehab Clinic
+bulbul-therapy-clinic.jpg             | Bulbul Therapy Clinic
+care-max-clinic-1.jpg                 | Care Max Clinic 1
+care-medicals-services.jpg            | Care Medicals Services
+care-trust-multi-speciality-clinic.jpg | Care Trust Multi Speciality Clinic
+careone-dental-clinic.jpg             | Careone Dental & Clinic
+central-clinic.jpg                    | Central Clinic
+central-medical-center.jpg            | Central Medical Center
+centre-for-traditional-medicine.jpg   | Centre for Traditional Medicine
+cheval-blance-randeli-clinic.jpg      | Cheval Blance Randeli Clinic
+child-development-clinic.jpg          | Child Development Clinic
+chinese-health-care.jpg               | Chinese Health Care
+cinnamon-dhonveli-maldives-medical-clinic.jpg | Cinnamon Dhonveli Maldives Medical Clinic
+cinnamon-velifushi-maldives-medical-clinic.jpg | Cinnamon Velifushi Maldives Medical Clinic
+city-opticals.jpg                     | City Opticals
+clinica.jpg                           | Clinica
+coco-chic-clinic.jpg                  | Coco Chic Clinic
+cocoa-island-island.jpg               | Cocoa Island Island
+cocogiri-clinic.jpg                   | Cocogiri Clinic
+constance-moofushi-resort-clinic.jpg  | Constance Moofushi Resort Clinic
+crystal-medicals.jpg                  | Crystal Medicals
+cyma-care.jpg                         | CyMa Care
+cyma-care-hulhumale.jpg               | CyMa Care Hulhumale'
+d-s-m-clinic.jpg                      | D.S.M Clinic
+dental-care-centre.jpg                | Dental Care Centre
+dental-studio.jpg                     | Dental Studio
+dharavandhoo-medical-center.jpg       | Dharavandhoo Medical Center
+dhigali-clinic.jpg                    | Dhigali Clinic
+dhivehi-beys-clinic.jpg               | Dhivehi Beys Clinic
+dhoonidhoo-clinic.jpg                 | Dhoonidhoo Clinic
+dhugethi-dhivehibeys-clinic.jpg       | Dhugethi Dhivehibeys Clinic
+doctor-s-clinic.jpg                   | Doctor's Clinic
+dr-didi-dental-and-medical-center.jpg | Dr Didi Dental And Medical Center
+dr-usama-dental-clinic.jpg            | Dr Usama Dental Clinic
+dr-didi-dental-centre.jpg             | Dr. Didi Dental Centre
+dr-jihad-s-medical-and-dental-centre.jpg | Dr. Jihad's Medical and Dental Centre
+dr-usama-s-clinic-maafannu.jpg        | Dr. Usama's Clinic Maafannu
+dream-land-clinic.jpg                 | Dream Land Clinic
+early-intervention-therapy-centre.jpg | Early Intervention Therapy Centre
+elite-medical-centre.jpg              | Elite Medical Centre
+ellaidhoo-clinic.jpg                  | Ellaidhoo Clinic
+emerald-dental-care.jpg               | Emerald Dental Care
+emerald-faarushi-clinic.jpg           | Emerald Faarushi Clinic
+emerald-maldives-resort-clinic.jpg    | Emerald Maldives Resort Clinic
+eri-maldives-clini.jpg                | Eri Maldives Clini
+eriyadu-clinic.jpg                    | Eriyadu Clinic
+eve-clinic.jpg                        | Eve Clinic
+eve-clinic-west-park.jpg              | Eve Clinic West Park
+eye-care-clinic-addu-branch.jpg       | Eye Care Clinic (Addu Branch)
+eye-care-hospital.jpg                 | Eye Care Hospital
+eye-care-hospital-hulhumale-annex.jpg | Eye Care Hospital Hulhumale' Annex
+eye-to-eye-opticals-clinic.jpg        | Eye to Eye Opticals & Clinic
+eye-to-eye-opticals-clinic-2.jpg      | Eye to Eye Opticals & Clinic 2
+eye-zone-clinic.jpg                   | Eye Zone Clinic
+eyecare-opticals-fuvahmulah-branch.jpg | Eyecare opticals (fuvahmulah branch)
+f-c-medicare-and-scan-center.jpg      | F & C Medicare and Scan Center
+f-c-prime-care.jpg                    | F & C Prime Care
+f-c-medicare.jpg                      | F&C Medicare
+f-c-medicare-meedhoo.jpg              | F&C Medicare, Meedhoo
+family-care-clinic-and-scan-centre.jpg | Family Care Clinic and Scan Centre
+family-dental-care.jpg                | Family Dental Care
+family-relationship-services.jpg      | Family Relationship Services
+farook-healthcare.jpg                 | Farook Healthcare
+farook-healthcare-villingili.jpg      | Farook Healthcare Villingili
+faruvaa-clinic.jpg                    | Faruvaa Clinic
+fihalhohi-clinic.jpg                  | Fihalhohi Clinic
+finolhu-clinic.jpg                    | Finolhu Clinic
+finolhu-clinic-plus.jpg               | Finolhu Clinic Plus
+four-seasons-resort-kuda-huraa-clinic.jpg | Four Seasons Resort Kuda Huraa Clinic
+furana-clinic.jpg                     | Furana Clinic
+furaveri-clinic.jpg                   | Furaveri Clinic
+fushi-clinic.jpg                      | Fushi Clinic
+gangehi-clinic-hf-23-alp-pvt-706.jpg  | Gangehi Clinic HF - 23/ALP/PVT/706
+gilli-gets-well.jpg                   | Gilli Gets Well
+great-minds.jpg                       | Great Minds
+guest-and-staff-clinic.jpg            | Guest and Staff Clinic
+haajy-medical-clinic.jpg              | Haajy Medical Clinic
+hadahaa-clinic.jpg                    | Hadahaa Clinic
+hakuraa-medical-centre.jpg            | Hakuraa Medical Centre
+halaveli-clinic.jpg                   | Halaveli Clinic
+havodda-clinic.jpg                    | Havodda Clinic
+healing-care-medical-center.jpg       | Healing Care Medical Center
+heart-care.jpg                        | Heart Care
+helengeli-clinic.jpg                  | Helengeli Clinic
+herbal-medi-clinic.jpg                | Herbal Medi Clinic
+hiyaa-medical-centre.jpg              | Hiyaa Medical Centre
+hope-dental-care.jpg                  | Hope Dental Care
+hope-health-care.jpg                  | Hope Health Care
+hudhuranfushi-clinic.jpg              | Hudhuranfushi Clinic
+hurawalhi-clinic.jpg                  | Hurawalhi Clinic
+hussain-abdul-samad-memorial-clinic.jpg | Hussain Abdul Samad Memorial Clinic
+huvadhoo-therapy-clinic.jpg           | Huvadhoo Therapy Clinic
+huvafen-fushi-clinic.jpg              | Huvafen Fushi Clinic
+i-wear.jpg                            | I wear
+i-m-d-c-multi-speciality-hospital.jpg | I.M.D.C Multi Speciality Hospital
+icatt-maldives-medical-services.jpg   | ICATT Maldives- Medical Services
+ifuru-clinic.jpg                      | Ifuru Clinic
+ihg-maamunagau-clinic.jpg             | IHG Maamunagau Clinic
+ilaa-ali-adam-clinic.jpg              | Ilaa Ali Adam Clinic
+image-centre.jpg                      | Image Centre
+imperial-medicare-centre.jpg          | Imperial Medicare Centre
+institute-for-counselling-and-psychotherapy.jpg | Institute For Counselling And Psychotherapy
+institute-for-mental-wellbeing.jpg    | Institute for Mental Wellbeing
+ithaafushi-clinic.jpg                 | Ithaafushi Clinic
+jawakara-clinic.jpg                   | Jawakara Clinic
+jibon-clinic.jpg                      | Jibon Clinic
+joali-being-clinic.jpg                | Joali Being Clinic
+joali-muravandhoo-clinic.jpg          | Joali Muravandhoo Clinic
+jp-memorial-clinic.jpg                | JP Memorial Clinic
+kaam-medical.jpg                      | Kaam Medical
+kagi-clinic.jpg                       | Kagi Clinic
+kandima-medical-centre.jpg            | Kandima Medical Centre
+kandolhu-clinic-hf-23-alp-pvt-713.jpg | Kandolhu Clinic HF -23/ALP/PVT/713
+kandooma-clinic.jpg                   | Kandooma Clinic
+kani-medical-clinic.jpg               | Kani Medical Clinic
+kanuhura-clinic.jpg                   | Kanuhura Clinic
+knowhub.jpg                           | Knowhub
+komandoo-clinic-hf-23-alp-pvt-712.jpg | Komandoo Clinic HF -23/ALP/PVT/712
+kothaifaru-clinic.jpg                 | Kothaifaru Clinic
+kuda-villingili.jpg                   | Kuda Villingili
+kulhelama-therapy.jpg                 | Kulhelama Therapy
+kulunu-medical-clinic.jpg             | Kulunu Medical Clinic
+kunaavashi-clinic.jpg                 | Kunaavashi Clinic
+kuramathi-medical-centre.jpg          | Kuramathi Medical Centre
+kuredivaru-clinic.jpg                 | kuredivaru Clinic
+kurumba-clinic.jpg                    | Kurumba Clinic
+lab-maldives.jpg                      | Lab Maldives
+leaf-of-life-clinic.jpg               | Leaf of Life Clinic
+leykokaa-medical-and-rehabilitation-centre.jpg | Leykokaa Medical and Rehabilitation Centre
+life-care-medical-centre.jpg          | Life Care Medical Centre
+life-wellness-clinic.jpg              | Life Wellness Clinic
+listen-clinic.jpg                     | Listen Clinic
+lux-maldives-resort-clinic.jpg        | Lux Maldives Resort Clinic
+maadhoo-clinic.jpg                    | Maadhoo Clinic
+maafushivaru-clinic.jpg               | Maafushivaru Clinic
+maalifushi-by-como.jpg                | Maalifushi by Como
+maamigili-clinic.jpg                  | Maamigili Clinic
+maandhoo-medical-centre.jpg           | Maandhoo Medical Centre
+maayafushi-clinic.jpg                 | Maayafushi Clinic
+macl-medical-clinic.jpg               | MACL Medical Clinic
+mafhaa-diagnostic-centre.jpg          | Mafhaa Diagnostic Centre
+magey-physio.jpg                      | Magey Physio
+maldicare-clinic.jpg                  | Maldicare Clinic
+maldives-alternative-medical-centre.jpg | Maldives Alternative Medical Centre
+maldives-diagnostic-centre.jpg        | Maldives Diagnostic Centre
+maldives-mobile-nursing-care.jpg      | Maldives Mobile Nursing Care
+maldives-neuro-endocrine-medical-facility.jpg | Maldives Neuro Endocrine Medical Facility
+male-eye-clinic.jpg                   | Male' Eye Clinic
+master-dental-care-centre.jpg         | Master Dental Care Centre
+master-dental-care-centro.jpg         | Master Dental Care Centro
+master-medical-and-dental-care-centre.jpg | Master Medical and Dental Care Centre
+medhope-medical-centre.jpg            | Medhope Medical Centre
+medica.jpg                            | Medica
+medica-annex.jpg                      | Medica Annex
+medical-hyperbaric-clinic.jpg         | Medical & Hyperbaric Clinic
+medicrest-clinic-and-diagnostics.jpg  | Medicrest Clinic and Diagnostics
+mediflex-dental-and-maxillofacial-surgery.jpg | Mediflex Dental and Maxillofacial Surgery
+mediflex-laboratories.jpg             | Mediflex Laboratories
+medlab-diagnostics.jpg                | Medlab Diagnostics
+mednova-medical-center.jpg            | Mednova Medical Center
+medplus-dental.jpg                    | Medplus Dental
+meedhupparu-clinic.jpg                | Meedhupparu Clinic
+meeru-clinic.jpg                      | Meeru Clinic
+mercure-maldives-kooddoo-clinic.jpg   | Mercure Maldives Kooddoo Clinic
+milaidhoo-clinic.jpg                  | Milaidhoo Clinic
+mind-space.jpg                        | Mind Space
+mindcare-clinic.jpg                   | Mindcare Clinic
+mipstar.jpg                           | MIPSTAR
+miriandhoo-medical-services.jpg       | Miriandhoo Medical Services
+modern-medical-centre.jpg             | Modern Medical Centre
+moving-cure.jpg                       | Moving Cure
+mpi-clinique.jpg                      | MPI Clinique
+mudhdhoo-clinic.jpg                   | Mudhdhoo Clinic
+muraka-clinic.jpg                     | Muraka Clinic
+mvdx-diagnostics.jpg                  | MVDX Diagnostics
+my-care-medical-centre.jpg            | My Care Medical Centre
+my-clinic.jpg                         | My Clinic
+my-dental-care-hf-23-alp-pvt-710.jpg  | My Dental Care HF -23/ALP/PVT/710
+my-family-dentist.jpg                 | My Family Dentist
+my-family-dentist-male.jpg            | My Family Dentist Male'
+nada-clinic.jpg                       | Nada Clinic
+nafsu-psychological-services.jpg      | Nafsu Psychological Services
+naifaru-medical-center.jpg            | Naifaru Medical Center
+nazahealth.jpg                        | NazaHealth
+niyama-resort-clinic.jpg              | Niyama Resort Clinic
+noo-clinic.jpg                        | Noo Clinic
+noosandha.jpg                         | Noosandha
+noosandha-addu.jpg                    | Noosandha - Addu
+nova-clinic.jpg                       | Nova Clinic
+novalux-diagnostics.jpg               | Novalux Diagnostics
+nowall-medical-centre.jpg             | Nowall Medical Centre
+oagaa-medical-centre.jpg              | Oagaa Medical Centre
+olhahali-clinic.jpg                   | Olhahali Clinic
+olive-medical-centre.jpg              | Olive Medical Centre
+omega-medical-centre.jpg              | Omega Medical Centre
+one-medical-care.jpg                  | One Medical Care
+oracare-dental.jpg                    | Oracare Dental
+ouch.jpg                              | Ouch
+pain-clinic.jpg                       | Pain Clinic
+paradise-medical-center.jpg           | Paradise Medical Center
+pearl-medical-centre.jpg              | Pearl Medical Centre
+pearl-medical-centre-hulhumale.jpg    | Pearl Medical Centre Hulhumale
+physio-autism-clinic-hulhumale.jpg    | Physio & Autism Clinic - Hulhumale'
+physio-and-autism-clinic.jpg          | Physio and Autism Clinic
+physio-clinic.jpg                     | Physio Clinic
+physio-clinic-annex-1.jpg             | Physio Clinic Annex 1
+physio-cure.jpg                       | Physio Cure
+physio-solutions.jpg                  | Physio Solutions
+pine-tree-medic-care.jpg              | Pine tree Medic Care
+pine-tree-medic-care-sh-funadhoo.jpg  | Pine tree Medic Care/ Sh. Funadhoo
+popular-clinic.jpg                    | Popular Clinic
+primax-medicare.jpg                   | Primax Medicare
+pro-care-clinic-and-dental-centre.jpg | Pro Care Clinic and Dental Centre
+pullman-maldives-maamutaa-resort-clinic.jpg | Pullman Maldives Maamutaa Resort Clinic
+queen-aesthetic-medical-center.jpg    | Queen Aesthetic Medical Center
+raaya-clinic.jpg                      | Raaya Clinic
+raffles-clinic.jpg                    | Raffles Clinic
+rangali-clinic.jpg                    | Rangali Clinic
+rannalhi-clinic-hf22-alp-pvt-659.jpg  | Rannalhi Clinic HF22/ALP/PVT/659
+rasfushi-clinic.jpg                   | Rasfushi Clinic
+reethi-beach-clilnic-hf-23-alp-pvt-711.jpg | Reethi Beach Clilnic HF -23/ALP/PVT/711
+reethi-faru-clinic.jpg                | Reethi Faru Clinic
+resort-clinic.jpg                     | Resort Clinic
+resort-medical-and-laboratory-services.jpg | Resort Medical and Laboratory Services
+revive-medical-centre.jpg             | Revive Medical Centre
+rmls-lab-services.jpg                 | RMLS Lab Services
+ruhgalu-clinic.jpg                    | Ruhgalu Clinic
+rx-medicare.jpg                       | Rx Medicare
+sandies-bathala-infirmary.jpg         | Sandies Bathala Infirmary
+sha-therapy-dhivehibeys-centre.jpg    | Sha Therapy Dhivehibeys Centre
+shifaa-medical.jpg                    | Shifaa Medical
+six-sensus-laamu-clinic.jpg           | Six Sensus Laamu Clinic
+siyam-world-maldives-clinic.jpg       | Siyam World Maldives Clinic
+smiles-dental-care.jpg                | Smiles Dental Care
+smiles-dental-care-hulhumale.jpg      | Smiles Dental Care Hulhumale'
+so-maldives-clinic.jpg                | SO/ Maldives Clinic
+soneva-fushi-clinic.jpg               | Soneva Fushi Clinic
+soneva-jani-clinic.jpg                | Soneva Jani Clinic
+southern-care-clinic.jpg              | Southern Care Clinic
+star-medical.jpg                      | Star Medical
+sukoon-clinic.jpg                     | Sukoon Clinic
+sun-island-medical-centre.jpg         | Sun Island Medical Centre
+sun-siyam-irufushi-maldives-clinic.jpg | Sun Siyam Irufushi Maldives Clinic
+sun-siyam-iruveli-maldives-clinic-hf-23-alp-pvt-709.jpg | Sun Siyam Iruveli Maldives Clinic HF -23/ALP/PVT/709
+sun-siyam-olhuveli-maldives-clinic.jpg | Sun Siyam Olhuveli Maldives Clinic
+sun-siyam-vilu-reef-maldives-clinic.jpg | Sun Siyam Vilu Reef Maldives CLinic
+synergy-care.jpg                      | Synergy Care
+taj-exotica-clinic.jpg                | Taj Exotica Clinic
+thasalli-medical-care.jpg             | Thasalli Medical Care
+the-clinic-at-sirru-fen-fushi.jpg     | The Clinic At Sirru Fen Fushi
+the-residence-maldives-at-dhigurah-clinic.jpg | The Residence Maldives at Dhigurah Clinic
+the-residence-maldives-clinic.jpg     | The Residence Maldives Clinic
+the-standard-clinic.jpg               | The Standard Clinic
+therapy-centre.jpg                    | Therapy Centre
+thilamaafushi-clinic.jpg              | Thilamaafushi Clinic
+thudufushi-medical-clinic.jpg         | Thudufushi Medical Clinic
+thulhagiri-clinic.jpg                 | Thulhagiri Clinic
+thundufushi-medical-clinic.jpg        | Thundufushi Medical Clinic
+tiny-drops-medical-services.jpg       | Tiny Drops Medical Services
+totalphysio.jpg                       | TotalPhysio
+treetop-hospital.jpg                  | TreeTop Hospital
+true-care-medicals.jpg                | True Care Medicals
+tth-clinic.jpg                        | TTH Clinic
+unique-dental.jpg                     | Unique Dental
+vabbinfaru-clinic.jpg                 | Vabbinfaru Clinic
+vadoo-clinic-hf-23-alp-pvt-708.jpg    | Vadoo Clinic HF -23/ALP/PVT/708
+valley-dental.jpg                     | Valley Dental
+varu-medical-centre.jpg               | Varu Medical Centre
+vcare-counselling-and-psychotherapy-centre.jpg | VCare Counselling and Psychotherapy Centre
+velaa-private-island-clinic.jpg       | Velaa Private Island Clinic
+velassaru-medical-center.jpg          | Velassaru Medical Center
+veligandu-clinic-hf-23-alp-pvt-704.jpg | Veligandu Clinic HF -23/ALP/PVT/704
+verso-medicalcentre-alifushi.jpg      | Verso MedicalCentre Alifushi
+villa-bio-medicals-laboratory.jpg     | Villa Bio Medicals Laboratory
+vision-care-optical-and-eye-clinic.jpg | Vision Care Optical and Eye Clinic
+vision-clinic.jpg                     | Vision Clinic
+vision-clinic-hulhumale.jpg           | Vision Clinic Hulhumale'
+vision-clinic-1.jpg                   | Vision Clinic-1
+vital-care.jpg                        | Vital Care
+vital-care-kulhudhufushi-anex.jpg     | Vital Care Kulhudhufushi Anex
+vital-care-kulhudhuffushi.jpg         | Vital Care- Kulhudhuffushi
+vitalcare-dental.jpg                  | VitalCare Dental
+vitalcare-huvadhoo.jpg                | Vitalcare Huvadhoo
+vivadent-dental-center.jpg            | Vivadent Dental Center
+vommuli-clinic.jpg                    | Vommuli Clinic
+wellcare-physiotherapy-sports-rehabilitation.jpg | Wellcare Physiotherapy & Sports Rehabilitation
+you-me-clinic.jpg                     | You & Me Clinic
+
+═══════════════════════════════════════════════════════════════
+                      SUMMARY
+═══════════════════════════════════════════════════════════════
+Doctors:   256 images needed in public/images/doctors/
+Hospitals: 321 images needed in public/images/hospitals/
+
+Example files to create:
+  public/images/doctors/aminath-lamha-ali.jpg
+  public/images/hospitals/aahiyans-medical-clinic.jpg
+
+═══════════════════════════════════════════════════════════════

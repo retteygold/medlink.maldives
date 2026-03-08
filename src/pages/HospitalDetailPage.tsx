@@ -4,11 +4,26 @@ import { MapPin, Star, Phone, Mail, Clock, ChevronLeft, Globe, Building2, Siren,
 import type { Hospital, Doctor } from '../types'
 import { getHospitalById, getDoctors } from '../lib/dataService'
 
+function slugifyFileName(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function getHospitalImageUrl(hospital: Hospital) {
+  const explicit = (hospital.image_url || '').trim()
+  if (explicit) return explicit
+  return `/images/hospitals/${slugifyFileName(hospital.name)}.jpg`
+}
+
 export default function HospitalDetailPage() {
   const { id } = useParams<{ id: string }>()
   const [hospital, setHospital] = useState<Hospital | null>(null)
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [loading, setLoading] = useState(true)
+  const [imageFailed, setImageFailed] = useState(false)
 
   useEffect(() => {
     loadHospitalData()
@@ -51,8 +66,18 @@ export default function HospitalDetailPage() {
           <ChevronLeft size={20} /> Back
         </button>
         <div className="flex items-center gap-4">
-          <div className="w-20 h-20 bg-white/20 rounded-xl flex items-center justify-center">
-            <Building2 size={36} className="text-white" />
+          <div className="w-20 h-20 bg-white/20 rounded-xl flex items-center justify-center overflow-hidden">
+            {imageFailed ? (
+              <Building2 size={36} className="text-white" />
+            ) : (
+              <img
+                src={getHospitalImageUrl(hospital)}
+                alt={hospital.name}
+                className="w-full h-full object-cover"
+                loading="lazy"
+                onError={() => setImageFailed(true)}
+              />
+            )}
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">{hospital.name}</h1>

@@ -5,6 +5,46 @@ import { getDoctors, getSpecialties } from '../lib/dataService'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
 
+function slugifyFileName(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '')
+}
+
+function getDoctorImageUrl(doctor: Doctor) {
+  const explicit = (doctor.image_url || '').trim()
+  if (explicit) return explicit
+  return `/images/doctors/${slugifyFileName(doctor.name)}.jpg`
+}
+
+function DoctorAvatar({ doctor }: { doctor: Doctor }) {
+  const [failed, setFailed] = useState(false)
+
+  if (failed) {
+    return (
+      <div className="w-20 h-20 bg-gradient-to-br from-medical-100 via-medical-200 to-medical-300 rounded-2xl flex items-center justify-center shadow-inner">
+        <span className="text-medical-700 text-2xl font-bold">
+          {doctor.name.split(' ').map(n => n[0]).join('')}
+        </span>
+      </div>
+    )
+  }
+
+  return (
+    <div className="w-20 h-20 bg-gradient-to-br from-medical-100 via-medical-200 to-medical-300 rounded-2xl flex items-center justify-center shadow-inner overflow-hidden">
+      <img
+        src={getDoctorImageUrl(doctor)}
+        alt={doctor.name}
+        className="w-full h-full object-cover"
+        loading="lazy"
+        onError={() => setFailed(true)}
+      />
+    </div>
+  )
+}
+
 export default function DoctorsPage() {
   const { t, language } = useLanguage()
   const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -128,11 +168,7 @@ export default function DoctorsPage() {
             <div className="flex gap-4 p-4">
               {/* Doctor Avatar */}
               <div className="relative">
-                <div className="w-20 h-20 bg-gradient-to-br from-medical-100 via-medical-200 to-medical-300 rounded-2xl flex items-center justify-center shadow-inner">
-                  <span className="text-medical-700 text-2xl font-bold">
-                    {doctor.name.split(' ').map(n => n[0]).join('')}
-                  </span>
-                </div>
+                <DoctorAvatar doctor={doctor} />
                 {doctor.is_active && (
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
                     <div className="w-2 h-2 bg-white rounded-full"></div>

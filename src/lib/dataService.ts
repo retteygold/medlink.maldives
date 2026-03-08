@@ -11,8 +11,11 @@ interface DBHospital {
   address: string
   contact_phone: string | null
   email: string | null
+  website: string | null
   category: string
   location_type: string
+  image_url: string | null
+  description: string | null
   has_emergency: boolean
   has_pharmacy: boolean
   has_laboratory: boolean
@@ -33,6 +36,7 @@ interface DBDoctor {
   qualifications: string[] | null
   contact_phone: string | null
   email: string | null
+  image_url: string | null
   about: string | null
   rating: number
   review_count: number
@@ -50,8 +54,11 @@ function transformHospital(db: DBHospital): Hospital {
     address: db.address,
     contact_phone: db.contact_phone || '',
     email: db.email || '',
+    website: db.website || '',
     category: db.category as Hospital['category'],
     location_type: db.location_type as Hospital['location_type'],
+    image_url: db.image_url || '',
+    description: db.description || '',
     has_emergency: db.has_emergency,
     has_pharmacy: db.has_pharmacy,
     has_laboratory: db.has_laboratory,
@@ -75,6 +82,7 @@ function transformDoctor(db: DBDoctor): Doctor {
     qualifications: db.qualifications || [],
     contact_phone: db.contact_phone || '',
     email: db.email || '',
+    image_url: db.image_url || '',
     about: db.about || '',
     rating: db.rating,
     review_count: db.review_count,
