@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { Search, Star, Filter, Building2 } from 'lucide-react'
 import type { Hospital } from '../types'
 import { getHospitals } from '../lib/dataService'
+import { useLanguage } from '../lib/languageContext'
+import { transliterateToDhivehi } from '../lib/transliteration'
 
 const categories = ['All', 'Private Hospital', 'General Clinic', 'Diagnostic Clinic', 'Speciality Clinic']
 
@@ -44,6 +46,7 @@ function HospitalAvatar({ hospital }: { hospital: Hospital }) {
 }
 
 export default function HospitalsPage() {
+  const { language } = useLanguage()
   const [hospitals, setHospitals] = useState<Hospital[]>([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -76,7 +79,7 @@ export default function HospitalsPage() {
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
-            placeholder="Search hospitals..."
+            placeholder={language === 'dv' ? 'ހޯދާ...' : 'Search hospitals...'}
             className="input-field pl-12 pr-12"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -129,8 +132,12 @@ export default function HospitalsPage() {
             <div className="flex items-start gap-3">
               <HospitalAvatar hospital={hospital} />
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-gray-800">{hospital.name}</h3>
-                <p className="text-gray-500 text-sm">{hospital.address}</p>
+                <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                  {language === 'dv' ? transliterateToDhivehi(hospital.name) : hospital.name}
+                </h3>
+                <p className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                  {language === 'dv' ? transliterateToDhivehi(hospital.address || '') : hospital.address}
+                </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {hospital.has_emergency && (
                     <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">

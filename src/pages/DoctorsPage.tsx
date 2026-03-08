@@ -4,6 +4,7 @@ import type { Doctor } from '../types'
 import { getDoctors, getSpecialties } from '../lib/dataService'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
+import { transliterateToDhivehi } from '../lib/transliteration'
 
 function slugifyFileName(value: string) {
   return value
@@ -19,14 +20,15 @@ function getDoctorImageUrl(doctor: Doctor) {
   return `/images/doctors/${slugifyFileName(doctor.name)}.jpg`
 }
 
-function DoctorAvatar({ doctor }: { doctor: Doctor }) {
+function DoctorAvatar({ doctor, language }: { doctor: Doctor; language: string }) {
   const [failed, setFailed] = useState(false)
+  const displayName = language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name
 
   if (failed) {
     return (
       <div className="w-20 h-20 bg-gradient-to-br from-medical-100 via-medical-200 to-medical-300 rounded-2xl flex items-center justify-center shadow-inner">
         <span className="text-medical-700 text-2xl font-bold">
-          {doctor.name.split(' ').map(n => n[0]).join('')}
+          {displayName.split(' ').map(n => n[0]).join('')}
         </span>
       </div>
     )
@@ -168,7 +170,7 @@ export default function DoctorsPage() {
             <div className="flex gap-4 p-4">
               {/* Doctor Avatar */}
               <div className="relative">
-                <DoctorAvatar doctor={doctor} />
+                <DoctorAvatar doctor={doctor} language={language} />
                 {doctor.is_active && (
                   <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-white flex items-center justify-center">
                     <div className="w-2 h-2 bg-white rounded-full"></div>
@@ -181,10 +183,10 @@ export default function DoctorsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className={`font-bold text-gray-800 truncate text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                      {doctor.name}
+                      {language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name}
                     </h3>
                     <p className={`text-medical-600 font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                      {doctor.specialty}
+                      {language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">
@@ -195,7 +197,9 @@ export default function DoctorsPage() {
                 
                 <div className="flex items-center gap-1 text-gray-500 text-sm mt-2">
                   <MapPin size={14} className="text-medical-500" />
-                  <span className={`truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{doctor.hospital_name}</span>
+                  <span className={`truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                    {language === 'dv' ? transliterateToDhivehi(doctor.hospital_name) : doctor.hospital_name}
+                  </span>
                 </div>
                 
                 {doctor.qualifications && doctor.qualifications.length > 0 && (
