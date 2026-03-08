@@ -6,6 +6,8 @@ interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  isRTL: boolean;
+  fontClass: string;
 }
 
 const translations = {
@@ -240,8 +242,11 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     return translations[language][key as keyof typeof translations.en] || key;
   };
 
+  const isRTL = language === 'dv';
+  const fontClass = language === 'dv' ? 'dhivehi-font' : '';
+
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, isRTL, fontClass }}>
       {children}
     </LanguageContext.Provider>
   );

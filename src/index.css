@@ -22,6 +22,10 @@
     -webkit-tap-highlight-color: transparent;
   }
   
+  html[dir="rtl"] {
+    font-family: 'Dhivehi', 'MV Faseyha', 'Faruma', 'Inter', system-ui, sans-serif;
+  }
+  
   body {
     @apply bg-gray-50 text-gray-900;
     overscroll-behavior-y: none;
@@ -43,6 +47,14 @@
   
   .input-field {
     @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-medical-500 focus:outline-none transition-colors text-base;
+  }
+  
+  /* Dhivehi RTL input field */
+  .input-field-rtl {
+    @apply w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:border-medical-500 focus:outline-none transition-colors text-base;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Dhivehi', 'MV Faseyha', 'Faruma', sans-serif;
   }
   
   .gradient-header {
@@ -67,6 +79,52 @@
   .dhivehi-text {
     line-height: 1.8;
     letter-spacing: 0.02em;
+  }
+  
+  /* RTL Layout support */
+  .rtl-layout {
+    direction: rtl;
+    text-align: right;
+  }
+  
+  .rtl-layout .flex {
+    flex-direction: row-reverse;
+  }
+  
+  .rtl-layout .flex-col {
+    flex-direction: column;
+  }
+  
+  .rtl-layout .text-left {
+    text-align: right;
+  }
+  
+  .rtl-layout .text-right {
+    text-align: left;
+  }
+  
+  .rtl-layout .ml-auto {
+    margin-left: 0;
+    margin-right: auto;
+  }
+  
+  .rtl-layout .mr-auto {
+    margin-right: 0;
+    margin-left: auto;
+  }
+  
+  .rtl-layout .ml-1,
+  .rtl-layout .ml-2,
+  .rtl-layout .ml-3,
+  .rtl-layout .ml-4 {
+    margin-left: 0;
+  }
+  
+  .rtl-layout .mr-1,
+  .rtl-layout .mr-2,
+  .rtl-layout .mr-3,
+  .rtl-layout .mr-4 {
+    margin-right: 0;
   }
 }
 
