@@ -97,58 +97,72 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6">
-        <h1 className="text-xl font-bold text-gray-800">Admin Login</h1>
-        <p className="text-sm text-gray-500 mt-1">Sign in to manage content</p>
-
-        {error && (
-          <div className="mt-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
-            {error}
-          </div>
-        )}
-
-        <form onSubmit={onSubmit} className="mt-6 space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="input-field"
-              required
-              autoComplete="email"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="input-field"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
+    <div className="min-h-screen bg-gray-50">
+      <div className="bg-medical-600 text-white px-4 pt-12 pb-8 rounded-b-3xl">
+        <div className="flex items-center justify-between">
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary disabled:opacity-50"
+            type="button"
+            onClick={() => navigate('/')}
+            className="text-white/80 text-sm font-medium"
           >
-            {loading ? 'Signing in...' : 'Sign in'}
+            Back
           </button>
-        </form>
+          <div className="text-white/80 text-sm">Admin</div>
+        </div>
 
-        <button
-          type="button"
-          onClick={() => navigate('/')}
-          className="w-full mt-3 text-sm text-gray-600 underline"
-        >
-          Back to Home
-        </button>
+        <div className="mt-6 flex items-center gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold">Admin Login</h1>
+            <p className="text-white/80 text-sm mt-1">Sign in to manage content</p>
+          </div>
+          <img
+            src="/images/storyset/Health professional team-amico.svg"
+            alt="Admin"
+            className="w-24 h-24 object-contain drop-shadow-lg"
+          />
+        </div>
+      </div>
+
+      <div className="px-4 -mt-6">
+        <div className="w-full max-w-md mx-auto bg-white rounded-2xl shadow-sm p-6">
+          {error && (
+            <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={onSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input-field"
+                required
+                autoComplete="email"
+                placeholder="admin@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input-field"
+                required
+                autoComplete="current-password"
+                placeholder="Your password"
+              />
+            </div>
+
+            <button type="submit" disabled={loading} className="w-full btn-primary disabled:opacity-50">
+              {loading ? 'Signing in...' : 'Sign in'}
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   )
