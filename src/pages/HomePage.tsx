@@ -91,10 +91,17 @@ export default function HomePage() {
           <input
             type="text"
             placeholder={t('home.searchPlaceholder')}
-            className="w-full pl-12 pr-4 py-4 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none shadow-lg"
+            className="w-full pl-12 pr-14 py-4 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none shadow-lg"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <button
+            type="submit"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 rounded-lg bg-medical-500 hover:bg-medical-600 transition-colors flex items-center justify-center"
+            aria-label="Search"
+          >
+            <Search size={18} className="text-white" />
+          </button>
         </form>
       </div>
 

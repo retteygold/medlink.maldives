@@ -85,8 +85,13 @@ export default function CommunityPage() {
   const categories = ['All', 'Recommendations', 'Doctor Reviews', 'Emergency', 'General', 'Insurance']
 
   const filteredQuestions = questions.filter(q => {
-    const matchesSearch = q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         q.content.toLowerCase().includes(searchQuery.toLowerCase())
+    const qSearch = searchQuery.trim().toLowerCase()
+    const matchesSearch =
+      !qSearch ||
+      q.title.toLowerCase().includes(qSearch) ||
+      q.content.toLowerCase().includes(qSearch) ||
+      q.author.toLowerCase().includes(qSearch) ||
+      q.category.toLowerCase().includes(qSearch)
     const matchesCategory = selectedCategory === 'All' || q.category === selectedCategory
     return matchesSearch && matchesCategory
   })
@@ -114,10 +119,18 @@ export default function CommunityPage() {
           <input
             type="text"
             placeholder="Search questions..."
-            className="w-full pl-12 pr-4 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none"
+            className="w-full pl-12 pr-14 py-3 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <button
+            type="button"
+            onClick={() => setSearchQuery((v) => v.trim())}
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg bg-medical-500 hover:bg-medical-600 transition-colors flex items-center justify-center"
+            aria-label="Search"
+          >
+            <Search size={16} className="text-white" />
+          </button>
         </div>
       </div>
 
