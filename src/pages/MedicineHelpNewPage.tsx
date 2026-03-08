@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, Upload, X, Save } from 'lucide-react'
+import { Upload, X, Save } from 'lucide-react'
 import { createMedicineRequest, uploadMedicineRequestImage } from '../lib/dataService'
 
 export default function MedicineHelpNewPage() {
@@ -53,22 +53,37 @@ export default function MedicineHelpNewPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white px-4 pt-12 pb-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={() => navigate(-1)} className="p-2 -ml-2">
-            <ChevronLeft size={22} className="text-gray-600" />
+      <div className="gradient-header px-4 pt-12 pb-8 rounded-b-3xl">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="text-white/80 text-sm font-medium"
+          >
+            Back
           </button>
-          <h1 className="text-xl font-bold text-gray-800">New Request</h1>
+          <div className="text-white/80 text-sm">Medicine Help</div>
         </div>
-        <p className="text-sm text-gray-500 mt-2">Please hide personal information in the prescription before uploading.</p>
+
+        <div className="mt-6 flex items-center gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-white">New Request</h1>
+            <p className="text-white/80 text-sm mt-1">Please hide personal information before uploading.</p>
+          </div>
+          <img
+            src="/images/storyset/Researchers-amico.svg"
+            alt="New request"
+            className="w-24 h-24 object-contain drop-shadow-lg"
+          />
+        </div>
       </div>
 
-      <form onSubmit={onSubmit} className="p-4 space-y-4">
+      <form onSubmit={onSubmit} className="px-4 -mt-6 space-y-4">
         {error && (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">{error}</div>
         )}
 
-        <div className="card p-4 space-y-3">
+        <div className="bg-white rounded-2xl shadow-sm p-5 space-y-3">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
             <input className="input-field" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Need insulin pen" />
@@ -112,7 +127,7 @@ export default function MedicineHelpNewPage() {
           </div>
         </div>
 
-        <div className="card p-4 space-y-3">
+        <div className="bg-white rounded-2xl shadow-sm p-5 space-y-3">
           <label className="block text-sm font-medium text-gray-700">Prescription image</label>
           {prescriptionFile ? (
             <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3">

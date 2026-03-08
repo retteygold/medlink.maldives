@@ -22,6 +22,8 @@
 
 MedLink Maldives is a mobile-first web app that helps you find doctors, hospitals, and specialists across the Maldives. No download is required – it works in any modern browser.
 
+The app uses a consistent MedLink color palette and illustrated screens (Storyset) for a modern, friendly experience.
+
 **URL**: [https://medlink-maldives.vercel.app](https://medlink-maldives.vercel.app)
 
 ### Requirements
@@ -291,10 +293,14 @@ When creating an account, select a role:
 
 This role is saved in your account metadata and can be used for future filtering or features.
 
+The signup screen uses a guided role selection UI.
+
 ### Login
 
 - Login uses **email + password**.
 - If you try to open Medicine Help while logged out, the app will redirect you to Login automatically.
+
+The login screen includes an illustrated header and clear success/error messages.
 
 ---
 
@@ -306,6 +312,8 @@ For hospital/clinic administrators to manage listings.
 
 - Go to `/admin`
 - Login credentials required (contact support)
+
+The admin login screen uses the same modern UI style as the user login.
 
 ### Admin Access Control
 

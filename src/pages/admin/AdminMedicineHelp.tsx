@@ -108,7 +108,7 @@ export default function AdminMedicineHelp() {
 
         <div className="space-y-3">
           {filtered.map((r) => (
-            <div key={r.id} className="bg-white rounded-xl p-4 shadow-sm">
+            <div key={r.id} className="bg-white rounded-2xl p-4 shadow-sm">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="font-bold text-gray-800 truncate">{r.title || r.medicine_name || 'Medicine request'}</div>
@@ -144,7 +144,22 @@ export default function AdminMedicineHelp() {
           ))}
 
           {!loading && filtered.length === 0 && (
-            <div className="bg-white rounded-xl p-6 text-center text-gray-500">No requests found.</div>
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <img
+                src="/images/storyset/Hospital bed-pana.svg"
+                alt="No requests"
+                className="w-56 h-56 mx-auto object-contain"
+              />
+              <div className="mt-2 font-bold text-gray-800">No requests found</div>
+              <div className="text-sm text-gray-600 mt-1">Try a different search or refresh.</div>
+              <button
+                type="button"
+                onClick={load}
+                className="mt-4 btn-primary w-full"
+              >
+                Refresh
+              </button>
+            </div>
           )}
         </div>
       </div>

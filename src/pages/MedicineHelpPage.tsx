@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Plus, Search, ChevronLeft, MessageCircle } from 'lucide-react'
+import { Plus, Search, MessageCircle } from 'lucide-react'
 import { listMedicineRequests } from '../lib/dataService'
 
 type MedicineRequest = {
@@ -46,27 +46,42 @@ export default function MedicineHelpPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
-      <div className="bg-white px-4 pt-12 pb-4 shadow-sm">
+      <div className="gradient-header px-4 pt-12 pb-8 rounded-b-3xl">
         <div className="flex items-center justify-between">
-          <button type="button" onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/profile'))} className="p-2 -ml-2">
-            <ChevronLeft size={22} className="text-gray-600" />
+          <button
+            type="button"
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+            className="text-white/80 text-sm font-medium"
+          >
+            Back
           </button>
-          <h1 className="text-xl font-bold text-gray-800">Medicine Help</h1>
           <button
             type="button"
             onClick={() => navigate('/medicine-help/new')}
-            className="p-2 bg-medical-500 text-white rounded-xl"
+            className="p-2 bg-white/15 text-white rounded-xl hover:bg-white/20 transition-colors"
             aria-label="New request"
           >
             <Plus size={20} />
           </button>
         </div>
 
-        <div className="relative mt-4">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+        <div className="mt-6 flex items-center gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-white">Medicine Help</h1>
+            <p className="text-white/80 text-sm mt-1">Post requests and chat privately with helpers</p>
+          </div>
+          <img
+            src="/images/storyset/Medical care-amico.svg"
+            alt="Medicine Help"
+            className="w-24 h-24 object-contain drop-shadow-lg"
+          />
+        </div>
+
+        <div className="relative mt-5">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70" size={18} />
           <input
             type="text"
-            className="input-field pl-11"
+            className="w-full rounded-xl bg-white/10 border border-white/20 px-11 py-3 text-white placeholder:text-white/70 outline-none"
             placeholder="Search requests..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -74,17 +89,15 @@ export default function MedicineHelpPage() {
         </div>
       </div>
 
-      <div className="px-4 py-3">
-        <p className="text-sm text-gray-600">
-          {loading ? 'Loading requests...' : `${filtered.length} requests`}
-        </p>
+      <div className="px-4 py-4">
+        <p className="text-sm text-gray-600">{loading ? 'Loading requests...' : `${filtered.length} requests`}</p>
       </div>
 
       <div className="px-4 space-y-3">
         {filtered.map((r) => (
-          <Link key={r.id} to={`/medicine-help/${r.id}`} className="card p-4 block">
+          <Link key={r.id} to={`/medicine-help/${r.id}`} className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow block">
             <div className="flex items-start gap-3">
-              <div className="w-10 h-10 rounded-xl bg-medical-50 flex items-center justify-center">
+              <div className="w-11 h-11 rounded-2xl bg-medical-50 flex items-center justify-center">
                 <MessageCircle size={18} className="text-medical-600" />
               </div>
               <div className="flex-1 min-w-0">
@@ -120,7 +133,22 @@ export default function MedicineHelpPage() {
         ))}
 
         {!loading && filtered.length === 0 && (
-          <div className="card p-6 text-center text-gray-500">No requests found.</div>
+          <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+            <img
+              src="/images/storyset/Doctors-pana.svg"
+              alt="No requests"
+              className="w-56 h-56 mx-auto object-contain"
+            />
+            <div className="mt-2 font-bold text-gray-800">No requests found</div>
+            <div className="text-sm text-gray-600 mt-1">Try a different search or create a new request.</div>
+            <button
+              type="button"
+              onClick={() => navigate('/medicine-help/new')}
+              className="mt-4 btn-primary w-full"
+            >
+              Create a request
+            </button>
+          </div>
         )}
       </div>
     </div>

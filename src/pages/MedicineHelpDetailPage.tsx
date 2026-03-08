@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { ChevronLeft, MessageCircle, Send, Image as ImageIcon } from 'lucide-react'
+import { MessageCircle, Send, Image as ImageIcon } from 'lucide-react'
 import { supabase } from '../lib/supabase'
 import {
   createOrGetMedicineConversation,
@@ -161,47 +161,74 @@ export default function MedicineHelpDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+        <img
+          src="/images/storyset/Researchers-pana.svg"
+          alt="Loading"
+          className="w-64 h-64 object-contain"
+        />
+        <p className="text-gray-600 mt-2">Loading...</p>
       </div>
     )
   }
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500">Request not found</p>
+      <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4">
+        <img
+          src="/images/storyset/Doctors-rafiki.svg"
+          alt="Not found"
+          className="w-64 h-64 object-contain"
+        />
+        <p className="text-gray-700 font-medium mt-2">Request not found</p>
+        <button type="button" className="btn-primary mt-4 w-full" onClick={() => navigate('/medicine-help')}>Back to list</button>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24">
-      <div className="bg-white px-4 pt-12 pb-4 shadow-sm">
-        <div className="flex items-center gap-3">
-          <button type="button" onClick={() => navigate(-1)} className="p-2 -ml-2">
-            <ChevronLeft size={22} className="text-gray-600" />
+      <div className="gradient-header px-4 pt-12 pb-8 rounded-b-3xl">
+        <div className="flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="text-white/80 text-sm font-medium"
+          >
+            Back
           </button>
-          <h1 className="text-xl font-bold text-gray-800">Request</h1>
+          <span className="text-xs px-2 py-1 rounded-full bg-white/15 text-white font-medium">{request.status}</span>
+        </div>
+        <div className="mt-6 flex items-center gap-4">
+          <div className="flex-1 min-w-0">
+            <h1 className="text-2xl font-bold text-white truncate">{request.title || request.medicine_name || 'Medicine request'}</h1>
+            <p className="text-white/80 text-sm mt-1">{[request.medicine_name, request.dosage].filter(Boolean).join(' · ')}</p>
+          </div>
+          <img
+            src="/images/storyset/Online Doctor-pana.svg"
+            alt="Request"
+            className="w-20 h-20 object-contain drop-shadow-lg"
+          />
         </div>
       </div>
 
-      <div className="p-4 space-y-4">
+      <div className="px-4 -mt-6 space-y-4">
         {error && <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">{error}</div>}
 
-        <div className="card p-4">
+        <div className="bg-white rounded-2xl shadow-sm p-5">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
-              <div className="font-bold text-gray-800 truncate">{request.title || request.medicine_name || 'Medicine request'}</div>
-              <div className="text-sm text-gray-600 mt-1">
-                {[request.medicine_name, request.dosage].filter(Boolean).join(' · ')}
+              <div className="text-sm text-gray-600">
+                {[request.location_type, request.atoll].filter(Boolean).join(' · ') || 'Location not specified'}
               </div>
               <div className="text-xs text-gray-500 mt-2">
-                {[request.location_type, request.atoll].filter(Boolean).join(' · ')}
+                {new Date(request.created_at).toLocaleString()}
               </div>
               {request.notes && <div className="text-sm text-gray-700 mt-3 whitespace-pre-line">{request.notes}</div>}
             </div>
-            <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 text-gray-700 font-medium">{request.status}</span>
+            <div className="w-10 h-10 rounded-2xl bg-medical-50 flex items-center justify-center">
+              <MessageCircle size={18} className="text-medical-600" />
+            </div>
           </div>
 
           {(prescriptionUrl || previousUrl) && (
@@ -237,7 +264,7 @@ export default function MedicineHelpDetailPage() {
         )}
 
         {isOwner && conversations.length > 0 && (
-          <div className="card p-4">
+          <div className="bg-white rounded-2xl shadow-sm p-5">
             <div className="font-bold text-gray-800 mb-3">Chats</div>
             <div className="space-y-2">
               {conversations.map((c) => {
@@ -260,7 +287,7 @@ export default function MedicineHelpDetailPage() {
         )}
 
         {activeConversation?.id && (
-          <div className="card p-4">
+          <div className="bg-white rounded-2xl shadow-sm p-5">
             <div className="font-bold text-gray-800 mb-3">Chat</div>
             <div className="space-y-2 max-h-80 overflow-auto">
               {messages.map((m) => (
@@ -271,7 +298,16 @@ export default function MedicineHelpDetailPage() {
                   {m.message}
                 </div>
               ))}
-              {messages.length === 0 && <div className="text-sm text-gray-500">No messages yet.</div>}
+              {messages.length === 0 && (
+                <div className="py-6 text-center">
+                  <img
+                    src="/images/storyset/Doctors-rafiki.svg"
+                    alt="No messages"
+                    className="w-44 h-44 mx-auto object-contain"
+                  />
+                  <div className="text-sm text-gray-600 mt-2">No messages yet.</div>
+                </div>
+              )}
             </div>
 
             <form onSubmit={onSend} className="mt-3 flex gap-2">

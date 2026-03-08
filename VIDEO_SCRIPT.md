@@ -30,7 +30,7 @@
 - **Visual**: Home screen → tap **Medicine Help** card
 - **Voiceover**: “Need medicine from abroad? MedLink includes a Medicine Help feature to connect requesters with helpers.”
 
-- **Visual**: Redirect to Login/Signup
+- **Visual**: Redirect to Login/Signup (modern illustrated screens)
 - **Voiceover**: “Users must sign in to keep requests and messages secure.”
 
 - **Visual**: Signup role selection

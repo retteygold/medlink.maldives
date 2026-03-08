@@ -24,6 +24,8 @@
   - 1-to-1 chat between requester and helper
 - **🔐 User Auth** (email/password)
   - Signup role selection: `need_service` (request help) or `provide_service` (provide help)
+- **✨ Modern UI**
+  - Consistent app palette and Storyset illustrated screens for user and admin flows
 - **🛠️ Admin Dashboard** – manage hospitals, doctors, community, and Medicine Help
   - Admin access is controlled by `admin_users` table
 - **📱 PWA Ready** – installable as a mobile app
