@@ -216,35 +216,30 @@ export async function updateHospital(
       image_url: payload.image_url || null
     }
 
-    let { error, count } = await supabase
+    let { data, error } = await supabase
       .from('hospitals')
-      .update(updatePayload, { returning: 'minimal', count: 'exact' })
+      .update(updatePayload, { count: 'exact' })
       .eq('id', id)
+      .select('*')
 
     if (error) {
       const missing = extractMissingColumnFromPostgrestError(error)
       if (missing && missing in updatePayload) {
         delete updatePayload[missing]
-        ;({ error, count } = await supabase
+        ;({ data, error } = await supabase
           .from('hospitals')
-          .update(updatePayload, { returning: 'minimal', count: 'exact' })
-          .eq('id', id))
+          .update(updatePayload, { count: 'exact' })
+          .eq('id', id)
+          .select('*'))
       }
     }
 
     if (error) throw error
-    if (!count) {
+    if (!data || data.length === 0) {
       throw new Error('No rows were updated. This is usually caused by Supabase RLS policies blocking UPDATE for this user.')
     }
 
-    const { data: refreshed, error: refreshError } = await supabase
-      .from('hospitals')
-      .select('*')
-      .eq('id', id)
-      .maybeSingle()
-    if (refreshError) throw refreshError
-    if (!refreshed) return undefined
-    return transformHospital(refreshed)
+    return transformHospital(data[0])
   } catch (err) {
     console.error('Error updating hospital:', err)
     return undefined
