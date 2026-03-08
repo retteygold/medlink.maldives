@@ -336,41 +336,17 @@ export async function createAnswer(answer: {
 // Stats
 export async function getDatabaseStats() {
   try {
-    // Use individual try-catch for each count to handle partial failures
-    let total_facilities = 0
-    let total_doctors = 0
-    let total_specialties = 0
-
-    try {
-      const { count, error } = await supabase
-        .from('hospitals')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
-      if (!error) total_facilities = count || 0
-    } catch (e) {
-      console.error('Hospitals count error:', e)
+    // Use working functions instead of count queries
+    const [hospitals, doctors, specialties] = await Promise.all([
+      getHospitals(),
+      getDoctors(),
+      getSpecialties()
+    ])
+    return {
+      total_facilities: hospitals.length,
+      total_doctors: doctors.length,
+      total_specialties: specialties.length
     }
-
-    try {
-      const { count, error } = await supabase
-        .from('doctors')
-        .select('*', { count: 'exact', head: true })
-        .eq('is_active', true)
-      if (!error) total_doctors = count || 0
-    } catch (e) {
-      console.error('Doctors count error:', e)
-    }
-
-    try {
-      const { count, error } = await supabase
-        .from('specialties')
-        .select('*', { count: 'exact', head: true })
-      if (!error) total_specialties = count || 0
-    } catch (e) {
-      console.error('Specialties count error:', e)
-    }
-
-    return { total_facilities, total_doctors, total_specialties }
   } catch (err) {
     console.error('Error fetching database stats:', err)
     return { total_facilities: 0, total_doctors: 0, total_specialties: 0 }
