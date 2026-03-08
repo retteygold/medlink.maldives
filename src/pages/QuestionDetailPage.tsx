@@ -12,6 +12,7 @@ import {
   MoreVertical
 } from 'lucide-react'
 import { createAnswer, getAnswersForQuestion, getQuestionById } from '../lib/dataService'
+import { useLanguage } from '../lib/languageContext'
 
 interface Answer {
   id: string
@@ -38,6 +39,7 @@ interface Question {
 export default function QuestionDetailPage() {
   const navigate = useNavigate()
   const { id } = useParams()
+  const { language, isRTL } = useLanguage()
   const [question, setQuestion] = useState<Question | null>(null)
   const [newAnswer, setNewAnswer] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -289,8 +291,10 @@ export default function QuestionDetailPage() {
             type="text"
             value={newAnswer}
             onChange={(e) => setNewAnswer(e.target.value)}
-            placeholder="Write your answer..."
-            className="flex-1 bg-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-medical-500"
+            placeholder={isRTL ? 'ޖަވާބު ލިޔޭ...' : 'Write your answer...'}
+            className={`flex-1 bg-gray-100 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-medical-500 ${isRTL ? 'input-field-rtl' : ''}`}
+            lang={language === 'dv' ? 'dv' : 'en'}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
           <button
             type="submit"

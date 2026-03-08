@@ -7,9 +7,11 @@ import {
   Image as ImageIcon
 } from 'lucide-react'
 import { createQuestion } from '../lib/dataService'
+import { useLanguage } from '../lib/languageContext'
 
 export default function AskQuestionPage() {
   const navigate = useNavigate()
+  const { language, isRTL } = useLanguage()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [category, setCategory] = useState('General')
@@ -107,11 +109,13 @@ export default function AskQuestionPage() {
             required
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="input-field"
-            placeholder="e.g., Best hospital for cardiology in Malé?"
+            className={`input-field ${isRTL ? 'input-field-rtl' : ''}`}
+            placeholder={isRTL ? 'މިސާލަކަށް: މާލޭގައި ކާޑިއޮލޮޖީގައި އެންމެ ރަނގަޅު ހޮސްޕިޓަލް؟' : 'e.g., Best hospital for cardiology in Malé?'}
+            lang={language === 'dv' ? 'dv' : 'en'}
+            dir={isRTL ? 'rtl' : 'ltr'}
           />
           <p className="text-xs text-gray-500 mt-1">
-            Be specific and concise to get better answers
+            {isRTL ? 'ރަނގަޅު ޖަވާބުތައް ހޯދުމަށް މަޢުލޫމާތު ދެއްކުމަށް' : 'Be specific and concise to get better answers'}
           </p>
         </div>
 
@@ -125,8 +129,11 @@ export default function AskQuestionPage() {
             rows={6}
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            className="input-field resize-none"
-            placeholder="Describe your question in detail. Include relevant information like symptoms, location preferences, budget, etc."
+            className={`input-field resize-none ${isRTL ? 'input-field-rtl' : ''}`}
+            placeholder={isRTL ? 'ތަކުރާރު ތަފްސީލުކޮށް ލިޔޭ... ތަކުރާރު، ދިމާވާ ސަރަޙައްދު، ބަޖެޓް ފަދަ މަޢުލޫމާތު ހިމެނުއްވާ.' : 'Describe your question in detail. Include relevant information like symptoms, location preferences, budget, etc.'}
+            lang={language === 'dv' ? 'dv' : 'en'}
+            dir={isRTL ? 'rtl' : 'ltr'}
+            maxLength={1000}
           />
           <p className="text-xs text-gray-500 mt-1">
             {content.length}/1000 characters
