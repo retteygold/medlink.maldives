@@ -34,6 +34,17 @@ interface DBDoctor {
   hospital_id: string | null
   hospital_name: string
   qualifications: string[] | null
+  languages?: string[] | null
+  services?: string[] | null
+  short_bio?: string | null
+  profile_notes?: string | null
+  website_url?: string | null
+  google_search_url?: string | null
+  google_maps_url?: string | null
+  facebook_url?: string | null
+  instagram_url?: string | null
+  verification_source?: string | null
+  last_verified_at?: string | null
   contact_phone: string | null
   email: string | null
   image_url: string | null
@@ -80,6 +91,17 @@ function transformDoctor(db: DBDoctor): Doctor {
     hospital_id: db.hospital_id || '',
     hospital_name: db.hospital_name,
     qualifications: db.qualifications || [],
+    languages: (db.languages || []) as string[],
+    services: (db.services || []) as string[],
+    short_bio: db.short_bio || '',
+    profile_notes: db.profile_notes || '',
+    website_url: db.website_url || '',
+    google_search_url: db.google_search_url || '',
+    google_maps_url: db.google_maps_url || '',
+    facebook_url: db.facebook_url || '',
+    instagram_url: db.instagram_url || '',
+    verification_source: db.verification_source || '',
+    last_verified_at: db.last_verified_at || '',
     contact_phone: db.contact_phone || '',
     email: db.email || '',
     image_url: db.image_url || '',

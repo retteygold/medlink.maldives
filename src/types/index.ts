@@ -7,6 +7,16 @@ export interface Doctor {
   qualifications?: string[];
   experience_years?: number;
   languages?: string[];
+  services?: string[];
+  short_bio?: string;
+  profile_notes?: string;
+  website_url?: string;
+  google_search_url?: string;
+  google_maps_url?: string;
+  facebook_url?: string;
+  instagram_url?: string;
+  verification_source?: string;
+  last_verified_at?: string;
   consultation_fee?: number;
   available_days?: string[];
   available_times?: string[];

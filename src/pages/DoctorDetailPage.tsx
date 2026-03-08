@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { Star, Phone, Mail, Clock, ChevronLeft, Calendar, Award, Home } from 'lucide-react'
+import { Star, Phone, Mail, Clock, ChevronLeft, Calendar, Award, Home, ExternalLink } from 'lucide-react'
 import type { Doctor } from '../types'
 import { getDoctorById } from '../lib/dataService'
 
@@ -16,6 +16,18 @@ function getDoctorImageUrl(doctor: Doctor) {
   const explicit = (doctor.image_url || '').trim()
   if (explicit) return explicit
   return `/images/doctors/${slugifyFileName(doctor.name)}.jpg`
+}
+
+function asNonEmptyUrl(value: unknown): string | null {
+  if (typeof value !== 'string') return null
+  const v = value.trim()
+  if (!v) return null
+  return v
+}
+
+function buildGoogleSearchUrl(doctor: Doctor) {
+  const q = `${doctor.name} ${doctor.hospital_name || ''} Maldives`.trim()
+  return `https://www.google.com/search?q=${encodeURIComponent(q)}`
 }
 
 export default function DoctorDetailPage() {
@@ -51,6 +63,14 @@ export default function DoctorDetailPage() {
       </div>
     )
   }
+
+  const websiteUrl = asNonEmptyUrl(doctor.website_url)
+  const googleSearchUrl = asNonEmptyUrl(doctor.google_search_url) || buildGoogleSearchUrl(doctor)
+  const googleMapsUrl = asNonEmptyUrl(doctor.google_maps_url)
+  const facebookUrl = asNonEmptyUrl(doctor.facebook_url)
+  const instagramUrl = asNonEmptyUrl(doctor.instagram_url)
+  const services = (doctor.services || []).map(s => (s || '').trim()).filter(Boolean)
+  const languages = (doctor.languages || []).map(l => (l || '').trim()).filter(Boolean)
 
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
@@ -116,9 +136,93 @@ export default function DoctorDetailPage() {
         </div>
 
         <div className="card p-4">
+          <h3 className="font-bold text-gray-800 mb-3">Links</h3>
+          <div className="flex flex-wrap gap-2">
+            <a
+              href={googleSearchUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="btn-secondary px-3 py-2 text-sm"
+            >
+              <ExternalLink size={16} /> Google
+            </a>
+            {googleMapsUrl && (
+              <a
+                href={googleMapsUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-secondary px-3 py-2 text-sm"
+              >
+                <ExternalLink size={16} /> Maps
+              </a>
+            )}
+            {websiteUrl && (
+              <a
+                href={websiteUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-secondary px-3 py-2 text-sm"
+              >
+                <ExternalLink size={16} /> Website
+              </a>
+            )}
+            {facebookUrl && (
+              <a
+                href={facebookUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-secondary px-3 py-2 text-sm"
+              >
+                <ExternalLink size={16} /> Facebook
+              </a>
+            )}
+            {instagramUrl && (
+              <a
+                href={instagramUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="btn-secondary px-3 py-2 text-sm"
+              >
+                <ExternalLink size={16} /> Instagram
+              </a>
+            )}
+          </div>
+          {(doctor.verification_source || doctor.last_verified_at) && (
+            <div className="mt-3 pt-3 border-t text-xs text-gray-500">
+              {doctor.verification_source ? (
+                <div>Source: {doctor.verification_source}</div>
+              ) : null}
+              {doctor.last_verified_at ? (
+                <div>Verified: {new Date(doctor.last_verified_at).toLocaleDateString()}</div>
+              ) : null}
+            </div>
+          )}
+        </div>
+
+        <div className="card p-4">
           <h3 className="font-bold text-gray-800 mb-2">About</h3>
           <p className="text-gray-600 text-sm">{doctor.about}</p>
         </div>
+
+        {doctor.short_bio?.trim() && (
+          <div className="card p-4">
+            <h3 className="font-bold text-gray-800 mb-2">Profile</h3>
+            <p className="text-gray-600 text-sm">{doctor.short_bio}</p>
+          </div>
+        )}
+
+        {services.length > 0 && (
+          <div className="card p-4">
+            <h3 className="font-bold text-gray-800 mb-3">Services</h3>
+            <div className="flex flex-wrap gap-2">
+              {services.map((svc, i) => (
+                <span key={i} className="px-3 py-1 bg-medical-50 text-medical-700 rounded-full text-sm border border-medical-100">
+                  {svc}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div className="card p-4">
           <h3 className="font-bold text-gray-800 mb-3">Qualifications</h3>
@@ -131,7 +235,7 @@ export default function DoctorDetailPage() {
           </div>
           <div className="mt-3 pt-3 border-t">
             <p className="text-sm text-gray-600"><span className="font-medium">Experience:</span> {doctor.experience_years} years</p>
-            <p className="text-sm text-gray-600 mt-1"><span className="font-medium">Languages:</span> {doctor.languages?.join(', ')}</p>
+            <p className="text-sm text-gray-600 mt-1"><span className="font-medium">Languages:</span> {languages.join(', ')}</p>
           </div>
         </div>
 
