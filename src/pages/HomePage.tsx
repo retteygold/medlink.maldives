@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
@@ -107,8 +107,8 @@ export default function HomePage() {
 
       {/* Smart Matcher CTA */}
       <div className="px-4 -mt-4">
-        <a
-          href="/smart-match"
+        <Link
+          to="/smart-match"
           className="block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/30 text-white"
         >
           <div className="flex items-center justify-between">
@@ -123,27 +123,27 @@ export default function HomePage() {
             </div>
             <ChevronRight size={24} />
           </div>
-        </a>
+        </Link>
       </div>
 
       {/* Specialties */}
       <div className="px-4 mt-6">
         <div className="flex justify-between items-center mb-3">
           <h2 className={`text-lg font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.specialties.title')}</h2>
-          <a href="/search" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.specialties.seeAll')}</a>
+          <Link to="/search" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.specialties.seeAll')}</Link>
         </div>
         <div className="grid grid-cols-3 gap-3">
           {specialties.map((specialty) => (
-            <a
+            <Link
               key={specialty.name}
-              href={`/doctors?specialty=${specialty.name}`}
+              to={`/doctors?specialty=${encodeURIComponent(specialty.name)}`}
               className="card flex flex-col items-center p-3 hover:scale-105 transition-transform"
             >
               <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-2 ${specialty.color}`}>
                 <specialty.icon size={24} />
               </div>
               <span className="text-xs text-center font-medium text-gray-700">{specialty.name}</span>
-            </a>
+            </Link>
           ))}
         </div>
       </div>
@@ -152,7 +152,7 @@ export default function HomePage() {
       <div className="px-4 mt-6">
         <div className="flex justify-between items-center mb-3">
           <h2 className={`text-lg font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.title')}</h2>
-          <a href="/doctors" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.viewAll')}</a>
+          <Link to="/doctors" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.viewAll')}</Link>
         </div>
         <div className="space-y-3">
           {loadingFeatured ? (
@@ -161,9 +161,9 @@ export default function HomePage() {
             <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.loading')}</div>
           ) : (
             featuredDoctors.map((doctor) => (
-              <a
+              <Link
                 key={doctor.id}
-                href={`/doctor/${doctor.id}`}
+                to={`/doctor/${doctor.id}`}
                 className="card p-4 flex items-center justify-between"
               >
                 <div className="min-w-0">
@@ -171,7 +171,7 @@ export default function HomePage() {
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{doctor.specialty} • {doctor.hospital_name}</div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
-              </a>
+              </Link>
             ))
           )}
         </div>
@@ -181,7 +181,7 @@ export default function HomePage() {
       <div className="px-4 mt-6 mb-6">
         <div className="flex justify-between items-center mb-3">
           <h2 className={`text-lg font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.title')}</h2>
-          <a href="/hospitals" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.viewAll')}</a>
+          <Link to="/hospitals" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.viewAll')}</Link>
         </div>
         <div className="space-y-3">
           {loadingFeatured ? (
@@ -190,9 +190,9 @@ export default function HomePage() {
             <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('hospitals.loading')}</div>
           ) : (
             featuredHospitals.map((hospital) => (
-              <a
+              <Link
                 key={hospital.id}
-                href={`/hospital/${hospital.id}`}
+                to={`/hospital/${hospital.id}`}
                 className="card p-4 flex items-center justify-between"
               >
                 <div className="min-w-0">
@@ -200,7 +200,7 @@ export default function HomePage() {
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{hospital.category} • {hospital.address}</div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
-              </a>
+              </Link>
             ))
           )}
         </div>

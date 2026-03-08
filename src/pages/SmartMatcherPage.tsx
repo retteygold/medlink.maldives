@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, MapPin, Star } from 'lucide-react'
 import type { Doctor, Hospital } from '../types'
 
@@ -25,6 +26,7 @@ const mockHospitals: Hospital[] = [
 ]
 
 export default function SmartMatcherPage() {
+  const navigate = useNavigate()
   const [symptoms, setSymptoms] = useState('')
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [results, setResults] = useState<{
@@ -80,7 +82,22 @@ export default function SmartMatcherPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="gradient-header px-4 pt-12 pb-6">
-        <button onClick={() => window.history.back()} className="text-white/80 mb-2">← Back</button>
+        <div className="flex items-center justify-between mb-2">
+          <button
+            type="button"
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+            className="text-white/80"
+          >
+            ← Back
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="text-white/80"
+          >
+            Home
+          </button>
+        </div>
         <div className="flex items-center gap-4 mb-4">
           <img src="/images/logo.png" alt="MedLink" className="w-12 h-12 rounded-xl" />
           <div>
@@ -139,7 +156,7 @@ export default function SmartMatcherPage() {
               <h3 className="font-bold text-gray-800 mb-3">Recommended Doctors</h3>
               <div className="space-y-3">
                 {results.doctors.map((doctor) => (
-                  <a key={doctor.id} href={`/doctor/${doctor.id}`} className="card flex items-center gap-4 p-4">
+                  <Link key={doctor.id} to={`/doctor/${doctor.id}`} className="card flex items-center gap-4 p-4">
                     <div className="w-14 h-14 bg-medical-100 rounded-full flex items-center justify-center">
                       <span className="text-medical-700 font-bold">
                         {doctor.name.split(' ').map(n => n[0]).join('')}
@@ -156,7 +173,7 @@ export default function SmartMatcherPage() {
                       <Star size={14} className="text-yellow-500 fill-yellow-500" />
                       <span className="text-sm font-bold text-yellow-700">{doctor.rating}</span>
                     </div>
-                  </a>
+                  </Link>
                 ))}
               </div>
             </div>

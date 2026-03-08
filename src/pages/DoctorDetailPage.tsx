@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
-import { Star, Phone, Mail, Clock, ChevronLeft, Calendar, Award } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import { Star, Phone, Mail, Clock, ChevronLeft, Calendar, Award, Home } from 'lucide-react'
 import type { Doctor } from '../types'
 import { getDoctorById } from '../lib/dataService'
 
@@ -20,6 +20,7 @@ function getDoctorImageUrl(doctor: Doctor) {
 
 export default function DoctorDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -54,9 +55,23 @@ export default function DoctorDetailPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="gradient-header px-4 pt-12 pb-6">
-        <button onClick={() => window.history.back()} className="flex items-center gap-2 text-white/80 mb-4">
-          <ChevronLeft size={20} /> Back
-        </button>
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
+            className="flex items-center gap-2 text-white/80"
+          >
+            <ChevronLeft size={20} /> Back
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="h-10 w-10 rounded-xl bg-white/10 hover:bg-white/20 transition-colors flex items-center justify-center"
+            aria-label="Home"
+          >
+            <Home size={18} className="text-white" />
+          </button>
+        </div>
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center overflow-hidden">
             <img

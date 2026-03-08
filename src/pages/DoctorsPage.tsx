@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, SlidersHorizontal, MapPin, Star, Phone, Calendar } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { Doctor } from '../types'
 import { getDoctors, getSpecialties } from '../lib/dataService'
 import { useLanguage } from '../lib/languageContext'
@@ -216,13 +217,13 @@ export default function DoctorsPage() {
             
             {/* Action Buttons */}
             <div className="flex gap-2 px-4 pb-4">
-              <a
-                href={`/doctor/${doctor.id}`}
+              <Link
+                to={`/doctor/${doctor.id}`}
                 className="flex-1 bg-medical-500 hover:bg-medical-600 text-white font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-center gap-2"
               >
                 <Calendar size={18} />
                 <span className={language === 'dv' ? 'dhivehi-font' : ''}>{t('doctor.bookNow')}</span>
-              </a>
+              </Link>
               <a
                 href={`tel:${doctor.contact_phone || ''}`}
                 className="bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium py-2.5 px-4 rounded-xl transition-colors flex items-center justify-center"

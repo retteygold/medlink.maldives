@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import { Search, Users, Building2, ChevronRight } from 'lucide-react'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Search, Users, Building2, ChevronRight, Home } from 'lucide-react'
 import { searchDoctors, searchHospitals } from '../lib/dataService'
 import type { Doctor, Hospital } from '../types'
 
@@ -56,7 +56,17 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-gray-50 pb-20">
       <div className="bg-white px-4 pt-12 pb-4 shadow-sm">
-        <h1 className="text-xl font-bold text-gray-800">Search</h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-xl font-bold text-gray-800">Search</h1>
+          <button
+            type="button"
+            onClick={() => navigate('/')}
+            className="h-10 w-10 rounded-xl bg-gray-100 hover:bg-gray-200 transition-colors flex items-center justify-center"
+            aria-label="Home"
+          >
+            <Home size={18} className="text-gray-700" />
+          </button>
+        </div>
 
         <form onSubmit={onSubmit} className="relative mt-4">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
@@ -99,19 +109,19 @@ export default function SearchPage() {
           </div>
           <div className="space-y-3">
             {hospitals.slice(0, 10).map((h) => (
-              <a key={h.id} href={`/hospital/${h.id}`} className="card p-4 flex items-center justify-between">
+              <Link key={h.id} to={`/hospital/${h.id}`} className="card p-4 flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="font-bold text-gray-800 truncate">{h.name}</div>
                   <div className="text-sm text-gray-500 truncate">{h.category} • {h.address}</div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
-              </a>
+              </Link>
             ))}
           </div>
           {hospitals.length > 10 && (
-            <a href={`/hospitals`} className="inline-block mt-3 text-sm text-medical-600 font-medium">
+            <Link to="/hospitals" className="inline-block mt-3 text-sm text-medical-600 font-medium">
               View all hospitals
-            </a>
+            </Link>
           )}
         </div>
       )}
@@ -124,19 +134,19 @@ export default function SearchPage() {
           </div>
           <div className="space-y-3">
             {doctors.slice(0, 10).map((d) => (
-              <a key={d.id} href={`/doctor/${d.id}`} className="card p-4 flex items-center justify-between">
+              <Link key={d.id} to={`/doctor/${d.id}`} className="card p-4 flex items-center justify-between">
                 <div className="min-w-0">
                   <div className="font-bold text-gray-800 truncate">{d.name}</div>
                   <div className="text-sm text-gray-500 truncate">{d.specialty} • {d.hospital_name}</div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
-              </a>
+              </Link>
             ))}
           </div>
           {doctors.length > 10 && (
-            <a href={`/doctors`} className="inline-block mt-3 text-sm text-medical-600 font-medium">
+            <Link to="/doctors" className="inline-block mt-3 text-sm text-medical-600 font-medium">
               View all doctors
-            </a>
+            </Link>
           )}
         </div>
       )}

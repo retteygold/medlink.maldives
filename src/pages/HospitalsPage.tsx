@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Search, Star, Filter, Building2 } from 'lucide-react'
+import { Link } from 'react-router-dom'
 import type { Hospital } from '../types'
 import { getHospitals } from '../lib/dataService'
 import { useLanguage } from '../lib/languageContext'
@@ -145,9 +146,9 @@ export default function HospitalsPage() {
 
       <div className="px-4 space-y-3">
         {filteredHospitals.map((hospital) => (
-          <a
+          <Link
             key={hospital.id}
-            href={`/hospital/${hospital.id}`}
+            to={`/hospital/${hospital.id}`}
             className="card p-4"
           >
             <div className="flex items-start gap-3">
@@ -180,7 +181,7 @@ export default function HospitalsPage() {
                 </div>
               </div>
             </div>
-          </a>
+          </Link>
         ))}
       </div>
     </div>
