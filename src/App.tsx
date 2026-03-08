@@ -15,6 +15,9 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminHospitals from './pages/admin/AdminHospitals'
 import AdminDoctors from './pages/admin/AdminDoctors'
 import AdminReviews from './pages/admin/AdminReviews'
+import AdminLogin from './pages/admin/AdminLogin'
+import AdminCommunity from './pages/admin/AdminCommunity'
+import RequireAdmin from './components/RequireAdmin'
 import { Footer } from './components/Footer'
 
 function App() {
@@ -44,10 +47,14 @@ function App() {
           <Route path="/question/:id" element={<QuestionDetailPage />} />
           
           {/* Admin Routes */}
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="/admin/hospitals" element={<AdminHospitals />} />
-          <Route path="/admin/doctors" element={<AdminDoctors />} />
-          <Route path="/admin/reviews" element={<AdminReviews />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route element={<RequireAdmin />}>
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/hospitals" element={<AdminHospitals />} />
+            <Route path="/admin/doctors" element={<AdminDoctors />} />
+            <Route path="/admin/reviews" element={<AdminReviews />} />
+            <Route path="/admin/community" element={<AdminCommunity />} />
+          </Route>
         </Routes>
       </main>
 

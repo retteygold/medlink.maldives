@@ -7,9 +7,11 @@ import {
   LogOut, 
   Plus,
   ChevronRight,
-  Activity
+  Activity,
+  MessageCircle
 } from 'lucide-react'
 import { getDatabaseStats } from '../../lib/dataService'
+import { supabase } from '../../lib/supabase'
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -50,6 +52,14 @@ export default function AdminDashboard() {
       color: 'bg-green-500'
     },
     {
+      title: 'Community',
+      description: 'Hide questions and answers',
+      icon: MessageCircle,
+      count: 0,
+      path: '/admin/community',
+      color: 'bg-indigo-500'
+    },
+    {
       title: 'Reviews & Comments',
       description: 'Manage customer reviews',
       icon: Star,
@@ -58,6 +68,11 @@ export default function AdminDashboard() {
       color: 'bg-yellow-500'
     }
   ]
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    navigate('/admin/login')
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -72,7 +87,7 @@ export default function AdminDashboard() {
             </div>
           </div>
           <button 
-            onClick={() => navigate('/')}
+            onClick={handleLogout}
             className="p-2 bg-white/10 rounded-lg hover:bg-white/20 transition-colors"
           >
             <LogOut size={20} />

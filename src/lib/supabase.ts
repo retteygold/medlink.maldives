@@ -1,7 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = (import.meta as any).env?.VITE_SUPABASE_URL || ''
-const supabaseAnonKey = (import.meta as any).env?.VITE_SUPABASE_ANON_KEY || ''
+const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim()
+const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
+
+if (!/^https?:\/\//i.test(supabaseUrl)) {
+  throw new Error(
+    `Invalid Supabase URL. Set VITE_SUPABASE_URL to something like https://<project-ref>.supabase.co (current: ${JSON.stringify(supabaseUrl)})`
+  )
+}
+if (!supabaseAnonKey) {
+  throw new Error('Missing VITE_SUPABASE_ANON_KEY. Paste the anon/public key from Supabase Project Settings → API.')
+}
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 

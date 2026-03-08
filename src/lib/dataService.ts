@@ -1,20 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from './supabase'
 import type { Hospital, Doctor } from '../types'
 
-// Supabase client
-const supabaseUrl = (import.meta.env.VITE_SUPABASE_URL || '').trim()
-const supabaseAnonKey = (import.meta.env.VITE_SUPABASE_ANON_KEY || '').trim()
-
-if (!/^https?:\/\//i.test(supabaseUrl)) {
-  throw new Error(
-    `Invalid Supabase URL. Set VITE_SUPABASE_URL to something like https://<project-ref>.supabase.co (current: ${JSON.stringify(supabaseUrl)})`
-  )
-}
-if (!supabaseAnonKey) {
-  throw new Error('Missing VITE_SUPABASE_ANON_KEY. Paste the anon/public key from Supabase Project Settings → API.')
-}
-
-const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Database types (must match Supabase schema)
 interface DBHospital {
