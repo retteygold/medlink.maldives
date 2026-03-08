@@ -9,7 +9,7 @@ const transliterationMap: Record<string, string> = {
   // Consonants
   'b': 'ބ', 'bh': 'ު',
   'c': 'ސ', 'ch': 'ޗ',
-  'd': 'ދ', 'dh': 'ޱ', 'dr': 'ޑރ',
+  'd': 'ދ', 'dh': 'ޱ',
   'f': 'ފ', 'g': 'ގ', 'gh': 'ޣ',
   'h': 'ހ', 'j': 'ޖ', 'jh': 'ޛ',
   'k': 'ކ', 'kh': 'ޚ', 'l': 'ލ', 'm': 'މ',
