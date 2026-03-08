@@ -7,6 +7,7 @@ import { useLanguage } from '../lib/languageContext'
 import { transliterateToDhivehi } from '../lib/transliteration'
 
 const categories = ['All', 'Private Hospital', 'General Clinic', 'Diagnostic Clinic', 'Speciality Clinic']
+const locationTypes: Array<'All' | Hospital['location_type']> = ['All', 'Male', 'Hulhumale', 'Island', 'Resort']
 
 function slugifyFileName(value: string) {
   return value
@@ -70,6 +71,8 @@ export default function HospitalsPage() {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All')
+  const [selectedLocationType, setSelectedLocationType] = useState<(typeof locationTypes)[number]>('All')
+  const [selectedAtoll, setSelectedAtoll] = useState('All')
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
@@ -82,6 +85,14 @@ export default function HospitalsPage() {
     setLoading(false)
   }
 
+  const availableAtolls = Array.from(
+    new Set(
+      (hospitals || [])
+        .map(h => (h.atoll || '').trim())
+        .filter(Boolean)
+    )
+  ).sort((a, b) => a.localeCompare(b))
+
   const filteredHospitals = hospitals.filter(hospital => {
     const q = (searchQuery || '').toLowerCase().trim()
     const normalizedHospital = normalizeHospitalSearchText(`${hospital.name} ${hospital.address || ''}`)
@@ -89,7 +100,11 @@ export default function HospitalsPage() {
 
     const matchesSearch = !q || normalizedHospital.includes(q) || normalizedHospital.includes(normalizedQuery)
     const matchesCategory = selectedCategory === 'All' || hospital.category === selectedCategory
-    return matchesSearch && matchesCategory
+    const matchesLocation =
+      selectedLocationType === 'All' ||
+      (hospital.location_type || '').toLowerCase().trim() === selectedLocationType.toLowerCase()
+    const matchesAtoll = selectedAtoll === 'All' || (hospital.atoll || '').trim() === selectedAtoll
+    return matchesSearch && matchesCategory && matchesLocation && matchesAtoll
   })
 
   return (
@@ -130,6 +145,54 @@ export default function HospitalsPage() {
                     }`}
                   >
                     {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-2 block">Area</label>
+              <div className="flex flex-wrap gap-2">
+                {locationTypes.map(loc => (
+                  <button
+                    key={loc}
+                    onClick={() => setSelectedLocationType(loc)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      selectedLocationType === loc
+                        ? 'bg-medical-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {loc}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-gray-600 mb-2 block">Atoll</label>
+              <div className="flex flex-wrap gap-2">
+                <button
+                  onClick={() => setSelectedAtoll('All')}
+                  className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                    selectedAtoll === 'All'
+                      ? 'bg-medical-500 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  All
+                </button>
+                {availableAtolls.map(at => (
+                  <button
+                    key={at}
+                    onClick={() => setSelectedAtoll(at)}
+                    className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      selectedAtoll === at
+                        ? 'bg-medical-500 text-white'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {at}
                   </button>
                 ))}
               </div>
