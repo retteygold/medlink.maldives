@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { MapPin, Star, Phone, Mail, Clock, ChevronLeft, Globe, Building2, Siren, Pill, FlaskConical, Stethoscope, Home } from 'lucide-react'
+import { MapPin, Star, Phone, Mail, Clock, ChevronLeft, Globe, Building2, Siren, Pill, FlaskConical, Stethoscope, Home, Navigation } from 'lucide-react'
 import type { Hospital, Doctor } from '../types'
 import { getHospitalById, getDoctors } from '../lib/dataService'
 
@@ -16,6 +16,14 @@ function getHospitalImageUrl(hospital: Hospital) {
   const explicit = (hospital.image_url || '').trim()
   if (explicit) return explicit
   return `/images/hospitals/${slugifyFileName(hospital.name)}.jpg`
+}
+
+function getHospitalMapsUrl(hospital: Hospital) {
+  const explicit = (hospital.google_maps_url || '').trim()
+  if (explicit) return explicit
+
+  const query = encodeURIComponent(`${hospital.name} ${hospital.address || ''}`.trim())
+  return `https://www.google.com/maps/search/?api=1&query=${query}`
 }
 
 export default function HospitalDetailPage() {
@@ -119,6 +127,15 @@ export default function HospitalDetailPage() {
         <div className="card p-4 flex gap-3">
           <a href={`tel:${hospital.contact_phone || '+960 331-3553'}`} className="btn-primary flex-1">
             <Phone size={18} /> Call Now
+          </a>
+          <a
+            href={getHospitalMapsUrl(hospital)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-secondary px-4"
+            aria-label="Open in Maps"
+          >
+            <Navigation size={18} />
           </a>
           <a href={hospital.website || '#'} target="_blank" rel="noopener noreferrer" className="btn-secondary px-4">
             <Globe size={18} />

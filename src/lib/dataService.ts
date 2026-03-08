@@ -12,6 +12,7 @@ interface DBHospital {
   contact_phone: string | null
   email: string | null
   website: string | null
+  google_maps_url?: string | null
   category: string
   location_type: string
   image_url: string | null
@@ -66,6 +67,7 @@ function transformHospital(db: DBHospital): Hospital {
     contact_phone: db.contact_phone || '',
     email: db.email || '',
     website: db.website || '',
+    google_maps_url: db.google_maps_url || '',
     category: db.category as Hospital['category'],
     location_type: db.location_type as Hospital['location_type'],
     image_url: db.image_url || '',
@@ -143,6 +145,7 @@ export async function createHospital(payload: {
   contact_phone?: string
   email?: string
   website?: string
+  google_maps_url?: string
   opening_hours?: string
   image_url?: string
 }): Promise<Hospital | undefined> {
@@ -154,6 +157,7 @@ export async function createHospital(payload: {
       contact_phone: payload.contact_phone || null,
       email: payload.email || null,
       website: payload.website || null,
+      google_maps_url: payload.google_maps_url || null,
       opening_hours: payload.opening_hours || null,
       image_url: payload.image_url || null,
       location_type: 'Male',
@@ -200,6 +204,7 @@ export async function updateHospital(
     contact_phone?: string
     email?: string
     website?: string
+    google_maps_url?: string
     opening_hours?: string
     image_url?: string
   }
@@ -212,6 +217,7 @@ export async function updateHospital(
       contact_phone: payload.contact_phone || null,
       email: payload.email || null,
       website: payload.website || null,
+      google_maps_url: payload.google_maps_url || null,
       opening_hours: payload.opening_hours || null,
       image_url: payload.image_url || null
     }

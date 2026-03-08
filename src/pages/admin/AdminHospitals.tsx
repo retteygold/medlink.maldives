@@ -31,6 +31,7 @@ export default function AdminHospitals() {
     contact_phone: '',
     email: '',
     website: '',
+    google_maps_url: '',
     opening_hours: '',
     image_url: ''
   })
@@ -58,6 +59,7 @@ export default function AdminHospitals() {
       contact_phone: hospital.contact_phone || '',
       email: hospital.email || '',
       website: hospital.website || '',
+      google_maps_url: hospital.google_maps_url || '',
       opening_hours: hospital.opening_hours || '',
       image_url: hospital.image_url || ''
     })
@@ -77,6 +79,7 @@ export default function AdminHospitals() {
         contact_phone: formData.contact_phone,
         email: formData.email,
         website: formData.website,
+        google_maps_url: formData.google_maps_url,
         opening_hours: formData.opening_hours,
         image_url: formData.image_url
       }
@@ -102,6 +105,7 @@ export default function AdminHospitals() {
         contact_phone: '',
         email: '',
         website: '',
+        google_maps_url: '',
         opening_hours: '',
         image_url: ''
       })
@@ -281,6 +285,19 @@ export default function AdminHospitals() {
                 onChange={(e) => setFormData({ ...formData, website: e.target.value })}
                 className="input-field"
                 placeholder="https://..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Google Maps Link
+              </label>
+              <input
+                type="url"
+                value={formData.google_maps_url}
+                onChange={(e) => setFormData({ ...formData, google_maps_url: e.target.value })}
+                className="input-field"
+                placeholder="https://maps.google.com/..."
               />
             </div>
           </div>

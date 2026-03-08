@@ -39,6 +39,7 @@ export interface Hospital {
   contact_phone?: string;
   email?: string;
   website?: string;
+  google_maps_url?: string;
   category: 'General Clinic' | 'Private Hospital' | 'Speciality Hospital' | 'Diagnostic Clinic' | 'Resort Clinic' | 'Therapeutic Clinic' | 'Area Specific Clinic' | 'Speciality Clinic' | 'Traditional Clinic';
   location_type: 'Male' | 'Hulhumale' | 'Island' | 'Resort';
   island_name?: string;
