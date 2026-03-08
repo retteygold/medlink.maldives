@@ -168,7 +168,7 @@ export async function createHospital(payload: {
       .from('hospitals')
       .insert(insertPayload)
       .select('*')
-      .single()
+      .maybeSingle()
 
     if (error) {
       const missing = extractMissingColumnFromPostgrestError(error)
@@ -178,11 +178,12 @@ export async function createHospital(payload: {
           .from('hospitals')
           .insert(insertPayload)
           .select('*')
-          .single())
+          .maybeSingle())
       }
     }
 
     if (error) throw error
+    if (!data) return undefined
     return transformHospital(data)
   } catch (err) {
     console.error('Error creating hospital:', err)
@@ -215,28 +216,35 @@ export async function updateHospital(
       image_url: payload.image_url || null
     }
 
-    let { data, error } = await supabase
+    let { error, count } = await supabase
       .from('hospitals')
-      .update(updatePayload)
+      .update(updatePayload, { returning: 'minimal', count: 'exact' })
       .eq('id', id)
-      .select('*')
-      .single()
 
     if (error) {
       const missing = extractMissingColumnFromPostgrestError(error)
       if (missing && missing in updatePayload) {
         delete updatePayload[missing]
-        ;({ data, error } = await supabase
+        ;({ error, count } = await supabase
           .from('hospitals')
-          .update(updatePayload)
-          .eq('id', id)
-          .select('*')
-          .single())
+          .update(updatePayload, { returning: 'minimal', count: 'exact' })
+          .eq('id', id))
       }
     }
 
     if (error) throw error
-    return transformHospital(data)
+    if (!count) {
+      throw new Error('No rows were updated. This is usually caused by Supabase RLS policies blocking UPDATE for this user.')
+    }
+
+    const { data: refreshed, error: refreshError } = await supabase
+      .from('hospitals')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+    if (refreshError) throw refreshError
+    if (!refreshed) return undefined
+    return transformHospital(refreshed)
   } catch (err) {
     console.error('Error updating hospital:', err)
     return undefined
