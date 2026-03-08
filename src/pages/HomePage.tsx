@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
+import { getDoctors, getHospitals } from '../lib/dataService'
+import type { Doctor, Hospital } from '../types'
 
 const specialties = [
   { name: 'Cardiology', icon: HeartPulse, color: 'bg-red-100 text-red-600' },
@@ -18,6 +20,9 @@ export default function HomePage() {
   const { t, language } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [greeting, setGreeting] = useState('Hello')
+  const [featuredDoctors, setFeaturedDoctors] = useState<Doctor[]>([])
+  const [featuredHospitals, setFeaturedHospitals] = useState<Hospital[]>([])
+  const [loadingFeatured, setLoadingFeatured] = useState(true)
 
   useEffect(() => {
     const hour = new Date().getHours()
@@ -25,6 +30,24 @@ export default function HomePage() {
     else if (hour < 17) setGreeting(t('home.greeting.afternoon'))
     else setGreeting(t('home.greeting.evening'))
   }, [t])
+
+  useEffect(() => {
+    loadFeatured()
+  }, [])
+
+  async function loadFeatured() {
+    try {
+      setLoadingFeatured(true)
+      const [doctors, hospitals] = await Promise.all([getDoctors(), getHospitals()])
+      setFeaturedDoctors(doctors.slice(0, 3))
+      setFeaturedHospitals(hospitals.slice(0, 3))
+    } catch {
+      setFeaturedDoctors([])
+      setFeaturedHospitals([])
+    } finally {
+      setLoadingFeatured(false)
+    }
+  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -125,7 +148,25 @@ export default function HomePage() {
           <a href="/doctors" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.viewAll')}</a>
         </div>
         <div className="space-y-3">
-          <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.loading')}</div>
+          {loadingFeatured ? (
+            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.loading')}</div>
+          ) : featuredDoctors.length === 0 ? (
+            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.loading')}</div>
+          ) : (
+            featuredDoctors.map((doctor) => (
+              <a
+                key={doctor.id}
+                href={`/doctor/${doctor.id}`}
+                className="card p-4 flex items-center justify-between"
+              >
+                <div className="min-w-0">
+                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{doctor.name}</div>
+                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{doctor.specialty} • {doctor.hospital_name}</div>
+                </div>
+                <ChevronRight size={18} className="text-gray-400" />
+              </a>
+            ))
+          )}
         </div>
       </div>
 
@@ -136,7 +177,25 @@ export default function HomePage() {
           <a href="/hospitals" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.viewAll')}</a>
         </div>
         <div className="space-y-3">
-          <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('hospitals.loading')}</div>
+          {loadingFeatured ? (
+            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('hospitals.loading')}</div>
+          ) : featuredHospitals.length === 0 ? (
+            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('hospitals.loading')}</div>
+          ) : (
+            featuredHospitals.map((hospital) => (
+              <a
+                key={hospital.id}
+                href={`/hospital/${hospital.id}`}
+                className="card p-4 flex items-center justify-between"
+              >
+                <div className="min-w-0">
+                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{hospital.name}</div>
+                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>{hospital.category} • {hospital.address}</div>
+                </div>
+                <ChevronRight size={18} className="text-gray-400" />
+              </a>
+            ))
+          )}
         </div>
       </div>
     </div>
