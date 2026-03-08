@@ -20,6 +20,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.0] – 2026-03-09
+
+### Added
+- **Medicine Help (authenticated-only)**
+  - New routes: `/medicine-help`, `/medicine-help/new`, `/medicine-help/:id`
+  - Create medicine request with prescription image and optional previous medicine photo
+  - Signed URLs for private images stored in Supabase Storage (`medicine-requests` bucket)
+  - **1-to-1 chat** per request between requester and helper (conversations + messages)
+- **User Authentication**
+  - New routes: `/login`, `/signup`
+  - Signup role selection saved in user metadata: `need_service` / `provide_service`
+- **Admin Medicine Help Management**
+  - New route: `/admin/medicine-help` to review requests and update request status
+- **Admin Access Control**
+  - Admin routes require membership in `admin_users` table
+
+### Changed
+- **Home Screen**
+  - Added a Medicine Help CTA card on `/` linking to `/medicine-help` (login required)
+- **Hospitals**
+  - Added separate hospital filters: Area (Male/Hulhumale/Island/Resort) and Atoll
+  - Added optional hospital `google_maps_url` and an "Open in Maps" button with fallback search
+- **Hospital Detail Page**
+  - Added doctor search autocomplete within each hospital page
+
+### Fixed
+- Supabase update issues due to schema mismatches (missing columns) now fail gracefully in admin hospital updates
+- Avoided PostgREST single-row coercion errors by updating selection strategy where applicable
+
+---
+
 ## [1.2.0] – 2025-03-10
 
 ### Added

@@ -11,12 +11,21 @@
 
 - **🔍 Search** doctors and hospitals with instant dropdown suggestions
 - **🏥 Browse** by specialty or location (Male’, Hulhumale’, Islands, Resorts)
+- **🗺️ Open in Maps** from hospital pages (Google Maps link per hospital with fallback search)
+- **🏥 Hospital Filters** separated by Area (Male/Hulhumale/Island/Resort) and Atoll
 - **⭐ Ratings & Reviews** for doctors and hospitals
 - **👨‍⚕️ Doctor Profiles** with qualifications, contact, and hospital info
 - **🏨 Hospital Details** with services, emergency, pharmacy, lab info
 - **🗣️ Dhivehi & English** language toggle
 - **👥 Community Q&A** – ask health questions and get answers
-- **🛠️ Admin Dashboard** – manage hospitals, doctors, and reviews
+- **💊 Medicine Help** (requires login)
+  - Post medicine requests with prescription + optional previous medicine photo
+  - Browse requests and open request details
+  - 1-to-1 chat between requester and helper
+- **🔐 User Auth** (email/password)
+  - Signup role selection: `need_service` (request help) or `provide_service` (provide help)
+- **🛠️ Admin Dashboard** – manage hospitals, doctors, community, and Medicine Help
+  - Admin access is controlled by `admin_users` table
 - **📱 PWA Ready** – installable as a mobile app
 
 ## 🛠️ Tech Stack
@@ -65,6 +74,8 @@ create table hospitals (
   address text not null,
   contact_phone text,
   email text,
+  website text,
+  google_maps_url text,
   category text not null, -- 'Hospital', 'Clinic', 'Pharmacy', etc.
   location_type text not null, -- 'Male', 'Hulhumale', 'Island', 'Resort'
   has_emergency boolean default false,
@@ -93,6 +104,117 @@ create table doctors (
   review_count int default 0,
   is_active boolean default true,
   created_at timestamp with time zone default now()
+);
+
+-- Admin users (controls /admin access)
+create table if not exists public.admin_users (
+  id uuid primary key references auth.users(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table public.admin_users enable row level security;
+create policy "admin_users_select_authenticated"
+on public.admin_users
+for select
+to authenticated
+using (true);
+
+-- Medicine Help
+create table if not exists public.medicine_requests (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text,
+  medicine_name text,
+  dosage text,
+  quantity integer,
+  needed_by date,
+  notes text,
+  location_type text,
+  atoll text,
+  prescription_image_path text,
+  previous_medicine_image_path text,
+  status text not null default 'open' check (status in ('open','in_progress','fulfilled','cancelled'))
+);
+
+create table if not exists public.medicine_conversations (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  request_id uuid not null references public.medicine_requests(id) on delete cascade,
+  requester_id uuid not null references auth.users(id) on delete cascade,
+  helper_id uuid not null references auth.users(id) on delete cascade,
+  unique (request_id, requester_id, helper_id),
+  check (requester_id <> helper_id)
+);
+
+create table if not exists public.medicine_messages (
+  id uuid primary key default gen_random_uuid(),
+  created_at timestamptz not null default now(),
+  conversation_id uuid not null references public.medicine_conversations(id) on delete cascade,
+  sender_id uuid not null references auth.users(id) on delete cascade,
+  message text not null
+);
+
+alter table public.medicine_requests enable row level security;
+alter table public.medicine_conversations enable row level security;
+alter table public.medicine_messages enable row level security;
+
+-- Authenticated-only access (simple baseline policies)
+create policy "medicine_requests_select_authenticated"
+on public.medicine_requests
+for select
+to authenticated
+using (true);
+
+create policy "medicine_requests_insert_own"
+on public.medicine_requests
+for insert
+to authenticated
+with check (auth.uid() = user_id);
+
+create policy "medicine_requests_update_own"
+on public.medicine_requests
+for update
+to authenticated
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
+
+create policy "medicine_conversations_select_participants"
+on public.medicine_conversations
+for select
+to authenticated
+using (auth.uid() = requester_id or auth.uid() = helper_id);
+
+create policy "medicine_conversations_insert_participants"
+on public.medicine_conversations
+for insert
+to authenticated
+with check (auth.uid() = requester_id or auth.uid() = helper_id);
+
+create policy "medicine_messages_select_participants"
+on public.medicine_messages
+for select
+to authenticated
+using (
+  exists (
+    select 1 from public.medicine_conversations c
+    where c.id = conversation_id
+      and (auth.uid() = c.requester_id or auth.uid() = c.helper_id)
+  )
+);
+
+create policy "medicine_messages_insert_participants"
+on public.medicine_messages
+for insert
+to authenticated
+with check (
+  auth.uid() = sender_id
+  and exists (
+    select 1 from public.medicine_conversations c
+    where c.id = conversation_id
+      and (auth.uid() = c.requester_id or auth.uid() = c.helper_id)
+  )
 );
 
 -- Specialties
@@ -252,3 +374,8 @@ MIT © 2025 MedLink Maldives
 ---
 
 _“Connecting you to healthcare since 2019 – Made with ❤️ in Maldives”_
+
+## 📚 Documentation
+
+- `USER_MANUAL.md` – step-by-step user + admin guide
+- `VIDEO_SCRIPT.md` – demo walkthrough script

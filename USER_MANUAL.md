@@ -11,8 +11,10 @@
 7. [Community Q&A](#community-qa)
 8. [Language Toggle](#language-toggle)
 9. [PWA Installation](#pwa-installation)
-10. [Admin Dashboard](#admin-dashboard)
-11. [Troubleshooting](#troubleshooting)
+10. [Medicine Help](#medicine-help)
+11. [Account & Login](#account--login)
+12. [Admin Dashboard](#admin-dashboard)
+13. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -119,8 +121,19 @@ Search is available on the Home screen and the dedicated Search page.
 ### Actions
 
 - **Call**: Dial the hospital’s main number
-- **Directions**: Open in Google Maps (if available)
+- **Directions / Open in Maps**: Opens the hospital in Google Maps
+  - If an exact Google Maps link is saved by admin, it opens that
+  - Otherwise it falls back to a Google Maps search using the hospital name + address
 - **Share**: Share the hospital info
+
+### Searching Doctors inside a Hospital
+
+On each hospital detail screen:
+
+1. Scroll to **Doctors at {Hospital}**
+2. Start typing a doctor name
+3. A dropdown list will appear
+4. Tap a suggestion to open the doctor profile
 
 ---
 
@@ -207,6 +220,84 @@ Install MedLink as a mobile app for quick access and offline support.
 
 ---
 
+## Medicine Help
+
+Medicine Help is a community feature to request medicine that is not available locally.
+
+### Who can use it?
+
+- You must be **logged in** to view and post Medicine Help requests.
+- You must be **logged in** to message someone about a request.
+
+### Accessing Medicine Help
+
+1. From the Home screen, tap **Medicine Help**
+2. If you are not logged in, the app will take you to **Login / Signup**
+3. After signing in, you will be redirected back to Medicine Help
+
+### Creating a Request
+
+1. Go to **Medicine Help**
+2. Tap the **+** button
+3. Fill in any optional fields:
+   - Title
+   - Medicine name
+   - Dosage
+   - Quantity
+   - Needed by date
+   - Location / Atoll
+   - Notes
+4. Upload:
+   - **Prescription image** (recommended)
+   - **Previous medicine photo** (optional)
+5. Tap **Post request**
+
+### Viewing Requests
+
+- Use the search bar to find a request
+- Tap a request card to open details
+
+### Messaging (1-to-1 chat)
+
+#### If you want to help (Helper)
+
+1. Open a request
+2. Tap **Message requester**
+3. Type and send your message
+
+#### If you posted the request (Requester)
+
+1. Open your request
+2. You will see a **Chats** section
+3. Open a conversation
+4. Reply to the helper
+
+### Privacy note
+
+- Prescription images can contain sensitive information.
+- Before uploading, **hide personal details** when possible.
+- Images are stored in a private storage bucket and only accessible to logged-in users.
+
+---
+
+## Account & Login
+
+### Signup
+
+When creating an account, select a role:
+
+- **Request medicine help** (`need_service`)
+- **Help others bring medicine** (`provide_service`)
+
+This role is saved in your account metadata and can be used for future filtering or features.
+
+### Login
+
+- Login uses **email + password**.
+- If you try to open Medicine Help while logged out, the app will redirect you to Login automatically.
+
+---
+
 ## Admin Dashboard
 
 For hospital/clinic administrators to manage listings.
@@ -216,12 +307,30 @@ For hospital/clinic administrators to manage listings.
 - Go to `/admin`
 - Login credentials required (contact support)
 
+### Admin Access Control
+
+Admin access is controlled by the `admin_users` table in Supabase.
+
+- Only users listed in `admin_users` can access `/admin/*`.
+- If a non-admin logs in at `/admin/login`, the system will sign them out and show an error.
+
 ### Features
 
 - **Dashboard Overview**: Stats for doctors, hospitals, reviews
 - **Manage Hospitals**: Add, edit, delete hospitals; upload images
 - **Manage Doctors**: Add, edit, delete doctors; move between hospitals
 - **Manage Reviews**: Moderate patient reviews and comments
+
+### Medicine Help Management (Admin)
+
+1. Go to Admin Dashboard
+2. Tap **Medicine Help**
+3. Search requests
+4. Change request status:
+   - `open`
+   - `in_progress`
+   - `fulfilled`
+   - `cancelled`
 
 ### Adding a Doctor
 
@@ -255,6 +364,21 @@ For hospital/clinic administrators to manage listings.
   - Check internet connection
   - Clear browser cache
   - Try a different browser
+
+#### New features not appearing after deployment
+
+Because MedLink Maldives is a PWA, browsers may cache older JavaScript bundles.
+
+- **Fix (desktop Chrome/Edge)**:
+  1. Open DevTools (F12)
+  2. Application → Service Workers → **Unregister**
+  3. Application → Storage → **Clear site data**
+  4. Reload the page
+
+- **Fix (mobile installed app/PWA)**:
+  - Remove the installed app icon
+  - Clear site data in browser settings
+  - Reopen the site
 
 #### Search not working
 
