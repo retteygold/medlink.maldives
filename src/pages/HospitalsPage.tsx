@@ -21,6 +21,24 @@ function getHospitalImageUrl(hospital: Hospital) {
   return `/images/hospitals/${slugifyFileName(hospital.name)}.jpg`
 }
 
+function normalizeHospitalSearchText(value: string) {
+  const base = (value || '').toLowerCase().trim()
+  if (!base) return ''
+
+  // Add common Maldives hospital aliases so searches work both ways
+  // Example: searching "igmh" should match "indira gandhi memorial hospital"
+  // and searching "indira gandhi" should match entries that contain "igmh".
+  const extras: string[] = []
+  if (base.includes('igmh')) {
+    extras.push('indira gandhi memorial hospital', 'indira gandhi')
+  }
+  if (base.includes('indira') || base.includes('gandhi')) {
+    extras.push('igmh')
+  }
+
+  return [base, ...extras].join(' | ')
+}
+
 function HospitalAvatar({ hospital }: { hospital: Hospital }) {
   const [failed, setFailed] = useState(false)
 
@@ -64,8 +82,11 @@ export default function HospitalsPage() {
   }
 
   const filteredHospitals = hospitals.filter(hospital => {
-    const matchesSearch = hospital.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         hospital.address.toLowerCase().includes(searchQuery.toLowerCase())
+    const q = (searchQuery || '').toLowerCase().trim()
+    const normalizedHospital = normalizeHospitalSearchText(`${hospital.name} ${hospital.address || ''}`)
+    const normalizedQuery = normalizeHospitalSearchText(q)
+
+    const matchesSearch = !q || normalizedHospital.includes(q) || normalizedHospital.includes(normalizedQuery)
     const matchesCategory = selectedCategory === 'All' || hospital.category === selectedCategory
     return matchesSearch && matchesCategory
   })
