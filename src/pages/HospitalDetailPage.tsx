@@ -36,9 +36,18 @@ export default function HospitalDetailPage() {
     setHospital(hospitalData || null)
     
     const allDoctors = await getDoctors()
-    const hospitalDoctors = allDoctors.filter(d => 
-      d.hospital_name.toLowerCase().includes(hospitalData?.name.toLowerCase() || '')
-    )
+    const hospitalDoctors = allDoctors.filter(d => {
+      if (!hospitalData) return false
+
+      const doctorHospitalId = (d as any).hospital_id as string | null | undefined
+      if (doctorHospitalId && doctorHospitalId === hospitalData.id) return true
+
+      const doctorHospitalName = (d.hospital_name || '').toLowerCase().trim()
+      const hospitalName = (hospitalData.name || '').toLowerCase().trim()
+      if (!doctorHospitalName || !hospitalName) return false
+
+      return doctorHospitalName === hospitalName
+    })
     setDoctors(hospitalDoctors)
     setLoading(false)
   }
