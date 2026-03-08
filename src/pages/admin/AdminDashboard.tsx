@@ -66,6 +66,14 @@ export default function AdminDashboard() {
       count: 0,
       path: '/admin/reviews',
       color: 'bg-yellow-500'
+    },
+    {
+      title: 'Medicine Help',
+      description: 'Manage medicine requests',
+      icon: MessageCircle,
+      count: 0,
+      path: '/admin/medicine-help',
+      color: 'bg-pink-500'
     }
   ]
 

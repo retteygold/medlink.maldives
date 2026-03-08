@@ -22,6 +22,7 @@ import AdminDoctors from './pages/admin/AdminDoctors'
 import AdminReviews from './pages/admin/AdminReviews'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminCommunity from './pages/admin/AdminCommunity'
+import AdminMedicineHelp from './pages/admin/AdminMedicineHelp'
 import RequireAdmin from './components/RequireAdmin'
 import RequireAuth from './components/RequireAuth'
 import { Footer } from './components/Footer'
@@ -70,6 +71,7 @@ function App() {
             <Route path="/admin/doctors" element={<AdminDoctors />} />
             <Route path="/admin/reviews" element={<AdminReviews />} />
             <Route path="/admin/community" element={<AdminCommunity />} />
+            <Route path="/admin/medicine-help" element={<AdminMedicineHelp />} />
           </Route>
         </Routes>
       </main>

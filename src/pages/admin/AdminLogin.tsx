@@ -17,8 +17,19 @@ export default function AdminLogin() {
     async function check() {
       const { data } = await supabase.auth.getSession()
       if (!mounted) return
-      if (data.session) {
-        navigate('/admin', { replace: true })
+      if (data.session?.user?.id) {
+        const { data: adminRow } = await supabase
+          .from('admin_users')
+          .select('id')
+          .eq('id', data.session.user.id)
+          .maybeSingle()
+        if (!mounted) return
+        if (adminRow) {
+          navigate('/admin', { replace: true })
+          return
+        }
+        await supabase.auth.signOut()
+        setError('This account is not allowed to access admin.')
       }
     }
 
@@ -41,6 +52,27 @@ export default function AdminLogin() {
 
     if (signInError) {
       setError(signInError.message)
+      setLoading(false)
+      return
+    }
+
+    const { data: sessionData } = await supabase.auth.getSession()
+    const uid = sessionData.session?.user?.id
+    if (!uid) {
+      setError('Login failed. Please try again.')
+      setLoading(false)
+      return
+    }
+
+    const { data: adminRow } = await supabase
+      .from('admin_users')
+      .select('id')
+      .eq('id', uid)
+      .maybeSingle()
+
+    if (!adminRow) {
+      await supabase.auth.signOut()
+      setError('This account is not allowed to access admin.')
       setLoading(false)
       return
     }

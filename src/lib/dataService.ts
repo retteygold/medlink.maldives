@@ -121,6 +121,24 @@ function transformHospital(db: DBHospital): Hospital {
   }
 }
 
+export async function updateMedicineRequestStatus(
+  id: string,
+  status: MedicineRequestStatus
+): Promise<boolean> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_requests')
+      .update({ status }, { count: 'exact' })
+      .eq('id', id)
+      .select('id')
+    if (error) throw error
+    return Boolean(data && data.length > 0)
+  } catch (err) {
+    console.error('Error updating medicine request status:', err)
+    return false
+  }
+}
+
 function extractMissingColumnFromPostgrestError(err: any): string | null {
   const message = typeof err?.message === 'string' ? err.message : ''
   const m = message.match(/Could not find the '([^']+)' column of '([^']+)'/i)

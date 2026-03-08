@@ -6,6 +6,7 @@ export default function RequireAdmin() {
   const location = useLocation()
   const [checking, setChecking] = useState(true)
   const [signedIn, setSignedIn] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
     let mounted = true
@@ -13,13 +14,39 @@ export default function RequireAdmin() {
     async function check() {
       const { data } = await supabase.auth.getSession()
       if (!mounted) return
-      setSignedIn(Boolean(data.session))
+      const session = data.session
+      setSignedIn(Boolean(session))
+      if (session?.user?.id) {
+        const { data: adminRow } = await supabase
+          .from('admin_users')
+          .select('id')
+          .eq('id', session.user.id)
+          .maybeSingle()
+        if (!mounted) return
+        setIsAdmin(Boolean(adminRow))
+      } else {
+        setIsAdmin(false)
+      }
       setChecking(false)
     }
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!mounted) return
       setSignedIn(Boolean(session))
+      if (session?.user?.id) {
+        supabase
+          .from('admin_users')
+          .select('id')
+          .eq('id', session.user.id)
+          .maybeSingle()
+          .then(({ data: adminRow }) => {
+            if (!mounted) return
+            setIsAdmin(Boolean(adminRow))
+            setChecking(false)
+          })
+        return
+      }
+      setIsAdmin(false)
       setChecking(false)
     })
 
@@ -41,6 +68,10 @@ export default function RequireAdmin() {
 
   if (!signedIn) {
     return <Navigate to="/admin/login" replace state={{ from: location }} />
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/profile" replace />
   }
 
   return <Outlet />
