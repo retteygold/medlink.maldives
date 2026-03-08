@@ -14,6 +14,26 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  function friendlyAuthError(err: any): string {
+    const status = err?.status
+    const message = typeof err?.message === 'string' ? err.message : ''
+
+    if (status === 429 || /too many requests/i.test(message)) {
+      return 'Too many attempts. Please wait a few minutes and try again.'
+    }
+
+    if (/captcha/i.test(message)) {
+      return 'Signup is protected by CAPTCHA and is currently not configured. Please disable CAPTCHA in Supabase Auth settings or configure it.'
+    }
+
+    if (/invalid login credentials/i.test(message)) {
+      return 'Invalid email or password.'
+    }
+
+    if (message) return message
+    return 'Signup failed. Please try again.'
+  }
+
   useEffect(() => {
     let mounted = true
 
@@ -38,7 +58,7 @@ export default function SignupPage() {
     setLoading(true)
     setError(null)
 
-    const { error: signUpError } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
       password,
       options: {
@@ -49,24 +69,25 @@ export default function SignupPage() {
     })
 
     if (signUpError) {
-      setError(signUpError.message)
-      setLoading(false)
-      return
-    }
-
-    const { error: signInError } = await supabase.auth.signInWithPassword({
-      email: email.trim(),
-      password
-    })
-
-    if (signInError) {
-      setError(signInError.message)
+      setError(friendlyAuthError(signUpError))
       setLoading(false)
       return
     }
 
     const from = location.state?.from?.pathname || '/profile'
-    navigate(from, { replace: true })
+
+    if (signUpData?.session) {
+      navigate(from, { replace: true })
+      return
+    }
+
+    navigate('/login', {
+      replace: true,
+      state: {
+        from: location.state?.from,
+        notice: 'Account created. Please sign in to continue.'
+      }
+    })
   }
 
   return (

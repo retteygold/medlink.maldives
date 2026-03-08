@@ -10,6 +10,27 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const notice = (location.state?.notice as string | undefined) || null
+
+  function friendlyAuthError(err: any): string {
+    const status = err?.status
+    const message = typeof err?.message === 'string' ? err.message : ''
+
+    if (status === 429 || /too many requests/i.test(message)) {
+      return 'Too many attempts. Please wait a few minutes and try again.'
+    }
+
+    if (/captcha/i.test(message)) {
+      return 'Login is protected by CAPTCHA and is currently not configured. Please disable CAPTCHA in Supabase Auth settings or configure it.'
+    }
+
+    if (/invalid login credentials/i.test(message)) {
+      return 'Invalid email or password.'
+    }
+
+    if (message) return message
+    return 'Sign in failed. Please try again.'
+  }
 
   useEffect(() => {
     let mounted = true
@@ -41,7 +62,7 @@ export default function LoginPage() {
     })
 
     if (signInError) {
-      setError(signInError.message)
+      setError(friendlyAuthError(signInError))
       setLoading(false)
       return
     }
@@ -55,6 +76,12 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-white rounded-2xl shadow-sm p-6">
         <h1 className="text-xl font-bold text-gray-800">Sign In</h1>
         <p className="text-sm text-gray-500 mt-1">Sign in to continue</p>
+
+        {notice && (
+          <div className="mt-4 bg-green-50 border border-green-200 text-green-700 rounded-xl p-3 text-sm">
+            {notice}
+          </div>
+        )}
 
         {error && (
           <div className="mt-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
