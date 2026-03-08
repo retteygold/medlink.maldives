@@ -16,6 +16,23 @@ type ApiRequest = {
   body?: any
 }
 
+type PatientContext = {
+  age?: number
+  sex?: 'male' | 'female' | 'other' | 'prefer_not_to_say'
+  durationDays?: number
+  severity?: 'mild' | 'moderate' | 'severe'
+  pregnant?: boolean
+  conditions?: string
+  redFlags?: {
+    troubleBreathing?: boolean
+    chestPain?: boolean
+    fainting?: boolean
+    confusion?: boolean
+    weaknessOneSide?: boolean
+    severeBleeding?: boolean
+  }
+}
+
 type ApiResponse = {
   status: (code: number) => ApiResponse
   json: (data: any) => any
@@ -28,6 +45,91 @@ function safeJsonParse<T>(value: string): T | null {
   } catch {
     return null
   }
+}
+
+function clampSeverity(value: unknown): PatientContext['severity'] {
+  const v = typeof value === 'string' ? value.toLowerCase().trim() : ''
+  if (v === 'mild' || v === 'moderate' || v === 'severe') return v
+  return undefined
+}
+
+function clampSex(value: unknown): PatientContext['sex'] {
+  const v = typeof value === 'string' ? value.toLowerCase().trim() : ''
+  if (v === 'male' || v === 'female' || v === 'other' || v === 'prefer_not_to_say') return v
+  return undefined
+}
+
+function normalizeContext(value: unknown): PatientContext {
+  const v = (value && typeof value === 'object') ? (value as any) : {}
+  const age = typeof v.age === 'number' && Number.isFinite(v.age) ? Math.max(0, Math.min(120, v.age)) : undefined
+  const durationDays = typeof v.durationDays === 'number' && Number.isFinite(v.durationDays) ? Math.max(0, Math.min(365, v.durationDays)) : undefined
+  const conditions = typeof v.conditions === 'string' ? v.conditions.trim().slice(0, 300) : undefined
+  const pregnant = typeof v.pregnant === 'boolean' ? v.pregnant : undefined
+  const sex = clampSex(v.sex)
+  const severity = clampSeverity(v.severity)
+  const rf = v.redFlags && typeof v.redFlags === 'object' ? v.redFlags : {}
+
+  return {
+    age,
+    sex,
+    durationDays,
+    severity,
+    pregnant,
+    conditions,
+    redFlags: {
+      troubleBreathing: Boolean(rf.troubleBreathing),
+      chestPain: Boolean(rf.chestPain),
+      fainting: Boolean(rf.fainting),
+      confusion: Boolean(rf.confusion),
+      weaknessOneSide: Boolean(rf.weaknessOneSide),
+      severeBleeding: Boolean(rf.severeBleeding)
+    }
+  }
+}
+
+function applyDeterministicTriage(result: SymptomCheckResponse, symptoms: string, ctx: PatientContext) {
+  const s = symptoms.toLowerCase()
+  const rf = ctx.redFlags
+
+  const emergency = Boolean(
+    rf?.troubleBreathing ||
+      rf?.chestPain ||
+      rf?.fainting ||
+      rf?.confusion ||
+      rf?.weaknessOneSide ||
+      rf?.severeBleeding ||
+      s.includes('chest pain') ||
+      (s.includes('shortness of breath') && (s.includes('chest') || s.includes('pain')))
+  )
+
+  if (emergency) {
+    result.urgency = 'emergency'
+    result.redFlags = Array.from(
+      new Set([
+        ...result.redFlags,
+        'Trouble breathing, severe chest pain, fainting, confusion, severe weakness, or heavy bleeding can be an emergency. Seek urgent medical care now.'
+      ])
+    ).slice(0, 12)
+  } else if (ctx.severity === 'severe' && result.urgency !== 'emergency') {
+    result.urgency = 'high'
+  }
+
+  if ((ctx.pregnant || (typeof ctx.age === 'number' && ctx.age < 2) || (typeof ctx.age === 'number' && ctx.age > 65)) && result.urgency === 'low') {
+    result.urgency = 'medium'
+  }
+}
+
+async function callGroq(apiKey: string, model: string, payload: any) {
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({ ...payload, model })
+  })
+
+  return response
 }
 
 function extractFirstJsonObject(value: string): string | null {
@@ -183,8 +285,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(400).json({ error: 'Missing symptoms' })
   }
 
+  const context = normalizeContext(req.body?.context)
+
   const system =
-    'You are a careful medical triage assistant. You do NOT diagnose. Provide general educational information and safe self-care. Always include red flags for emergencies. Always include: selfCare, firstAid, avoidList. Exercises can be empty if not appropriate. Output ONLY valid JSON matching the schema.'
+    'You are a careful medical triage assistant. You do NOT diagnose. Provide general educational information and safe self-care. Use the provided patient context (age/sex/duration/severity/pregnancy/conditions) to tailor advice. Always include red flags for emergencies. Always include: selfCare, firstAid, avoidList. Exercises can be empty if not appropriate. Output ONLY valid JSON matching the schema.'
 
   const user = {
     schema: {
@@ -199,11 +303,11 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
       recommendedSpecialties: 'string[] (max 5, use common specialties like General Medicine, Cardiology, Neurology, Pediatrics, Orthopedics, ENT, Dermatology, Gastroenterology, Gynecology, Ophthalmology, Dental)',
       urgency: 'one of: low, medium, high, emergency'
     },
-    symptoms
+    symptoms,
+    context
   }
 
   const payload = {
-    model: 'llama-3.1-8b-instant',
     temperature: 0.2,
     messages: [
       { role: 'system', content: system },
@@ -211,14 +315,10 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     ]
   }
 
-  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify(payload)
-  })
+  let response = await callGroq(apiKey, 'llama-3.1-70b-versatile', payload)
+  if (!response.ok) {
+    response = await callGroq(apiKey, 'llama-3.1-8b-instant', payload)
+  }
 
   if (!response.ok) {
     const text = await response.text()
@@ -256,6 +356,8 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   result.firstAid = fallbackList(result.firstAid, symptomFallback.firstAid)
   result.avoidList = fallbackList(result.avoidList, symptomFallback.avoidList)
   result.exercises = fallbackList(result.exercises, symptomFallback.exercises)
+
+  applyDeterministicTriage(result, symptoms, context)
 
   return res.status(200).json(result)
 }

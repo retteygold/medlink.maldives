@@ -28,11 +28,41 @@ type SymptomCheckResponse = {
   urgency: 'low' | 'medium' | 'high' | 'emergency'
 }
 
+type PatientContext = {
+  age?: number
+  sex?: 'male' | 'female' | 'other' | 'prefer_not_to_say'
+  durationDays?: number
+  severity?: 'mild' | 'moderate' | 'severe'
+  pregnant?: boolean
+  conditions?: string
+  redFlags?: {
+    troubleBreathing?: boolean
+    chestPain?: boolean
+    fainting?: boolean
+    confusion?: boolean
+    weaknessOneSide?: boolean
+    severeBleeding?: boolean
+  }
+}
+
 export default function SmartMatcherPage() {
   const navigate = useNavigate()
   const [symptoms, setSymptoms] = useState('')
   const [symptomDraft, setSymptomDraft] = useState('')
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
+  const [showDetails, setShowDetails] = useState(false)
+  const [age, setAge] = useState<number | ''>('')
+  const [sex, setSex] = useState<PatientContext['sex']>('prefer_not_to_say')
+  const [durationDays, setDurationDays] = useState<number | ''>('')
+  const [severity, setSeverity] = useState<PatientContext['severity']>('moderate')
+  const [pregnant, setPregnant] = useState(false)
+  const [conditions, setConditions] = useState('')
+  const [rfTroubleBreathing, setRfTroubleBreathing] = useState(false)
+  const [rfChestPain, setRfChestPain] = useState(false)
+  const [rfFainting, setRfFainting] = useState(false)
+  const [rfConfusion, setRfConfusion] = useState(false)
+  const [rfWeaknessOneSide, setRfWeaknessOneSide] = useState(false)
+  const [rfSevereBleeding, setRfSevereBleeding] = useState(false)
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [analysis, setAnalysis] = useState<SymptomCheckResponse | null>(null)
   const [recommendedDoctors, setRecommendedDoctors] = useState<Doctor[]>([])
@@ -90,6 +120,23 @@ export default function SmartMatcherPage() {
     const input = symptoms.trim()
     if (!input) return
 
+    const context: PatientContext = {
+      age: typeof age === 'number' ? age : undefined,
+      sex,
+      durationDays: typeof durationDays === 'number' ? durationDays : undefined,
+      severity,
+      pregnant: pregnant ? true : undefined,
+      conditions: conditions.trim() ? conditions.trim() : undefined,
+      redFlags: {
+        troubleBreathing: rfTroubleBreathing,
+        chestPain: rfChestPain,
+        fainting: rfFainting,
+        confusion: rfConfusion,
+        weaknessOneSide: rfWeaknessOneSide,
+        severeBleeding: rfSevereBleeding
+      }
+    }
+
     setIsAnalyzing(true)
     setError(null)
     setAnalysis(null)
@@ -99,7 +146,7 @@ export default function SmartMatcherPage() {
       const resp = await fetch('/api/symptom-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ symptoms: input })
+        body: JSON.stringify({ symptoms: input, context })
       })
 
       if (!resp.ok) {
@@ -278,6 +325,118 @@ export default function SmartMatcherPage() {
             placeholder="Example: I've been having chest pain and shortness of breath..."
             className="input-field min-h-[120px] resize-none"
           />
+
+          <button
+            type="button"
+            onClick={() => setShowDetails(v => !v)}
+            className="w-full mt-3 px-4 py-2 rounded-xl bg-gray-100 text-gray-800 text-sm font-semibold"
+          >
+            {showDetails ? 'Hide details' : 'Add details (improves accuracy)'}
+          </button>
+
+          {showDetails && (
+            <div className="mt-3 space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 mb-1">Age</div>
+                  <input
+                    value={age}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      setAge(v === '' ? '' : Number(v))
+                    }}
+                    inputMode="numeric"
+                    type="number"
+                    min={0}
+                    max={120}
+                    className="input-field"
+                    placeholder="e.g. 25"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 mb-1">Sex</div>
+                  <select value={sex} onChange={(e) => setSex(e.target.value as PatientContext['sex'])} className="input-field">
+                    <option value="prefer_not_to_say">Prefer not to say</option>
+                    <option value="female">Female</option>
+                    <option value="male">Male</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 mb-1">Duration (days)</div>
+                  <input
+                    value={durationDays}
+                    onChange={(e) => {
+                      const v = e.target.value
+                      setDurationDays(v === '' ? '' : Number(v))
+                    }}
+                    inputMode="numeric"
+                    type="number"
+                    min={0}
+                    max={365}
+                    className="input-field"
+                    placeholder="e.g. 3"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs font-semibold text-gray-600 mb-1">Severity</div>
+                  <select value={severity} onChange={(e) => setSeverity(e.target.value as PatientContext['severity'])} className="input-field">
+                    <option value="mild">Mild</option>
+                    <option value="moderate">Moderate</option>
+                    <option value="severe">Severe</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 rounded-xl bg-gray-50 border border-gray-200 px-3 py-2">
+                <div className="text-sm font-semibold text-gray-700">Pregnant</div>
+                <input type="checkbox" checked={pregnant} onChange={(e) => setPregnant(e.target.checked)} />
+              </div>
+
+              <div>
+                <div className="text-xs font-semibold text-gray-600 mb-1">Existing conditions (optional)</div>
+                <input
+                  value={conditions}
+                  onChange={(e) => setConditions(e.target.value)}
+                  className="input-field"
+                  placeholder="e.g. asthma, diabetes"
+                />
+              </div>
+
+              <div className="rounded-xl bg-red-50 border border-red-200 p-3">
+                <div className="text-sm font-bold text-red-800 mb-2">Emergency warning signs</div>
+                <div className="space-y-2 text-sm text-red-800">
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={rfTroubleBreathing} onChange={(e) => setRfTroubleBreathing(e.target.checked)} />
+                    Trouble breathing
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={rfChestPain} onChange={(e) => setRfChestPain(e.target.checked)} />
+                    Chest pain
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={rfFainting} onChange={(e) => setRfFainting(e.target.checked)} />
+                    Fainting
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={rfConfusion} onChange={(e) => setRfConfusion(e.target.checked)} />
+                    Confusion
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={rfWeaknessOneSide} onChange={(e) => setRfWeaknessOneSide(e.target.checked)} />
+                    Weakness/numbness on one side
+                  </label>
+                  <label className="flex items-center gap-2">
+                    <input type="checkbox" checked={rfSevereBleeding} onChange={(e) => setRfSevereBleeding(e.target.checked)} />
+                    Severe bleeding
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
           <button
             onClick={analyzeSymptoms}
             disabled={!symptoms.trim() || isAnalyzing}
