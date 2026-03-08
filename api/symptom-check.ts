@@ -49,9 +49,9 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const apiKey = process.env.GEMINI_API_KEY
+  const apiKey = process.env.GROQ_API_KEY
   if (!apiKey) {
-    return res.status(500).json({ error: 'Missing GEMINI_API_KEY' })
+    return res.status(500).json({ error: 'Missing GROQ_API_KEY' })
   }
 
   const symptoms = typeof req.body?.symptoms === 'string' ? req.body.symptoms.trim() : ''
@@ -78,40 +78,32 @@ export default async function handler(req: ApiRequest, res: ApiResponse) {
   }
 
   const payload = {
-    systemInstruction: {
-      parts: [{ text: system }]
-    },
-    contents: [
-      {
-        role: 'user',
-        parts: [{ text: JSON.stringify(user) }]
-      }
-    ],
-    generationConfig: {
-      temperature: 0.2
-    }
+    model: 'llama-3.1-8b-instant',
+    temperature: 0.2,
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: JSON.stringify(user) }
+    ]
   }
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${encodeURIComponent(apiKey)}`,
-    {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(payload)
-    }
-  )
+  const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`
+    },
+    body: JSON.stringify(payload)
+  })
 
   if (!response.ok) {
     const text = await response.text()
-    return res.status(502).json({ error: 'Gemini request failed', detail: text })
+    return res.status(502).json({ error: 'Groq request failed', detail: text })
   }
 
   const data = (await response.json()) as any
-  const content = data?.candidates?.[0]?.content?.parts?.map((p: any) => p?.text).filter(Boolean).join('')
+  const content = data?.choices?.[0]?.message?.content
   if (typeof content !== 'string' || !content.trim()) {
-    return res.status(502).json({ error: 'Invalid Gemini response' })
+    return res.status(502).json({ error: 'Invalid Groq response' })
   }
 
   const parsed = safeJsonParse<Partial<SymptomCheckResponse>>(content)
