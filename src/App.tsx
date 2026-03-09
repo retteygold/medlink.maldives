@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { Link, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
 import { Home, Search, User, MessageCircle } from 'lucide-react'
 import HomePage from './pages/HomePage'
@@ -31,6 +32,28 @@ import { Footer } from './components/Footer'
 function App() {
   const location = useLocation()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    const hash = (location.hash || '').trim()
+    if (!hash.startsWith('#')) return
+
+    const params = new URLSearchParams(hash.slice(1))
+    const errorCode = params.get('error_code')
+    const errorDescription = params.get('error_description')
+
+    if (!errorCode) return
+
+    let notice = 'Authentication link is invalid or expired. Please try again.'
+    if (errorCode === 'otp_expired') {
+      notice = 'This email link has expired. Please request a new one and try again.'
+    }
+    if (errorDescription && /invalid|expired/i.test(errorDescription)) {
+      notice = decodeURIComponent(errorDescription.replace(/\+/g, ' '))
+    }
+
+    window.history.replaceState(null, '', window.location.pathname + window.location.search)
+    navigate('/login', { replace: true, state: { notice } })
+  }, [location.hash, navigate])
 
   const hideNavPaths = ['/doctor/', '/hospital/', '/smart-match', '/admin', '/community', '/ask']
   const showNav = !hideNavPaths.some(path => location.pathname.startsWith(path))
