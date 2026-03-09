@@ -27,6 +27,7 @@ import AdminReviews from './pages/admin/AdminReviews'
 import AdminLogin from './pages/admin/AdminLogin'
 import AdminCommunity from './pages/admin/AdminCommunity'
 import AdminMedicineHelp from './pages/admin/AdminMedicineHelp'
+import AdminPharmacyFinder from './pages/admin/AdminPharmacyFinder'
 import RequireAdmin from './components/RequireAdmin'
 import RequireAuth from './components/RequireAuth'
 import { Footer } from './components/Footer'
@@ -106,6 +107,7 @@ function App() {
             <Route path="/admin/reviews" element={<AdminReviews />} />
             <Route path="/admin/community" element={<AdminCommunity />} />
             <Route path="/admin/medicine-help" element={<AdminMedicineHelp />} />
+            <Route path="/admin/pharmacy-finder" element={<AdminPharmacyFinder />} />
           </Route>
         </Routes>
       </main>

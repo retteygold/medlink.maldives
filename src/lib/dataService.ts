@@ -1225,16 +1225,13 @@ export async function getVisitAnalytics(
   }
 }
 
-// Get recent visits (admin only)
-export async function getRecentVisits(limit: number = 100): Promise<AppVisit[]> {
+// Get recent visits with user emails (admin only)
+export async function getRecentVisitsWithUsers(limit: number = 100): Promise<(AppVisit & { user_email?: string })[]> {
   const { data, error } = await supabase
-    .from('app_visits')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(limit)
+    .rpc('get_visits_with_users', { limit_count: limit })
 
   if (error) {
-    console.error('Error fetching recent visits:', error)
+    console.error('Error fetching visits with users:', error)
     return []
   }
   return data || []

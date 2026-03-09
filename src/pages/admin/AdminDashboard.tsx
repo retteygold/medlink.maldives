@@ -10,9 +10,10 @@ import {
   Activity,
   MessageCircle,
   Eye,
-  X
+  X,
+  MapPin
 } from 'lucide-react'
-import { getDatabaseStats, getVisitAnalytics, getRecentVisits, type AppVisit, type VisitAnalytics } from '../../lib/dataService'
+import { getDatabaseStats, getVisitAnalytics, getRecentVisitsWithUsers, type AppVisit, type VisitAnalytics } from '../../lib/dataService'
 import { supabase } from '../../lib/supabase'
 
 export default function AdminDashboard() {
@@ -29,7 +30,7 @@ export default function AdminDashboard() {
     loggedInVisits: 0,
     anonymousVisits: 0
   })
-  const [recentVisits, setRecentVisits] = useState<AppVisit[]>([])
+  const [recentVisits, setRecentVisits] = useState<(AppVisit & { user_email?: string })[]>([])
   const [showVisitors, setShowVisitors] = useState(false)
 
   useEffect(() => {
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
   async function loadVisitStats() {
     const analytics = await getVisitAnalytics()
     setVisitStats(analytics)
-    const visits = await getRecentVisits(50)
+    const visits = await getRecentVisitsWithUsers(50)
     setRecentVisits(visits)
   }
 
@@ -93,6 +94,14 @@ export default function AdminDashboard() {
       count: 0,
       path: '/admin/medicine-help',
       color: 'bg-pink-500'
+    },
+    {
+      title: 'Pharmacy Finder',
+      description: 'View and answer pharmacy requests',
+      icon: MapPin,
+      count: 0,
+      path: '/admin/pharmacy-finder',
+      color: 'bg-teal-500'
     },
     {
       title: 'Visitors',
@@ -230,7 +239,7 @@ export default function AdminDashboard() {
               </div>
 
               {/* Recent Visits Table */}
-              <h3 className="font-semibold text-gray-800 mb-3">Recent Visits</h3>
+              <h3 className="font-semibold text-gray-800 mb-3">Recent Visits (with User Details)</h3>
               <div className="space-y-2">
                 {recentVisits.length === 0 ? (
                   <p className="text-gray-500 text-sm">No visits recorded yet.</p>
@@ -243,14 +252,26 @@ export default function AdminDashboard() {
                           {new Date(visit.created_at).toLocaleString()}
                         </span>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                      <div className="mt-2 space-y-1">
                         {visit.user_id ? (
-                          <span className="text-green-600 font-medium">● Logged in</span>
+                          <div className="text-xs">
+                            <span className="text-green-600 font-medium">● Logged in</span>
+                            {visit.user_email && (
+                              <span className="ml-2 text-gray-700">{visit.user_email}</span>
+                            )}
+                            <span className="ml-2 text-gray-400">({visit.user_id.slice(0, 8)}...)</span>
+                          </div>
                         ) : (
-                          <span className="text-gray-400">● Anonymous</span>
+                          <span className="text-xs text-gray-400">● Anonymous visitor</span>
+                        )}
+                        {visit.session_id && (
+                          <div className="text-xs text-gray-400">Session: {visit.session_id.slice(0, 16)}...</div>
                         )}
                         {visit.user_agent && (
-                          <span className="truncate">{visit.user_agent.slice(0, 60)}...</span>
+                          <div className="text-xs text-gray-500 truncate">{visit.user_agent}</div>
+                        )}
+                        {visit.referrer && (
+                          <div className="text-xs text-gray-400">From: {visit.referrer}</div>
                         )}
                       </div>
                     </div>
