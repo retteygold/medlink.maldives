@@ -18,6 +18,8 @@ import QuestionDetailPage from './pages/QuestionDetailPage'
 import MedicineHelpPage from './pages/MedicineHelpPage'
 import MedicineHelpNewPage from './pages/MedicineHelpNewPage'
 import MedicineHelpDetailPage from './pages/MedicineHelpDetailPage'
+import PharmacyFinderPage from './pages/PharmacyFinderPage'
+import PharmacyFinderInboxPage from './pages/PharmacyFinderInboxPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminHospitals from './pages/admin/AdminHospitals'
 import AdminDoctors from './pages/admin/AdminDoctors'
@@ -86,6 +88,9 @@ function App() {
             <Route path="/medicine-help" element={<MedicineHelpPage />} />
             <Route path="/medicine-help/new" element={<MedicineHelpNewPage />} />
             <Route path="/medicine-help/:id" element={<MedicineHelpDetailPage />} />
+
+            <Route path="/pharmacy-finder" element={<PharmacyFinderPage />} />
+            <Route path="/pharmacy-finder/inbox" element={<PharmacyFinderInboxPage />} />
           </Route>
           
           {/* Admin Routes */}

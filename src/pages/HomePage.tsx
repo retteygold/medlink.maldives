@@ -148,6 +148,27 @@ export default function HomePage() {
         </Link>
       </div>
 
+      {/* Pharmacy Finder CTA */}
+      <div className="px-4 mt-4">
+        <Link
+          to="/pharmacy-finder"
+          className="block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/20 text-white"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <MapPin size={24} />
+              </div>
+              <div>
+                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>Pharmacy Finder</h3>
+                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>Upload prescription/medicine photo and find a pharmacy.</p>
+              </div>
+            </div>
+            <ChevronRight size={24} />
+          </div>
+        </Link>
+      </div>
+
       {/* Specialties */}
       <div className="px-4 mt-6">
         <div className="flex justify-between items-center mb-3">

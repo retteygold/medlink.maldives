@@ -85,6 +85,26 @@ interface DBMedicineReview {
   is_active: boolean
 }
 
+export type PharmacyFinderAvailability = 'in_stock' | 'out_of_stock' | 'unknown'
+
+export type PharmacyFinderStatus = 'open' | 'answered' | 'closed'
+
+export interface DBPharmacyFinderRequest {
+  id: string
+  created_at: string
+  updated_at: string
+  user_id: string
+  image_path: string
+  notes: string | null
+  status: PharmacyFinderStatus
+  pharmacy_name: string | null
+  pharmacy_phone: string | null
+  pharmacy_location: string | null
+  availability: PharmacyFinderAvailability | null
+  answered_by: string | null
+  answered_at: string | null
+}
+
 interface DBDoctor {
   id: string
   name: string
@@ -517,6 +537,136 @@ export async function uploadMedicineRequestImage(file: File): Promise<string> {
   })
   if (error) throw error
   return path
+}
+
+export async function uploadPharmacyFinderImage(file: File): Promise<string> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError) throw sessionError
+  const user = sessionData.session?.user
+  if (!user) throw new Error('Not authenticated')
+
+  const safeName = (file.name || 'image').replace(/[^a-zA-Z0-9._-]+/g, '-')
+  const path = `pharmacy-finder/${user.id}/${Date.now()}-${safeName}`
+
+  const { error } = await supabase.storage.from('medicine-requests').upload(path, file, {
+    upsert: false,
+    contentType: file.type || undefined
+  })
+  if (error) throw error
+  return path
+}
+
+export async function createPharmacyFinderRequest(payload: {
+  image_path: string
+  notes?: string
+}): Promise<DBPharmacyFinderRequest | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data, error } = await supabase
+      .from('pharmacy_finder_requests')
+      .insert({
+        user_id: user.id,
+        image_path: payload.image_path,
+        notes: payload.notes?.trim() || null,
+        status: 'open'
+      })
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error creating pharmacy finder request:', err)
+    return undefined
+  }
+}
+
+export async function listMyPharmacyFinderRequests(): Promise<DBPharmacyFinderRequest[]> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data, error } = await supabase
+      .from('pharmacy_finder_requests')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error listing my pharmacy finder requests:', err)
+    return []
+  }
+}
+
+export async function listOpenPharmacyFinderRequests(): Promise<DBPharmacyFinderRequest[]> {
+  try {
+    const { data, error } = await supabase
+      .from('pharmacy_finder_requests')
+      .select('*')
+      .eq('status', 'open')
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error listing open pharmacy finder requests:', err)
+    return []
+  }
+}
+
+export async function getPharmacyFinderRequestById(id: string): Promise<DBPharmacyFinderRequest | undefined> {
+  try {
+    const { data, error } = await supabase
+      .from('pharmacy_finder_requests')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error fetching pharmacy finder request:', err)
+    return undefined
+  }
+}
+
+export async function answerPharmacyFinderRequest(payload: {
+  id: string
+  pharmacy_name: string
+  pharmacy_phone?: string
+  pharmacy_location?: string
+  availability: PharmacyFinderAvailability
+}): Promise<boolean> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const updatePayload: any = {
+      status: 'answered',
+      pharmacy_name: payload.pharmacy_name.trim(),
+      pharmacy_phone: payload.pharmacy_phone?.trim() || null,
+      pharmacy_location: payload.pharmacy_location?.trim() || null,
+      availability: payload.availability,
+      answered_by: user.id,
+      answered_at: new Date().toISOString()
+    }
+
+    const { error } = await supabase
+      .from('pharmacy_finder_requests')
+      .update(updatePayload)
+      .eq('id', payload.id)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error answering pharmacy finder request:', err)
+    return false
+  }
 }
 
 export async function getSignedMedicineRequestImageUrl(path: string, expiresInSeconds = 60 * 60): Promise<string> {
