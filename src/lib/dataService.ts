@@ -747,7 +747,7 @@ export async function sendMedicineMessageWithImage(payload: {
       conversation_id: payload.conversation_id,
       sender_id: user.id,
       sender_name: payload.sender_name || user.email?.split('@')[0] || 'User',
-      message: payload.message,
+      message: payload.message?.trim() || null,
       image_path: payload.image_path || null,
       is_read: false
     }
