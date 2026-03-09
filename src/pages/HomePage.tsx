@@ -139,8 +139,8 @@ export default function HomePage() {
                 <Activity size={24} />
               </div>
               <div>
-                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>Medicine Help</h3>
-                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>Need medicine from abroad? Upload prescription and request help.</p>
+                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>Need Urgent Medicine from Abroad?</h3>
+                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>Upload prescription and request help.</p>
               </div>
             </div>
             <ChevronRight size={24} />

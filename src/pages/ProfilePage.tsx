@@ -72,7 +72,7 @@ export default function ProfilePage() {
           onClick={goMedicineHelp}
           className="w-full bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 text-white text-left shadow-lg shadow-medical-500/20"
         >
-          <div className="font-bold text-lg">Need medicine from abroad?</div>
+          <div className="font-bold text-lg">Need Urgent Medicine from Abroad?</div>
           <div className="text-white/80 text-sm mt-1">Upload prescription and request help from the community</div>
         </button>
 

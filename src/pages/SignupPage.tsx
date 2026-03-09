@@ -116,7 +116,7 @@ export default function SignupPage() {
         <div className="mt-6 flex items-center gap-4">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Create Account</h1>
-            <p className="text-white/80 text-sm mt-1">Choose how you want to use Medicine Help</p>
+            <p className="text-white/80 text-sm mt-1">Choose how you want to use medicine help</p>
           </div>
           <img
             src="/images/storyset/Doctors-cuate.svg"
