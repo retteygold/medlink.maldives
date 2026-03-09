@@ -275,14 +275,19 @@ export default function MedicineHelpDetailPage() {
   }, [activeConversation, meId])
 
   const otherUserName = useMemo(() => {
+    // First check messages for other user's sender_name
+    const otherUserMessage = messages.find(m => m.sender_id !== meId && m.sender_name)
+    if (otherUserMessage?.sender_name) return otherUserMessage.sender_name
+    // Then check profile
     if (otherUserProfile?.name) return otherUserProfile.name
     if (otherUserProfile?.email) return otherUserProfile.email.split('@')[0]
+    // Fallback to ID slice
     if (!activeConversation || !meId) return 'User'
     const otherId = activeConversation.requester_id === meId 
       ? activeConversation.helper_id 
       : activeConversation.requester_id
     return otherId.slice(0, 8) + '...'
-  }, [activeConversation, meId, otherUserProfile])
+  }, [activeConversation, meId, otherUserProfile, messages])
 
   async function startConversation() {
     if (!request?.id || !request.user_id) return

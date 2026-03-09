@@ -731,20 +731,10 @@ export async function createAnswer(answer: {
 }
 
 // Get user profile by ID (for chat display names)
-export async function getUserProfileById(userId: string): Promise<{ email: string; name?: string } | null> {
-  try {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('email, name')
-      .eq('id', userId)
-      .maybeSingle()
-    
-    if (error) throw error
-    return data
-  } catch {
-    // Fallback: try to get from auth admin or return null
-    return null
-  }
+// Note: Profiles table may not exist, returns null to trigger fallback
+export async function getUserProfileById(_userId: string): Promise<{ email: string; name?: string } | null> {
+  // Profiles table doesn't exist - return null to use fallback (email from conversation)
+  return null
 }
 
 // Enhanced Medicine Chat with Images
