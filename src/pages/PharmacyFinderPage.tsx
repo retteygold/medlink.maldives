@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, Upload, Phone, MapPin, Package } from 'lucide-react'
+import { useLanguage } from '../lib/languageContext'
 import {
   createPharmacyFinderRequest,
   getSignedMedicineRequestImageUrl,
@@ -13,7 +14,15 @@ type DisplayRequest = DBPharmacyFinderRequest & { signed_image_url?: string | nu
 
 export default function PharmacyFinderPage() {
   const navigate = useNavigate()
+  const { t, language } = useLanguage()
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  const statusLabel = (status: string) => {
+    if (status === 'open') return t('pharmacyFinder.status.open')
+    if (status === 'answered') return t('pharmacyFinder.status.answered')
+    if (status === 'closed') return t('pharmacyFinder.status.closed')
+    return status
+  }
 
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -45,7 +54,7 @@ export default function PharmacyFinderPage() {
       )
       setRequests(withUrls)
     } catch (err: any) {
-      setError(err?.message || 'Failed to load')
+      setError(err?.message || t('pharmacyFinder.inbox.submitFailed'))
       setRequests([])
     } finally {
       setLoading(false)
@@ -66,13 +75,13 @@ export default function PharmacyFinderPage() {
         notes
       })
       if (!created?.id) {
-        setError('Failed to submit request')
+        setError(t('pharmacyFinder.inbox.submitFailed'))
         return
       }
       setNotes('')
       await load()
     } catch (err: any) {
-      setError(err?.message || 'Failed to submit')
+      setError(err?.message || t('pharmacyFinder.inbox.submitFailed'))
     } finally {
       setSubmitting(false)
       if (fileInputRef.current) fileInputRef.current.value = ''
@@ -87,8 +96,8 @@ export default function PharmacyFinderPage() {
             <ChevronLeft size={24} className="text-white" />
           </button>
           <div className="flex-1">
-            <h1 className="text-white text-2xl font-bold">Pharmacy Finder</h1>
-            <p className="text-white/80 text-sm">Upload a prescription/medicine photo and we’ll help find a pharmacy.</p>
+            <h1 className={`text-white text-2xl font-bold ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.title')}</h1>
+            <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.subtitle')}</p>
           </div>
         </div>
       </div>
@@ -101,7 +110,7 @@ export default function PharmacyFinderPage() {
             <textarea
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Optional notes (medicine name, dosage, where you searched, etc.)"
+              placeholder={t('pharmacyFinder.notesPlaceholder')}
               rows={3}
               className="input-field w-full resize-none"
             />
@@ -115,16 +124,16 @@ export default function PharmacyFinderPage() {
               className="w-full bg-medical-500 hover:bg-medical-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Upload size={18} />
-              {submitting ? 'Uploading...' : 'Upload Prescription / Medicine Photo'}
+              {submitting ? t('pharmacyFinder.uploading') : t('pharmacyFinder.uploadButton')}
             </button>
 
-            <div className="text-xs text-gray-500">
-              If you can’t wait, you can share the image via Viber to <span className="font-semibold">Shikavathi Chatline +7951400</span>.
+            <div className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {t('pharmacyFinder.viberFallbackShort')}
             </div>
 
             <div className="pt-2">
-              <Link to="/pharmacy-finder/inbox" className="text-sm text-medical-600 font-medium">
-                Provider/Admin Inbox
+              <Link to="/pharmacy-finder/inbox" className={`text-sm text-medical-600 font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                {t('pharmacyFinder.providerInbox')}
               </Link>
             </div>
           </div>
@@ -133,12 +142,12 @@ export default function PharmacyFinderPage() {
 
       <div className="px-4 mt-4">
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          <h2 className="font-bold text-gray-800">Latest Status</h2>
+          <h2 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.latestStatus')}</h2>
 
           {loading ? (
-            <p className="text-gray-500 text-sm mt-2">Loading...</p>
+            <p className={`text-gray-500 text-sm mt-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('common.loading')}</p>
           ) : !latest ? (
-            <p className="text-gray-500 text-sm mt-2">No requests yet. Upload an image to start.</p>
+            <p className={`text-gray-500 text-sm mt-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.noRequestsYet')}</p>
           ) : (
             <div className="mt-3 space-y-3">
               {latest.signed_image_url && (
@@ -151,14 +160,14 @@ export default function PharmacyFinderPage() {
                 <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                   latest.status === 'answered' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                 }`}>
-                  {latest.status}
+                  {statusLabel(latest.status)}
                 </span>
                 <span className="text-xs text-gray-400">{new Date(latest.created_at).toLocaleString()}</span>
               </div>
 
               {latest.status !== 'answered' ? (
-                <div className="bg-blue-50 text-blue-800 text-sm rounded-xl p-3">
-                  We’re checking pharmacies. If you need urgent help, share the image via Viber to <span className="font-semibold">+7951400</span>.
+                <div className={`bg-blue-50 text-blue-800 text-sm rounded-xl p-3 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                  {t('pharmacyFinder.viberFallbackChecking')}
                 </div>
               ) : (
                 <div className="bg-green-50 text-green-900 rounded-xl p-3 space-y-2">
@@ -166,7 +175,7 @@ export default function PharmacyFinderPage() {
                   {latest.availability && (
                     <div className="flex items-center gap-2 text-sm">
                       <Package size={16} />
-                      <span>{latest.availability.replace(/_/g, ' ')}</span>
+                      <span>{t(`pharmacyFinder.availability.${latest.availability}`)}</span>
                     </div>
                   )}
                   {latest.pharmacy_phone && (
@@ -190,11 +199,11 @@ export default function PharmacyFinderPage() {
 
       <div className="px-4 mt-4">
         <div className="bg-white rounded-2xl shadow-sm p-4">
-          <h2 className="font-bold text-gray-800">My Requests</h2>
+          <h2 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.myRequests')}</h2>
           {loading ? (
-            <p className="text-gray-500 text-sm mt-2">Loading...</p>
+            <p className={`text-gray-500 text-sm mt-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('common.loading')}</p>
           ) : requests.length === 0 ? (
-            <p className="text-gray-500 text-sm mt-2">No requests.</p>
+            <p className={`text-gray-500 text-sm mt-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.noRequests')}</p>
           ) : (
             <div className="mt-3 space-y-3">
               {requests.map((r) => (
@@ -203,7 +212,7 @@ export default function PharmacyFinderPage() {
                     <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                       r.status === 'answered' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
                     }`}>
-                      {r.status}
+                      {statusLabel(r.status)}
                     </span>
                     <span className="text-xs text-gray-400">{new Date(r.created_at).toLocaleString()}</span>
                   </div>

@@ -22,6 +22,10 @@
   - Post medicine requests with prescription + optional previous medicine photo
   - Browse requests and open request details
   - 1-to-1 chat between requester and helper
+- **🏪 Pharmacy Finder** (requires login)
+  - Upload a prescription/medicine photo and create a request
+  - Providers/admins can answer with pharmacy name, phone, location, and availability
+  - Fallback guidance to share via Viber when urgent
 - **🔐 User Auth** (email/password)
   - Signup role selection: `need_service` (request help) or `provide_service` (provide help)
 - **✨ Modern UI**
@@ -113,6 +117,9 @@ create table if not exists public.admin_users (
   id uuid primary key references auth.users(id) on delete cascade,
   created_at timestamptz not null default now()
 );
+
+-- Pharmacy Finder
+-- Run the included file: pharmacy_finder_migration.sql
 
 alter table public.admin_users enable row level security;
 create policy "admin_users_select_authenticated"

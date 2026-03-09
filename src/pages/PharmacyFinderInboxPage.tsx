@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ChevronLeft, RefreshCcw, CheckCircle2 } from 'lucide-react'
+import { useLanguage } from '../lib/languageContext'
 import {
   answerPharmacyFinderRequest,
   getSignedMedicineRequestImageUrl,
@@ -13,6 +14,7 @@ type DisplayRequest = DBPharmacyFinderRequest & { signed_image_url?: string | nu
 
 export default function PharmacyFinderInboxPage() {
   const navigate = useNavigate()
+  const { t, language } = useLanguage()
 
   const [loading, setLoading] = useState(true)
   const [savingId, setSavingId] = useState<string | null>(null)
@@ -65,7 +67,7 @@ export default function PharmacyFinderInboxPage() {
         return next
       })
     } catch (err: any) {
-      setError(err?.message || 'Failed to load')
+      setError(err?.message || t('pharmacyFinder.inbox.submitFailed'))
       setRequests([])
     } finally {
       setLoading(false)
@@ -85,7 +87,7 @@ export default function PharmacyFinderInboxPage() {
   async function onAnswer(id: string) {
     const draft = draftById[id]
     if (!draft?.pharmacy_name?.trim()) {
-      setError('Pharmacy name is required')
+      setError(t('pharmacyFinder.inbox.nameRequired'))
       return
     }
 
@@ -103,7 +105,7 @@ export default function PharmacyFinderInboxPage() {
     setSavingId(null)
 
     if (!ok) {
-      setError('Failed to submit answer (check RLS / permissions)')
+      setError(t('pharmacyFinder.inbox.submitFailed'))
       return
     }
 
@@ -119,12 +121,12 @@ export default function PharmacyFinderInboxPage() {
               <ChevronLeft size={24} className="text-white" />
             </button>
             <div>
-              <h1 className="text-white text-2xl font-bold">Pharmacy Finder Inbox</h1>
-              <p className="text-white/80 text-sm">Open requests: {openCount}</p>
+              <h1 className={`text-white text-2xl font-bold ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.inbox.title')}</h1>
+              <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.inbox.openRequests')}: {openCount}</p>
             </div>
           </div>
 
-          <button onClick={load} className="p-2 hover:bg-white/10 rounded-full" aria-label="Refresh">
+          <button onClick={load} className="p-2 hover:bg-white/10 rounded-full" aria-label={t('pharmacyFinder.inbox.refresh')}>
             <RefreshCcw size={18} className="text-white" />
           </button>
         </div>
@@ -135,9 +137,9 @@ export default function PharmacyFinderInboxPage() {
           {error && <div className="mb-3 bg-red-50 text-red-700 text-sm rounded-lg p-2">{error}</div>}
 
           {loading ? (
-            <p className="text-gray-500 text-sm">Loading...</p>
+            <p className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('common.loading')}</p>
           ) : requests.length === 0 ? (
-            <p className="text-gray-500 text-sm">No open requests.</p>
+            <p className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.inbox.noOpenRequests')}</p>
           ) : (
             <div className="space-y-4">
               {requests.map((r) => {
@@ -145,7 +147,7 @@ export default function PharmacyFinderInboxPage() {
                 return (
                   <div key={r.id} className="border border-gray-100 rounded-2xl p-4">
                     <div className="flex items-center justify-between">
-                      <div className="text-sm font-semibold text-gray-800">Request</div>
+                      <div className={`text-sm font-semibold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.inbox.request')}</div>
                       <div className="text-xs text-gray-400">{new Date(r.created_at).toLocaleString()}</div>
                     </div>
 
@@ -161,19 +163,19 @@ export default function PharmacyFinderInboxPage() {
                       <input
                         value={draft?.pharmacy_name || ''}
                         onChange={(e) => updateDraft(r.id, { pharmacy_name: e.target.value })}
-                        placeholder="Pharmacy name"
+                        placeholder={t('pharmacyFinder.inbox.pharmacyName')}
                         className="input-field w-full"
                       />
                       <input
                         value={draft?.pharmacy_phone || ''}
                         onChange={(e) => updateDraft(r.id, { pharmacy_phone: e.target.value })}
-                        placeholder="Phone (optional)"
+                        placeholder={t('pharmacyFinder.inbox.phoneOptional')}
                         className="input-field w-full"
                       />
                       <input
                         value={draft?.pharmacy_location || ''}
                         onChange={(e) => updateDraft(r.id, { pharmacy_location: e.target.value })}
-                        placeholder="Location (optional)"
+                        placeholder={t('pharmacyFinder.inbox.locationOptional')}
                         className="input-field w-full"
                       />
                       <select
@@ -181,9 +183,9 @@ export default function PharmacyFinderInboxPage() {
                         onChange={(e) => updateDraft(r.id, { availability: e.target.value as PharmacyFinderAvailability })}
                         className="input-field w-full"
                       >
-                        <option value="unknown">unknown</option>
-                        <option value="in_stock">in stock</option>
-                        <option value="out_of_stock">out of stock</option>
+                        <option value="unknown">{t('pharmacyFinder.availability.unknown')}</option>
+                        <option value="in_stock">{t('pharmacyFinder.availability.in_stock')}</option>
+                        <option value="out_of_stock">{t('pharmacyFinder.availability.out_of_stock')}</option>
                       </select>
 
                       <button
@@ -193,7 +195,7 @@ export default function PharmacyFinderInboxPage() {
                         className="w-full bg-medical-500 hover:bg-medical-600 text-white font-semibold py-3 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50"
                       >
                         <CheckCircle2 size={18} />
-                        {savingId === r.id ? 'Saving...' : 'Submit Answer'}
+                        {savingId === r.id ? t('pharmacyFinder.inbox.saving') : t('pharmacyFinder.inbox.submitAnswer')}
                       </button>
                     </div>
                   </div>

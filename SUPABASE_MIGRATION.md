@@ -3,9 +3,23 @@
 ## Overview
 This migration adds real-time chat features, shipment tracking, and review system to the Medicine Help feature.
 
+It also includes a separate migration file for the Pharmacy Finder feature.
+
 ## SQL Migration Commands
 
 Run these commands in your Supabase SQL Editor:
+
+### Pharmacy Finder (new)
+
+Run the included SQL file in the repo:
+
+- `pharmacy_finder_migration.sql`
+
+This creates the `pharmacy_finder_requests` table, indexes, and RLS policies so:
+
+- Requesters can create and view their own requests
+- Providers (role `provide_service` or `both`) can view and answer requests
+- Admins (in `admin_users`) can view and answer requests
 
 ### 1. Update medicine_requests status enum
 ```sql

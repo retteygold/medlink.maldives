@@ -12,9 +12,10 @@
 8. [Language Toggle](#language-toggle)
 9. [PWA Installation](#pwa-installation)
 10. [Medicine Help](#medicine-help)
-11. [Account & Login](#account--login)
-12. [Admin Dashboard](#admin-dashboard)
-13. [Troubleshooting](#troubleshooting)
+11. [Pharmacy Finder](#pharmacy-finder)
+12. [Account & Login](#account--login)
+13. [Admin Dashboard](#admin-dashboard)
+14. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -279,6 +280,27 @@ Medicine Help is a community feature to request medicine that is not available l
 - Prescription images can contain sensitive information.
 - Before uploading, **hide personal details** when possible.
 - Images are stored in a private storage bucket and only accessible to logged-in users.
+
+---
+
+## Pharmacy Finder
+
+Pharmacy Finder helps you find a pharmacy that has a medicine in stock by uploading a prescription or medicine photo.
+
+### How to Use
+
+1. From the Home screen, tap **Pharmacy Finder**
+2. Add optional notes (medicine name, dosage, where you searched)
+3. Upload a prescription/medicine photo
+4. Wait for a provider/admin to respond with:
+   - Pharmacy name
+   - Phone
+   - Location
+   - Availability (in stock / out of stock / unknown)
+
+### If you need urgent help
+
+If you can’t wait for an in-app response, you can share the image via **Viber** to **Shikavathi Chatline +7951400**.
 
 ---
 

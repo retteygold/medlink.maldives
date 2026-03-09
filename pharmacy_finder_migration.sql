@@ -47,11 +47,44 @@ ALTER TABLE pharmacy_finder_requests ENABLE ROW LEVEL SECURITY;
 -- Helper function: check if current user is admin
 CREATE OR REPLACE FUNCTION is_admin_user()
 RETURNS BOOLEAN AS $$
+DECLARE
+  has_user_id BOOLEAN;
+  has_id BOOLEAN;
+  res BOOLEAN;
+BEGIN
   SELECT EXISTS (
-    SELECT 1 FROM admin_users au
-    WHERE au.user_id = auth.uid() OR au.id = auth.uid()
-  );
-$$ LANGUAGE sql STABLE;
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'admin_users'
+      AND column_name = 'user_id'
+  ) INTO has_user_id;
+
+  SELECT EXISTS (
+    SELECT 1
+    FROM information_schema.columns
+    WHERE table_schema = 'public'
+      AND table_name = 'admin_users'
+      AND column_name = 'id'
+  ) INTO has_id;
+
+  res := false;
+
+  IF has_user_id THEN
+    EXECUTE 'SELECT EXISTS (SELECT 1 FROM admin_users WHERE user_id = $1)' INTO res USING auth.uid();
+    IF res THEN
+      RETURN true;
+    END IF;
+  END IF;
+
+  IF has_id THEN
+    EXECUTE 'SELECT EXISTS (SELECT 1 FROM admin_users WHERE id = $1)' INTO res USING auth.uid();
+    RETURN res;
+  END IF;
+
+  RETURN false;
+END;
+$$ LANGUAGE plpgsql STABLE;
 
 -- Requester can create
 DROP POLICY IF EXISTS "pharmacy_finder_requester_insert" ON pharmacy_finder_requests;

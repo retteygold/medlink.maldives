@@ -160,8 +160,8 @@ export default function HomePage() {
                 <MapPin size={24} />
               </div>
               <div>
-                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>Pharmacy Finder</h3>
-                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>Upload prescription/medicine photo and find a pharmacy.</p>
+                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.title')}</h3>
+                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.subtitle')}</p>
               </div>
             </div>
             <ChevronRight size={24} />
