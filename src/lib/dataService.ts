@@ -730,6 +730,23 @@ export async function createAnswer(answer: {
   }
 }
 
+// Get user profile by ID (for chat display names)
+export async function getUserProfileById(userId: string): Promise<{ email: string; name?: string } | null> {
+  try {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('email, name')
+      .eq('id', userId)
+      .maybeSingle()
+    
+    if (error) throw error
+    return data
+  } catch {
+    // Fallback: try to get from auth admin or return null
+    return null
+  }
+}
+
 // Enhanced Medicine Chat with Images
 export async function sendMedicineMessageWithImage(payload: {
   conversation_id: string

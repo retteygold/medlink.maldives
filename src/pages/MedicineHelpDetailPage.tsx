@@ -15,6 +15,7 @@ import {
 import { usePushNotifications } from '../hooks/usePushNotifications'
 import { supabase } from '../lib/supabase'
 import {
+  getUserProfileById,
   createOrGetMedicineConversation,
   getMedicineRequestById,
   getSignedMedicineRequestImageUrl,
@@ -94,6 +95,7 @@ export default function MedicineHelpDetailPage() {
   const [, setPreviousUrl] = useState<string | null>(null)
   const [, setConversations] = useState<MedicineConversation[]>([])
   const [activeConversation, setActiveConversation] = useState<MedicineConversation | null>(null)
+  const [otherUserProfile, setOtherUserProfile] = useState<{email: string; name?: string} | null>(null)
   const [messages, setMessages] = useState<MedicineMessage[]>([])
   const [draft, setDraft] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -239,6 +241,13 @@ export default function MedicineHelpDetailPage() {
       const mine = (convs as any[]).find((c) => c.requester_id === uid || c.helper_id === uid) || null
       setActiveConversation(mine)
 
+      // Fetch other user's profile for display name
+      if (mine) {
+        const otherId = mine.requester_id === uid ? mine.helper_id : mine.requester_id
+        const profile = await getUserProfileById(otherId)
+        setOtherUserProfile(profile)
+      }
+
       if (mine?.id) {
         const msgs = await listMedicineMessages(mine.id)
         setMessages(msgs as any)
@@ -266,12 +275,14 @@ export default function MedicineHelpDetailPage() {
   }, [activeConversation, meId])
 
   const otherUserName = useMemo(() => {
+    if (otherUserProfile?.name) return otherUserProfile.name
+    if (otherUserProfile?.email) return otherUserProfile.email.split('@')[0]
     if (!activeConversation || !meId) return 'User'
     const otherId = activeConversation.requester_id === meId 
       ? activeConversation.helper_id 
       : activeConversation.requester_id
     return otherId.slice(0, 8) + '...'
-  }, [activeConversation, meId])
+  }, [activeConversation, meId, otherUserProfile])
 
   async function startConversation() {
     if (!request?.id || !request.user_id) return
