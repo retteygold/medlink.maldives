@@ -29,7 +29,7 @@ interface DBHospital {
 }
 
 // Medicine Help (must match Supabase schema)
-type MedicineRequestStatus = 'open' | 'in_progress' | 'fulfilled' | 'cancelled'
+export type MedicineRequestStatus = 'open' | 'in_progress' | 'shipped' | 'received' | 'completed' | 'cancelled'
 
 interface DBMedicineRequest {
   id: string
@@ -55,6 +55,12 @@ interface DBMedicineConversation {
   request_id: string
   requester_id: string
   helper_id: string
+  shipment_status: 'none' | 'shipped' | 'received' | null
+  tracking_number: string | null
+  shipped_at: string | null
+  received_at: string | null
+  completed_at: string | null
+  is_active: boolean
 }
 
 interface DBMedicineMessage {
@@ -62,7 +68,21 @@ interface DBMedicineMessage {
   created_at: string
   conversation_id: string
   sender_id: string
+  sender_name: string | null
   message: string
+  image_path: string | null
+  is_read: boolean
+}
+
+interface DBMedicineReview {
+  id: string
+  created_at: string
+  conversation_id: string
+  requester_id: string
+  helper_id: string
+  rating: number
+  comment: string | null
+  is_active: boolean
 }
 
 interface DBDoctor {
@@ -708,6 +728,267 @@ export async function createAnswer(answer: {
     console.error('Error creating answer:', err)
     throw err
   }
+}
+
+// Enhanced Medicine Chat with Images
+export async function sendMedicineMessageWithImage(payload: {
+  conversation_id: string
+  message: string
+  image_path?: string | null
+  sender_name?: string
+}): Promise<DBMedicineMessage | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const insertPayload: any = {
+      conversation_id: payload.conversation_id,
+      sender_id: user.id,
+      sender_name: payload.sender_name || user.email?.split('@')[0] || 'User',
+      message: payload.message,
+      image_path: payload.image_path || null,
+      is_read: false
+    }
+
+    const { data, error } = await supabase
+      .from('medicine_messages')
+      .insert(insertPayload)
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error sending medicine message:', err)
+    return undefined
+  }
+}
+
+export async function uploadChatImage(file: File): Promise<string> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError) throw sessionError
+  const user = sessionData.session?.user
+  if (!user) throw new Error('Not authenticated')
+
+  const safeName = (file.name || 'image').replace(/[^a-zA-Z0-9._-]+/g, '-')
+  const path = `chat/${user.id}/${Date.now()}-${safeName}`
+
+  const { error } = await supabase.storage.from('medicine-requests').upload(path, file, {
+    upsert: false,
+    contentType: file.type || undefined
+  })
+  if (error) throw error
+  return path
+}
+
+export async function markMessagesAsRead(conversationId: string): Promise<boolean> {
+  try {
+    const { data: sessionData } = await supabase.auth.getSession()
+    const userId = sessionData.session?.user?.id
+    if (!userId) return false
+
+    const { error } = await supabase
+      .from('medicine_messages')
+      .update({ is_read: true })
+      .eq('conversation_id', conversationId)
+      .neq('sender_id', userId)
+      .eq('is_read', false)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error marking messages as read:', err)
+    return false
+  }
+}
+
+// Shipment Tracking
+export async function markMedicineShipped(
+  conversationId: string,
+  trackingNumber?: string
+): Promise<boolean> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const updatePayload: any = {
+      shipment_status: 'shipped',
+      shipped_at: new Date().toISOString(),
+      tracking_number: trackingNumber || null
+    }
+
+    const { error } = await supabase
+      .from('medicine_conversations')
+      .update(updatePayload)
+      .eq('id', conversationId)
+      .eq('helper_id', user.id)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error marking medicine shipped:', err)
+    return false
+  }
+}
+
+export async function markMedicineReceived(conversationId: string): Promise<boolean> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { error } = await supabase
+      .from('medicine_conversations')
+      .update({
+        shipment_status: 'received',
+        received_at: new Date().toISOString()
+      })
+      .eq('id', conversationId)
+      .eq('requester_id', user.id)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error marking medicine received:', err)
+    return false
+  }
+}
+
+// Medicine Reviews
+export async function submitMedicineReview(payload: {
+  conversation_id: string
+  requester_id: string
+  helper_id: string
+  rating: number
+  comment: string
+}): Promise<DBMedicineReview | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const insertPayload: any = {
+      conversation_id: payload.conversation_id,
+      requester_id: payload.requester_id,
+      helper_id: payload.helper_id,
+      rating: payload.rating,
+      comment: payload.comment || null,
+      is_active: true
+    }
+
+    const { data, error } = await supabase
+      .from('medicine_reviews')
+      .insert(insertPayload)
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+
+    // Complete the conversation
+    await supabase
+      .from('medicine_conversations')
+      .update({
+        is_active: false,
+        completed_at: new Date().toISOString()
+      })
+      .eq('id', payload.conversation_id)
+
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error submitting medicine review:', err)
+    return undefined
+  }
+}
+
+export async function getMedicineReview(conversationId: string): Promise<DBMedicineReview | undefined> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_reviews')
+      .select('*')
+      .eq('conversation_id', conversationId)
+      .eq('is_active', true)
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error fetching medicine review:', err)
+    return undefined
+  }
+}
+
+export async function getMedicineReviewsForUser(userId: string): Promise<DBMedicineReview[]> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_reviews')
+      .select('*')
+      .or(`requester_id.eq.${userId},helper_id.eq.${userId}`)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error fetching medicine reviews for user:', err)
+    return []
+  }
+}
+
+// Admin: Get all medicine transactions with tracking
+export async function getAllMedicineTransactions(): Promise<any[]> {
+  try {
+    const { data, error } = await supabase
+      .from('medicine_conversations')
+      .select(`
+        *,
+        medicine_requests (id, title, medicine_name, user_id),
+        medicine_reviews (rating, comment)
+      `)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data || []
+  } catch (err) {
+    console.error('Error fetching medicine transactions:', err)
+    return []
+  }
+}
+
+// Real-time subscriptions
+export function subscribeToMessages(
+  conversationId: string,
+  callback: (payload: any) => void
+) {
+  return supabase
+    .channel(`messages:${conversationId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'medicine_messages',
+        filter: `conversation_id=eq.${conversationId}`
+      },
+      callback
+    )
+    .subscribe()
+}
+
+export function subscribeToConversation(
+  conversationId: string,
+  callback: (payload: any) => void
+) {
+  return supabase
+    .channel(`conversation:${conversationId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'medicine_conversations',
+        filter: `id=eq.${conversationId}`
+      },
+      callback
+    )
+    .subscribe()
 }
 
 // Stats
