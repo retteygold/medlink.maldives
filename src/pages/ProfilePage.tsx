@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
-type UserRole = 'need_service' | 'provide_service' | ''
+type UserRole = 'need_service' | 'provide_service' | 'both' | ''
 
 export default function ProfilePage() {
   const navigate = useNavigate()
@@ -89,6 +89,8 @@ export default function ProfilePage() {
                     ? 'Role: Request medicine help'
                     : role === 'provide_service'
                       ? 'Role: Provide medicine help'
+                      : role === 'both'
+                        ? 'Role: Request + Provide medicine help'
                       : 'Role: Not set'
                   : 'Sign in to request or provide medicine help'}
               </div>

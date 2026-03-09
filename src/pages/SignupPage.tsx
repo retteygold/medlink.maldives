@@ -4,13 +4,15 @@ import { supabase } from '../lib/supabase'
 
 type UserRole = 'need_service' | 'provide_service'
 
+type MedicineHelpRole = UserRole | 'both'
+
 export default function SignupPage() {
   const navigate = useNavigate()
   const location = useLocation() as any
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [role, setRole] = useState<UserRole>('need_service')
+  const [role, setRole] = useState<MedicineHelpRole>('need_service')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -107,7 +109,7 @@ export default function SignupPage() {
         <div className="mt-6 flex items-center gap-4">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Create Account</h1>
-            <p className="text-white/80 text-sm mt-1">Choose your role for Medicine Help</p>
+            <p className="text-white/80 text-sm mt-1">Choose how you want to use Medicine Help</p>
           </div>
           <img
             src="/images/storyset/Doctors-cuate.svg"
@@ -148,6 +150,17 @@ export default function SignupPage() {
                 >
                   <div className="font-bold text-gray-800">Help others bring medicine</div>
                   <div className="text-xs text-gray-500 mt-1">I can purchase abroad and deliver</div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setRole('both')}
+                  className={`p-4 rounded-2xl border text-left transition-colors ${
+                    role === 'both' ? 'border-medical-500 bg-medical-50' : 'border-gray-200 bg-white hover:bg-gray-50'
+                  }`}
+                >
+                  <div className="font-bold text-gray-800">Both</div>
+                  <div className="text-xs text-gray-500 mt-1">I may request help and also help others</div>
                 </button>
               </div>
             </div>

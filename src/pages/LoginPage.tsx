@@ -9,7 +9,10 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [resending, setResending] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice2, setNotice2] = useState<string | null>(null)
+  const [showResend, setShowResend] = useState(false)
   const notice = (location.state?.notice as string | undefined) || null
 
   function friendlyAuthError(err: any): string {
@@ -26,6 +29,10 @@ export default function LoginPage() {
 
     if (/invalid login credentials/i.test(message)) {
       return 'Invalid email or password.'
+    }
+
+    if (/email not confirmed/i.test(message)) {
+      return 'Email not confirmed. Please check your inbox (and spam) for the confirmation link.'
     }
 
     if (message) return message
@@ -55,6 +62,8 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setNotice2(null)
+    setShowResend(false)
 
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: email.trim(),
@@ -63,12 +72,39 @@ export default function LoginPage() {
 
     if (signInError) {
       setError(friendlyAuthError(signInError))
+      const message = typeof (signInError as any)?.message === 'string' ? (signInError as any).message : ''
+      if (/email not confirmed/i.test(message)) {
+        setShowResend(true)
+      }
       setLoading(false)
       return
     }
 
     const from = location.state?.from?.pathname || '/profile'
     navigate(from, { replace: true })
+  }
+
+  async function onResendConfirmation() {
+    const cleanEmail = email.trim()
+    if (!cleanEmail) return
+
+    setResending(true)
+    setError(null)
+    setNotice2(null)
+
+    const { error: resendError } = await supabase.auth.resend({
+      type: 'signup',
+      email: cleanEmail
+    })
+
+    if (resendError) {
+      setError(friendlyAuthError(resendError))
+      setResending(false)
+      return
+    }
+
+    setNotice2('Confirmation email sent. Please check your inbox (and spam) and open the link to confirm your email.')
+    setResending(false)
   }
 
   return (
@@ -106,10 +142,27 @@ export default function LoginPage() {
             </div>
           )}
 
+          {notice2 && (
+            <div className="mb-4 bg-green-50 border border-green-200 text-green-700 rounded-xl p-3 text-sm">
+              {notice2}
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 bg-red-50 border border-red-200 text-red-700 rounded-xl p-3 text-sm">
               {error}
             </div>
+          )}
+
+          {showResend && (
+            <button
+              type="button"
+              onClick={onResendConfirmation}
+              disabled={resending || !email.trim()}
+              className="w-full mb-4 btn-secondary disabled:opacity-50"
+            >
+              {resending ? 'Sending confirmation email...' : 'Resend confirmation email'}
+            </button>
           )}
 
           <form onSubmit={onSubmit} className="space-y-4">
