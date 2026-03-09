@@ -107,9 +107,9 @@ const translations = {
     'profile.contact': 'Contact Us',
 
     // Pharmacy Finder
-    'pharmacyFinder.title': 'Pharmacy Finder',
-    'pharmacyFinder.subtitle': 'Upload a prescription/medicine photo and we’ll help find a pharmacy.',
-    'pharmacyFinder.notesPlaceholder': 'Optional notes (medicine name, dosage, where you searched, etc.)',
+    'pharmacyFinder.title': 'Not sure which pharmacy has your medicine?',
+    'pharmacyFinder.subtitle': 'Upload a prescription or medicine photo. Optional: write the medicine name/brand.',
+    'pharmacyFinder.notesPlaceholder': 'Medicine name / brand (optional)',
     'pharmacyFinder.uploadButton': 'Upload Prescription / Medicine Photo',
     'pharmacyFinder.uploading': 'Uploading...',
     'pharmacyFinder.latestStatus': 'Latest Status',
@@ -249,9 +249,9 @@ const translations = {
     'profile.contact': 'ކޮންޓެކްޓް އަސް',
 
     // Pharmacy Finder
-    'pharmacyFinder.title': 'ފަރުމަސީ ހޯދާ',
-    'pharmacyFinder.subtitle': 'ރެސިޕީ/މެޑިސިން ފޮޓޯ އަޕްލޯޑް ކޮށް ފަރުމަސީއެއް ހޯދައިދެން.',
-    'pharmacyFinder.notesPlaceholder': 'އިންތިޒާމީ ނޯޓް (މެޑިސިން ނަން، ޑޮސޭޖް، ހޯދި ތަން އެއްޗެއް...)',
+    'pharmacyFinder.title': 'ކޮން ފަރުމަސީއަކީ މެޑިސިން ހުރި ނޭނގޭތަ؟',
+    'pharmacyFinder.subtitle': 'ރެސިޕީ ނުވަތަ މެޑިސިން ފޮޓޯ އަޕްލޯޑް ކުރޭ. އިޚްތިޔާރީ: މެޑިސިން ނަން/ބްރޭންޑް ލިޔޭ.',
+    'pharmacyFinder.notesPlaceholder': 'މެޑިސިން ނަން / ބްރޭންޑް (އިޚްތިޔާރީ)',
     'pharmacyFinder.uploadButton': 'ރެސިޕީ / މެޑިސިން ފޮޓޯ އަޕްލޯޑް',
     'pharmacyFinder.uploading': 'އަޕްލޯޑް ކުރަން...',
     'pharmacyFinder.latestStatus': 'އެންމެ އާ ހާލަތް',

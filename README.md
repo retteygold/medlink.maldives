@@ -22,8 +22,9 @@
   - Post medicine requests with prescription + optional previous medicine photo
   - Browse requests and open request details
   - 1-to-1 chat between requester and helper
-- **🏪 Pharmacy Finder** (requires login)
-  - Upload a prescription/medicine photo and create a request
+- **🏪 Not sure which pharmacy has your medicine?** (requires login)
+  - Upload a prescription or medicine photo
+  - Optionally add medicine name/brand
   - Providers/admins can answer with pharmacy name, phone, location, and availability
   - Fallback guidance to share via Viber when urgent
 - **🔐 User Auth** (email/password)

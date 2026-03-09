@@ -25,7 +25,7 @@
 - **Visual**: Community Q&A – ask a health question, view answers
 - **Voiceover**: “Ask health questions and get answers from the community – all in one place.”
 
-## Medicine Help (105–210s)
+## Medicine Help (105–180s)
 
 - **Visual**: Home screen → tap **Medicine Help** card
 - **Voiceover**: “Need medicine from abroad? MedLink includes a Medicine Help feature to connect requesters with helpers.”
@@ -48,7 +48,24 @@
 - **Visual**: Requester views chats and replies
 - **Voiceover**: “Requesters can manage multiple chats and respond from the request screen.”
 
-## Admin Dashboard (210–255s)
+## Not sure which pharmacy has your medicine? (180–240s)
+
+- **Visual**: Home screen → tap **Not sure which pharmacy has your medicine?**
+- **Voiceover**: “Can’t find your medicine? Upload a prescription or medicine photo, add the medicine name if you know it, and we’ll help you find a pharmacy that has it in stock.”
+
+- **Visual**: Upload image → optionally type medicine name/brand → submit
+- **Voiceover**: “It’s quick and simple. Just upload and optionally add the medicine name or brand.”
+
+- **Visual**: Request shows as “open” → later shows pharmacy answer with availability
+- **Voiceover**: “Providers and admins will respond with the pharmacy name, phone, location, and whether it’s in stock.”
+
+- **Visual**: Viber fallback message displayed
+- **Voiceover**: “If you need urgent help, you can also share the image via Viber to Shikavathi Chatline at plus 7951400.”
+
+- **Visual**: Provider/admin inbox → view open requests → fill pharmacy details → submit answer
+- **Voiceover**: “For providers and admins, a dedicated inbox lets you view requests and respond quickly.”
+
+## Admin Dashboard (240–285s)
 
 - **Visual**: Go to `/admin` → login
 - **Voiceover**: “Admin access is restricted to authorized accounts via Supabase.”

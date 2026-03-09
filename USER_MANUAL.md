@@ -12,7 +12,7 @@
 8. [Language Toggle](#language-toggle)
 9. [PWA Installation](#pwa-installation)
 10. [Medicine Help](#medicine-help)
-11. [Pharmacy Finder](#pharmacy-finder)
+11. [Not sure which pharmacy has your medicine?](#not-sure-which-pharmacy-has-your-medicine)
 12. [Account & Login](#account--login)
 13. [Admin Dashboard](#admin-dashboard)
 14. [Troubleshooting](#troubleshooting)
@@ -283,15 +283,15 @@ Medicine Help is a community feature to request medicine that is not available l
 
 ---
 
-## Pharmacy Finder
+## Not sure which pharmacy has your medicine?
 
-Pharmacy Finder helps you find a pharmacy that has a medicine in stock by uploading a prescription or medicine photo.
+This feature helps you find a pharmacy that has your medicine in stock by uploading a prescription or medicine photo.
 
 ### How to Use
 
-1. From the Home screen, tap **Pharmacy Finder**
-2. Add optional notes (medicine name, dosage, where you searched)
-3. Upload a prescription/medicine photo
+1. From the Home screen, tap **Not sure which pharmacy has your medicine?**
+2. Optionally add the medicine name or brand
+3. Upload a prescription or medicine photo
 4. Wait for a provider/admin to respond with:
    - Pharmacy name
    - Phone

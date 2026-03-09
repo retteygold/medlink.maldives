@@ -20,6 +20,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.3.1] – 2026-03-10
+
+### Added
+- **Not sure which pharmacy has your medicine?** (renamed from Pharmacy Finder)
+  - New routes: `/pharmacy-finder`, `/pharmacy-finder/inbox`
+  - Upload prescription or medicine photo with optional medicine name/brand
+  - Providers/admins can answer with pharmacy details (name, phone, location, availability)
+  - Viber fallback for urgent requests: Shikavathi Chatline +7951400
+  - Bilingual support (English/Dhivehi)
+- **Visitor Analytics** (admin-only)
+  - New table `app_visits` for logging page visits
+  - Admin dashboard shows: total visits, unique visitors, logged-in vs anonymous
+  - Detailed visit log table with user agent and timestamp
+
+### Changed
+- **Pharmacy Finder renamed** to "Not sure which pharmacy has your medicine?"
+  - Updated all UI text, translations (EN/DV), docs, and video script
+  - Simplified form: image upload + optional medicine name/brand only
+
+---
+
 ## [1.3.0] – 2026-03-09
 
 ### Added

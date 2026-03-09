@@ -1148,7 +1148,97 @@ export function subscribeToConversation(
     .subscribe()
 }
 
-// Stats
+// Visitor Analytics Types
+export interface AppVisit {
+  id: string
+  created_at: string
+  path: string
+  user_id: string | null
+  session_id: string | null
+  user_agent: string | null
+  referrer: string | null
+}
+
+export interface VisitAnalytics {
+  totalVisits: number
+  uniqueVisitors: number
+  loggedInVisits: number
+  anonymousVisits: number
+}
+
+// Log a page visit
+export async function logAppVisit(
+  path: string,
+  sessionId: string,
+  userAgent?: string,
+  referrer?: string
+): Promise<boolean> {
+  const { data: { session } } = await supabase.auth.getSession()
+  const userId = session?.user?.id || null
+
+  const { error } = await supabase.from('app_visits').insert({
+    path,
+    user_id: userId,
+    session_id: sessionId,
+    user_agent: userAgent?.slice(0, 500),
+    referrer: referrer?.slice(0, 500)
+  })
+
+  if (error) {
+    console.error('Error logging visit:', error)
+    return false
+  }
+  return true
+}
+
+// Get visit analytics (admin only)
+export async function getVisitAnalytics(
+  startDate?: string,
+  endDate?: string
+): Promise<VisitAnalytics> {
+  let query = supabase.from('app_visits').select('*')
+
+  if (startDate) {
+    query = query.gte('created_at', startDate)
+  }
+  if (endDate) {
+    query = query.lte('created_at', endDate)
+  }
+
+  const { data, error } = await query
+
+  if (error || !data) {
+    console.error('Error fetching visit analytics:', error)
+    return { totalVisits: 0, uniqueVisitors: 0, loggedInVisits: 0, anonymousVisits: 0 }
+  }
+
+  const totalVisits = data.length
+  const uniqueSessions = new Set(data.map((v: AppVisit) => v.session_id).filter(Boolean)).size
+  const loggedInVisits = data.filter((v: AppVisit) => v.user_id).length
+  const anonymousVisits = totalVisits - loggedInVisits
+
+  return {
+    totalVisits,
+    uniqueVisitors: uniqueSessions,
+    loggedInVisits,
+    anonymousVisits
+  }
+}
+
+// Get recent visits (admin only)
+export async function getRecentVisits(limit: number = 100): Promise<AppVisit[]> {
+  const { data, error } = await supabase
+    .from('app_visits')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) {
+    console.error('Error fetching recent visits:', error)
+    return []
+  }
+  return data || []
+}
 export async function getDatabaseStats() {
   try {
     // Use working functions instead of count queries

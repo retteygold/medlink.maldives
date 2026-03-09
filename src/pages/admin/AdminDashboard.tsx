@@ -8,9 +8,11 @@ import {
   Plus,
   ChevronRight,
   Activity,
-  MessageCircle
+  MessageCircle,
+  Eye,
+  X
 } from 'lucide-react'
-import { getDatabaseStats } from '../../lib/dataService'
+import { getDatabaseStats, getVisitAnalytics, getRecentVisits, type AppVisit, type VisitAnalytics } from '../../lib/dataService'
 import { supabase } from '../../lib/supabase'
 
 export default function AdminDashboard() {
@@ -21,8 +23,18 @@ export default function AdminDashboard() {
     specialties: 0
   })
 
+  const [visitStats, setVisitStats] = useState<VisitAnalytics>({
+    totalVisits: 0,
+    uniqueVisitors: 0,
+    loggedInVisits: 0,
+    anonymousVisits: 0
+  })
+  const [recentVisits, setRecentVisits] = useState<AppVisit[]>([])
+  const [showVisitors, setShowVisitors] = useState(false)
+
   useEffect(() => {
     loadStats()
+    loadVisitStats()
   }, [])
 
   async function loadStats() {
@@ -32,6 +44,13 @@ export default function AdminDashboard() {
       doctors: data.total_doctors,
       specialties: data.total_specialties
     })
+  }
+
+  async function loadVisitStats() {
+    const analytics = await getVisitAnalytics()
+    setVisitStats(analytics)
+    const visits = await getRecentVisits(50)
+    setRecentVisits(visits)
   }
 
   const menuItems = [
@@ -74,6 +93,14 @@ export default function AdminDashboard() {
       count: 0,
       path: '/admin/medicine-help',
       color: 'bg-pink-500'
+    },
+    {
+      title: 'Visitors',
+      description: 'View visitor analytics and logs',
+      icon: Eye,
+      count: visitStats.totalVisits,
+      path: '#visitors',
+      color: 'bg-purple-500'
     }
   ]
 
@@ -127,7 +154,7 @@ export default function AdminDashboard() {
         {menuItems.map((item) => (
           <button
             key={item.title}
-            onClick={() => navigate(item.path)}
+            onClick={() => item.path === '#visitors' ? setShowVisitors(true) : navigate(item.path)}
             className="w-full bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-all flex items-center gap-4"
           >
             <div className={`${item.color} text-white p-3 rounded-xl`}>
@@ -165,6 +192,75 @@ export default function AdminDashboard() {
           </button>
         </div>
       </div>
+
+      {/* Visitors Modal */}
+      {showVisitors && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-4">
+          <div className="bg-white w-full max-w-2xl max-h-[80vh] rounded-t-2xl sm:rounded-2xl overflow-hidden flex flex-col">
+            <div className="flex justify-between items-center p-4 border-b">
+              <h2 className="text-lg font-bold">Visitor Analytics</h2>
+              <button onClick={() => setShowVisitors(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-4 overflow-y-auto flex-1">
+              {/* Stats Cards */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+                <div className="bg-purple-50 rounded-xl p-3">
+                  <Eye size={20} className="text-purple-600 mb-1" />
+                  <p className="text-2xl font-bold text-purple-700">{visitStats.totalVisits}</p>
+                  <p className="text-xs text-purple-600">Total Visits</p>
+                </div>
+                <div className="bg-blue-50 rounded-xl p-3">
+                  <Users size={20} className="text-blue-600 mb-1" />
+                  <p className="text-2xl font-bold text-blue-700">{visitStats.uniqueVisitors}</p>
+                  <p className="text-xs text-blue-600">Unique Visitors</p>
+                </div>
+                <div className="bg-green-50 rounded-xl p-3">
+                  <Activity size={20} className="text-green-600 mb-1" />
+                  <p className="text-2xl font-bold text-green-700">{visitStats.loggedInVisits}</p>
+                  <p className="text-xs text-green-600">Logged-in Visits</p>
+                </div>
+                <div className="bg-gray-50 rounded-xl p-3">
+                  <Users size={20} className="text-gray-600 mb-1" />
+                  <p className="text-2xl font-bold text-gray-700">{visitStats.anonymousVisits}</p>
+                  <p className="text-xs text-gray-600">Anonymous Visits</p>
+                </div>
+              </div>
+
+              {/* Recent Visits Table */}
+              <h3 className="font-semibold text-gray-800 mb-3">Recent Visits</h3>
+              <div className="space-y-2">
+                {recentVisits.length === 0 ? (
+                  <p className="text-gray-500 text-sm">No visits recorded yet.</p>
+                ) : (
+                  recentVisits.map((visit) => (
+                    <div key={visit.id} className="bg-gray-50 rounded-lg p-3 text-sm border border-gray-100">
+                      <div className="flex justify-between items-start">
+                        <span className="font-medium text-gray-800">{visit.path}</span>
+                        <span className="text-xs text-gray-500">
+                          {new Date(visit.created_at).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1 flex items-center gap-2">
+                        {visit.user_id ? (
+                          <span className="text-green-600 font-medium">● Logged in</span>
+                        ) : (
+                          <span className="text-gray-400">● Anonymous</span>
+                        )}
+                        {visit.user_agent && (
+                          <span className="truncate">{visit.user_agent.slice(0, 60)}...</span>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

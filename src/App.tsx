@@ -30,10 +30,14 @@ import AdminMedicineHelp from './pages/admin/AdminMedicineHelp'
 import RequireAdmin from './components/RequireAdmin'
 import RequireAuth from './components/RequireAuth'
 import { Footer } from './components/Footer'
+import { useVisitLogger } from './hooks/useVisitLogger'
 
 function App() {
   const location = useLocation()
   const navigate = useNavigate()
+  
+  // Log page visits for analytics
+  useVisitLogger()
 
   useEffect(() => {
     const hash = (location.hash || '').trim()
