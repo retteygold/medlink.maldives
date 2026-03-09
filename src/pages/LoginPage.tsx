@@ -10,10 +10,13 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [resending, setResending] = useState(false)
+  const [resetting, setResetting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [notice2, setNotice2] = useState<string | null>(null)
   const [showResend, setShowResend] = useState(false)
   const notice = (location.state?.notice as string | undefined) || null
+
+  const resetRedirectTo = `${window.location.origin}/reset-password`
 
   function friendlyAuthError(err: any): string {
     const status = err?.status
@@ -107,6 +110,28 @@ export default function LoginPage() {
     setResending(false)
   }
 
+  async function onResetPassword() {
+    const cleanEmail = email.trim()
+    if (!cleanEmail) return
+
+    setResetting(true)
+    setError(null)
+    setNotice2(null)
+
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(cleanEmail, {
+      redirectTo: resetRedirectTo
+    })
+
+    if (resetError) {
+      setError(friendlyAuthError(resetError))
+      setResetting(false)
+      return
+    }
+
+    setNotice2('Password reset email sent. Please open the link in your email to set a new password.')
+    setResetting(false)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="gradient-header px-4 pt-12 pb-8 rounded-b-3xl">
@@ -191,6 +216,15 @@ export default function LoginPage() {
                 placeholder="Your password"
               />
             </div>
+
+            <button
+              type="button"
+              onClick={onResetPassword}
+              disabled={resetting || !email.trim()}
+              className="w-full btn-secondary disabled:opacity-50"
+            >
+              {resetting ? 'Sending reset email...' : 'Forgot password? Reset'}
+            </button>
 
             <button type="submit" disabled={loading} className="w-full btn-primary disabled:opacity-50">
               {loading ? 'Signing in...' : 'Sign in'}

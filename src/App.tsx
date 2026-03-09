@@ -7,6 +7,7 @@ import HospitalsPage from './pages/HospitalsPage'
 import ProfilePage from './pages/ProfilePage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import DoctorDetailPage from './pages/DoctorDetailPage'
 import HospitalDetailPage from './pages/HospitalDetailPage'
 import SmartMatcherPage from './pages/SmartMatcherPage'
@@ -47,6 +48,7 @@ function App() {
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/doctor/:id" element={<DoctorDetailPage />} />
           <Route path="/hospital/:id" element={<HospitalDetailPage />} />
           <Route path="/smart-match" element={<SmartMatcherPage />} />

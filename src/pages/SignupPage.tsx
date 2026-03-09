@@ -12,6 +12,7 @@ export default function SignupPage() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [role, setRole] = useState<MedicineHelpRole>('need_service')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -59,6 +60,12 @@ export default function SignupPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.')
+      setLoading(false)
+      return
+    }
 
     const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email: email.trim(),
@@ -188,6 +195,19 @@ export default function SignupPage() {
                 required
                 autoComplete="new-password"
                 placeholder="Create a password"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="input-field"
+                required
+                autoComplete="new-password"
+                placeholder="Confirm your password"
               />
             </div>
 
