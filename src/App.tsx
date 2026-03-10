@@ -32,10 +32,13 @@ import RequireAdmin from './components/RequireAdmin'
 import RequireAuth from './components/RequireAuth'
 import { Footer } from './components/Footer'
 import { useVisitLogger } from './hooks/useVisitLogger'
+import { useLanguage } from './lib/languageContext'
 
 function App() {
   const location = useLocation()
   const navigate = useNavigate()
+  const { language } = useLanguage()
+  const isRTL = language === 'dv'
   
   // Log page visits for analytics
   useVisitLogger()
@@ -67,7 +70,7 @@ function App() {
   const isAdmin = location.pathname.startsWith('/admin')
 
   return (
-    <div className="min-h-screen bg-gray-50 max-w-md mx-auto relative shadow-2xl">
+    <div className={`min-h-screen bg-gray-50 max-w-md mx-auto relative shadow-2xl ${isRTL ? 'rtl-layout' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Main Content */}
       <main className={`${showNav && !isAdmin ? 'pb-20' : ''} safe-top`}>
         <Routes>
@@ -142,6 +145,7 @@ function App() {
 
 function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label: string }) {
   const location = useLocation()
+  const { language } = useLanguage()
   const isActive = location.pathname === to
 
   return (
@@ -152,7 +156,7 @@ function NavLink({ to, icon, label }: { to: string; icon: React.ReactNode; label
       }`}
     >
       {icon}
-      <span className="text-xs mt-1 font-medium">{label}</span>
+      <span className={`text-xs mt-1 font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{label}</span>
     </Link>
   )
 }

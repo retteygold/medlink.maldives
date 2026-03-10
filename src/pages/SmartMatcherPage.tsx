@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Sparkles, MapPin, Star, AlertTriangle } from 'lucide-react'
 import type { Doctor } from '../types'
 import { getDoctors } from '../lib/dataService'
+import { useLanguage } from '../lib/languageContext'
 
 const symptomKeywords: Record<string, { specialties: string[]; urgency: string; description: string }> = {
   'chest pain': { specialties: ['Cardiology'], urgency: 'emergency', description: 'Chest pain requires immediate cardiac evaluation' },
@@ -47,6 +48,8 @@ type PatientContext = {
 
 export default function SmartMatcherPage() {
   const navigate = useNavigate()
+  const { t, language } = useLanguage()
+  const isRTL = language === 'dv'
   const [symptoms, setSymptoms] = useState('')
   const [symptomDraft, setSymptomDraft] = useState('')
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([])
@@ -234,29 +237,29 @@ export default function SmartMatcherPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pb-20">
+    <div className={`min-h-screen bg-gray-50 pb-20 ${isRTL ? 'rtl-layout' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="gradient-header px-4 pt-12 pb-6">
         <div className="flex items-center justify-between mb-2">
           <button
             type="button"
             onClick={() => (window.history.length > 1 ? navigate(-1) : navigate('/'))}
-            className="text-white/80"
+            className={`text-white/80 ${language === 'dv' ? 'dhivehi-font' : ''}`}
           >
-            ← Back
+            {language === 'dv' ? 'ފަހަތަށް' : '← Back'}
           </button>
           <button
             type="button"
             onClick={() => navigate('/')}
-            className="text-white/80"
+            className={`text-white/80 ${language === 'dv' ? 'dhivehi-font' : ''}`}
           >
-            Home
+            {language === 'dv' ? 'މެއިން' : 'Home'}
           </button>
         </div>
         <div className="flex items-center gap-4 mb-4">
           <img src="/images/logo.png" alt="MedLink" className="w-12 h-12 rounded-xl" />
           <div>
-            <h1 className="text-xl font-bold text-white">Smart Doctor Finder</h1>
-            <p className="text-white/80 text-sm">Describe your symptoms and we'll find the right specialist</p>
+            <h1 className={`text-xl font-bold text-white ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('smartMatch.title')}</h1>
+            <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('smartMatch.subtitle')}</p>
           </div>
         </div>
         <div className="flex justify-center">
@@ -270,8 +273,8 @@ export default function SmartMatcherPage() {
 
       <div className="px-4 -mt-3">
         <div className="card p-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            What symptoms are you experiencing?
+          <label className={`block text-sm font-medium text-gray-700 mb-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+            {t('smartMatch.label')}
           </label>
           <div className="flex gap-2 mb-3">
             <div className="flex-1">
@@ -285,8 +288,8 @@ export default function SmartMatcherPage() {
                   }
                 }}
                 list="symptom-options"
-                placeholder="Select a symptom (dropdown)"
-                className="input-field"
+                placeholder={t('smartMatch.placeholder')}
+                className={`input-field ${language === 'dv' ? 'dhivehi-font' : ''}`}
               />
               <datalist id="symptom-options">
                 {commonSymptomOptions.map((opt) => (
@@ -297,9 +300,9 @@ export default function SmartMatcherPage() {
             <button
               type="button"
               onClick={addSymptomFromDraft}
-              className="px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold"
+              className={`px-4 py-2 rounded-xl bg-gray-900 text-white text-sm font-semibold ${language === 'dv' ? 'dhivehi-font' : ''}`}
             >
-              Add
+              {language === 'dv' ? 'އިތުރުކުރޭ' : 'Add'}
             </button>
           </div>
 
@@ -322,16 +325,16 @@ export default function SmartMatcherPage() {
           <textarea
             value={symptoms}
             onChange={(e) => setSymptoms(e.target.value)}
-            placeholder="Example: I've been having chest pain and shortness of breath..."
-            className="input-field min-h-[120px] resize-none"
+            placeholder={t('smartMatch.placeholder')}
+            className={`input-field min-h-[120px] resize-none ${language === 'dv' ? 'dhivehi-font' : ''}`}
           />
 
           <button
             type="button"
             onClick={() => setShowDetails(v => !v)}
-            className="w-full mt-3 px-4 py-2 rounded-xl bg-gray-100 text-gray-800 text-sm font-semibold"
+            className={`w-full mt-3 px-4 py-2 rounded-xl bg-gray-100 text-gray-800 text-sm font-semibold ${language === 'dv' ? 'dhivehi-font' : ''}`}
           >
-            {showDetails ? 'Hide details' : 'Add details (improves accuracy)'}
+            {showDetails ? (language === 'dv' ? 'ތަފްސީލް ފޮރުވާ' : 'Hide details') : t('smartMatch.subtitle')}
           </button>
 
           {showDetails && (
@@ -440,12 +443,12 @@ export default function SmartMatcherPage() {
           <button
             onClick={analyzeSymptoms}
             disabled={!symptoms.trim() || isAnalyzing}
-            className="btn-primary w-full mt-3 disabled:opacity-50"
+            className={`btn-primary w-full mt-3 disabled:opacity-50 ${language === 'dv' ? 'dhivehi-font' : ''}`}
           >
             {isAnalyzing ? (
-              <><Sparkles className="animate-pulse" size={20} /> Analyzing...</>
+              <><Sparkles className="animate-pulse" size={20} /> {language === 'dv' ? 'ހޯދަން...' : 'Analyzing...'}</>
             ) : (
-              <><Sparkles size={20} /> Find Doctors</>
+              <><Sparkles size={20} /> {t('smartMatch.button')}</>
             )}
           </button>
         </div>

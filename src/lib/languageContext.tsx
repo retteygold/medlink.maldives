@@ -221,7 +221,7 @@ const translations = {
     'hospital.viewAllDoctors': 'އެއްކޮން ބެލުމަށް',
     
     // Smart Match
-    'smartMatch.title': 'Smart Doctor Finder',
+    'smartMatch.title': 'ޖާދުވީ ޑޮކްޓަރ ހޯދާ',
     'smartMatch.subtitle': 'ވާ އުނދަގޫ ތަށް ހިއްސާ ކޮއްލައްވާ، އެކަށީގެންވާ ޑޮކްޓަރ ހޯދުމަށް އެހީ ވެދޭނަން',
     'smartMatch.label': 'ކޮންކަހަލަ އުނދަގޫ ތަކެށްތޯ ވަނީ؟',
     'smartMatch.placeholder': 'އަޅުގަނޑު ނޭވާ ހިއްލާފަ މޭގަ ރިއްސަނީ....',
