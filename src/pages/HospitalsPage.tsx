@@ -217,31 +217,31 @@ export default function HospitalsPage() {
             <div className="flex items-start gap-3">
               <HospitalAvatar hospital={hospital} />
               <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font text-right' : ''}`}>
                   {language === 'dv' ? (hospital.name_dv || transliterateToDhivehi(hospital.name)) : hospital.name}
                 </h3>
-                <p className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                <p className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font text-right' : ''}`}>
                   {language === 'dv'
                     ? (hospital.address_dv || transliterateToDhivehi(hospital.address || ''))
                     : hospital.address}
                 </p>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className={`flex flex-wrap gap-2 mt-2 ${language === 'dv' ? 'justify-end' : ''}`}>
                   {hospital.has_emergency && (
-                    <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium">
-                      24/7 Emergency
+                    <span className={`text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                      {language === 'dv' ? '24/7 އިމަޖެންސީ' : '24/7 Emergency'}
                     </span>
                   )}
                   {hospital.has_pharmacy && (
-                    <span className="text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium">
-                      Pharmacy
+                    <span className={`text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                      {language === 'dv' ? 'ފާރްމަސީ' : 'Pharmacy'}
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-3 mt-2">
+                <div className={`flex items-center gap-3 mt-2 ${language === 'dv' ? 'flex-row-reverse justify-end' : ''}`}>
                   <div className="flex items-center gap-1">
                     <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-medium">{hospital.rating}</span>
-                    <span className="text-xs text-gray-400">({hospital.review_count} reviews)</span>
+                    <span className="text-sm font-medium">{typeof hospital.rating === 'number' ? hospital.rating.toFixed(1) : Number(hospital.rating || 0).toFixed(1)}</span>
+                    <span className="text-xs text-gray-400">({hospital.review_count || 0} {language === 'dv' ? 'ރިވިއޫ' : 'reviews'})</span>
                   </div>
                 </div>
               </div>
