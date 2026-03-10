@@ -90,3 +90,40 @@ export function transliterateToDhivehi(text: string): string {
   
   return result || text; // Fallback to original if empty
 }
+
+// Reverse mapping for Dhivehi to English (for search support)
+const reverseTransliterationMap: Record<string, string> = Object.fromEntries(
+  Object.entries(transliterationMap).map(([en, dv]) => [dv, en])
+);
+
+// Common Thaana characters to Latin mapping
+const thaanaToLatinMap: Record<string, string> = {
+  'ަ': 'a', 'ާ': 'aa', 'ި': 'i', 'ީ': 'ee', 'ު': 'u', 'ޫ': 'oo',
+  'ެ': 'e', 'ޭ': 'ey', 'ޮ': 'o', 'ޯ': 'oa',
+  'ހ': 'h', 'ށ': 'sh', 'ނ': 'n', 'ރ': 'r', 'ބ': 'b', 'ޅ': 'lh',
+  'ކ': 'k', 'އ': 'a', 'ވ': 'v', 'މ': 'm', 'ފ': 'f', 'ދ': 'd',
+  'ތ': 't', 'ލ': 'l', 'ގ': 'g', 'ޏ': 'ng', 'ސ': 's', 'ޑ': 'd',
+  'ޒ': 'z', 'ޓ': 't', 'ޔ': 'y', 'ޕ': 'p', 'ޖ': 'j', 'ޗ': 'ch',
+  'ޘ': 'th', 'ޙ': 'h', 'ޚ': 'kh', 'ޛ': 'z', 'ޜ': 'th', 'ޝ': 's',
+  'ޞ': 's', 'ޟ': 'd', 'ޠ': 'th', 'ޡ': 'z', 'ޢ': 'a', 'ޤ': 'q',
+  'ޥ': 'w', 'ަް': '', 'ާް': '', 'ިް': '', 'ުް': '', 'ެް': '',
+  'ް': '', // sukun (no vowel)
+};
+
+export function transliterateFromDhivehi(text: string): string {
+  if (!text) return '';
+  
+  let result = '';
+  for (const char of text) {
+    result += thaanaToLatinMap[char] || char;
+  }
+  
+  return result || text;
+}
+
+// Check if text contains Thaana (Dhivehi) characters
+export function containsThaana(text: string): boolean {
+  if (!text) return false;
+  // Thaana Unicode range: U+0780 to U+07BF
+  return /[\u0780-\u07BF]/.test(text);
+}

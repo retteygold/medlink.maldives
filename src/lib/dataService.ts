@@ -1,5 +1,6 @@
 import { supabase } from './supabase'
 import type { Hospital, Doctor } from '../types'
+import { containsThaana, transliterateFromDhivehi } from './transliteration'
 
 
 // Database types (must match Supabase schema)
@@ -421,13 +422,36 @@ export async function getSpecialties(): Promise<string[]> {
 }
 
 // Search - supports both English and Dhivehi (name_dv, specialty_dv, address_dv)
+// When Dhivehi text is detected, it also transliterates and searches English fields
 export async function searchHospitals(query: string): Promise<Hospital[]> {
   try {
+    const queries = [query]
+    // If query contains Dhivehi, also search transliterated English
+    if (containsThaana(query)) {
+      const latinQuery = transliterateFromDhivehi(query)
+      if (latinQuery && latinQuery !== query) {
+        queries.push(latinQuery)
+      }
+    }
+    
+    // Build OR conditions for all queries across all fields
+    const conditions: string[] = []
+    for (const q of queries) {
+      const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_')
+      conditions.push(
+        `name.ilike.%${escaped}%`,
+        `address.ilike.%${escaped}%`,
+        `category.ilike.%${escaped}%`,
+        `name_dv.ilike.%${escaped}%`,
+        `address_dv.ilike.%${escaped}%`
+      )
+    }
+    
     const { data, error } = await supabase
       .from('hospitals')
       .select('*')
       .eq('is_active', true)
-      .or(`name.ilike.%${query}%,address.ilike.%${query}%,category.ilike.%${query}%,name_dv.ilike.%${query}%,address_dv.ilike.%${query}%`)
+      .or(conditions.join(','))
       .order('name')
     if (error) throw error
     return (data || []).map(transformHospital)
@@ -439,11 +463,34 @@ export async function searchHospitals(query: string): Promise<Hospital[]> {
 
 export async function searchDoctors(query: string): Promise<Doctor[]> {
   try {
+    const queries = [query]
+    // If query contains Dhivehi, also search transliterated English
+    if (containsThaana(query)) {
+      const latinQuery = transliterateFromDhivehi(query)
+      if (latinQuery && latinQuery !== query) {
+        queries.push(latinQuery)
+      }
+    }
+    
+    // Build OR conditions for all queries across all fields
+    const conditions: string[] = []
+    for (const q of queries) {
+      const escaped = q.replace(/%/g, '\\%').replace(/_/g, '\\_')
+      conditions.push(
+        `name.ilike.%${escaped}%`,
+        `specialty.ilike.%${escaped}%`,
+        `hospital_name.ilike.%${escaped}%`,
+        `name_dv.ilike.%${escaped}%`,
+        `specialty_dv.ilike.%${escaped}%`,
+        `hospital_name_dv.ilike.%${escaped}%`
+      )
+    }
+    
     const { data, error } = await supabase
       .from('doctors')
       .select('*')
       .eq('is_active', true)
-      .or(`name.ilike.%${query}%,specialty.ilike.%${query}%,hospital_name.ilike.%${query}%,name_dv.ilike.%${query}%,specialty_dv.ilike.%${query}%,hospital_name_dv.ilike.%${query}%`)
+      .or(conditions.join(','))
       .order('name')
     if (error) throw error
     return (data || []).map(transformDoctor)
