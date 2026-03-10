@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { MapPin, Star, Phone, Mail, Clock, ChevronLeft, Globe, Building2, Siren, Pill, FlaskConical, Stethoscope, Home, Navigation } from 'lucide-react'
 import type { Hospital, Doctor } from '../types'
 import { getHospitalById, getDoctors } from '../lib/dataService'
+import { useLanguage } from '../lib/languageContext'
+import { transliterateToDhivehi } from '../lib/transliteration'
 
 function slugifyFileName(value: string) {
   return value
@@ -29,6 +31,7 @@ function getHospitalMapsUrl(hospital: Hospital) {
 export default function HospitalDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { language } = useLanguage()
   const [hospital, setHospital] = useState<Hospital | null>(null)
   const [doctors, setDoctors] = useState<Doctor[]>([])
   const [loading, setLoading] = useState(true)
@@ -134,8 +137,12 @@ export default function HospitalDetailPage() {
             )}
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">{hospital.name}</h1>
-            <p className="text-white/80">{hospital.category}</p>
+            <h1 className={`text-2xl font-bold text-white ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? transliterateToDhivehi(hospital.name) : hospital.name}
+            </h1>
+            <p className={`text-white/80 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? transliterateToDhivehi(hospital.category) : hospital.category}
+            </p>
             <div className="flex items-center gap-1 mt-1">
               <Star size={16} className="text-yellow-300 fill-yellow-300" />
               <span className="text-white">{hospital.rating?.toFixed(1) || '4.0'}</span>
@@ -210,7 +217,9 @@ export default function HospitalDetailPage() {
             <MapPin size={20} className="text-medical-600 mt-0.5" />
             <div>
               <h3 className="font-bold text-gray-800">Address</h3>
-              <p className="text-gray-600 text-sm mt-1">{hospital.address}</p>
+              <p className={`text-gray-600 text-sm mt-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                {language === 'dv' ? transliterateToDhivehi(hospital.address || '') : hospital.address}
+              </p>
             </div>
           </div>
         </div>
@@ -231,8 +240,8 @@ export default function HospitalDetailPage() {
         <div className="card p-4">
           <div className="flex items-center gap-2 mb-4">
             <Stethoscope size={20} className="text-medical-600" />
-            <h3 className="font-bold text-gray-800">
-              Doctors at {hospital.name} ({doctors.length})
+            <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? `${transliterateToDhivehi(hospital.name)} ގެ ޑޮކްޓަރުން (${doctors.length})` : `Doctors at ${hospital.name} (${doctors.length})`}
             </h3>
           </div>
 
@@ -282,20 +291,15 @@ export default function HospitalDetailPage() {
                   className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                 >
                   <div className="w-12 h-12 bg-gradient-to-br from-medical-100 to-medical-200 rounded-full flex items-center justify-center">
-                    <span className="text-medical-700 text-sm font-bold">
-                      {doctor.name.split(' ').map(n => n[0]).join('')}
-                    </span>
+                    <span className="text-sm font-bold text-gray-700">{doctor.rating?.toFixed(1) || '4.0'}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h4 className="font-bold text-gray-800 truncate">{doctor.name}</h4>
-                    <p className="text-medical-600 text-sm">{doctor.specialty}</p>
-                    {doctor.qualifications && doctor.qualifications.length > 0 && (
-                      <p className="text-gray-500 text-xs mt-0.5">{doctor.qualifications[0]}</p>
-                    )}
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Star size={14} className="text-yellow-500 fill-yellow-500" />
-                    <span className="text-sm font-bold text-gray-700">{doctor.rating?.toFixed(1) || '4.0'}</span>
+                    <h4 className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                      {language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name}
+                    </h4>
+                    <p className={`text-medical-600 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                      {language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty}
+                    </p>
                   </div>
                 </a>
               ))}

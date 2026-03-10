@@ -3,6 +3,8 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { Star, Phone, Mail, Clock, ChevronLeft, Calendar, Award, Home, ExternalLink } from 'lucide-react'
 import type { Doctor } from '../types'
 import { getDoctorById } from '../lib/dataService'
+import { useLanguage } from '../lib/languageContext'
+import { transliterateToDhivehi } from '../lib/transliteration'
 
 function slugifyFileName(value: string) {
   return value
@@ -33,6 +35,7 @@ function buildGoogleSearchUrl(doctor: Doctor) {
 export default function DoctorDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { language } = useLanguage()
   const [doctor, setDoctor] = useState<Doctor | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -114,8 +117,12 @@ export default function DoctorDetailPage() {
             />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-white">{doctor.name}</h1>
-            <p className="text-white/80">{doctor.specialty}</p>
+            <h1 className={`text-2xl font-bold text-white ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name}
+            </h1>
+            <p className={`text-white/80 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty}
+            </p>
             <div className="flex items-center gap-1 mt-1">
               <Star size={16} className="text-yellow-300 fill-yellow-300" />
               <span className="text-white">{doctor.rating?.toFixed(1) || '4.0'}</span>
