@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity } from 'lucide-react'
+import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity, Building2 } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { getDoctors, getHospitals } from '../lib/dataService'
@@ -58,7 +58,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen pb-20">
+    <div className={`min-h-screen pb-20 ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="gradient-header px-4 pt-12 pb-8 rounded-b-3xl">
         <div className="flex justify-between items-center mb-4">
@@ -167,6 +167,36 @@ export default function HomePage() {
             <ChevronRight size={24} />
           </div>
         </Link>
+      </div>
+
+      {/* Quick Access - Hospitals & Doctors */}
+      <div className="px-4 mt-4">
+        <div className="grid grid-cols-2 gap-3">
+          <Link
+            to="/hospitals"
+            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center gap-3 hover:shadow-md transition-all"
+          >
+            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
+              <Building2 size={24} className="text-blue-600" />
+            </div>
+            <div className="min-w-0">
+              <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('nav.hospitals')}</h3>
+              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.viewAll')}</p>
+            </div>
+          </Link>
+          <Link
+            to="/doctors"
+            className="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center gap-3 hover:shadow-md transition-all"
+          >
+            <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shrink-0">
+              <Stethoscope size={24} className="text-green-600" />
+            </div>
+            <div className="min-w-0">
+              <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.title')}</h3>
+              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.viewAll')}</p>
+            </div>
+          </Link>
+        </div>
       </div>
 
       {/* Specialties */}
