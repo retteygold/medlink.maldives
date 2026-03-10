@@ -118,7 +118,7 @@ export default function SearchPage() {
                     {language === 'dv' ? (h.name_dv || transliterateToDhivehi(h.name)) : h.name}
                   </div>
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {(language === 'dv' ? transliterateToDhivehi(h.category) : h.category)} • {(language === 'dv' ? transliterateToDhivehi(h.address) : h.address)}
+                    {(language === 'dv' ? transliterateToDhivehi(h.category) : h.category)} • {(language === 'dv' ? (h.address_dv || transliterateToDhivehi(h.address)) : h.address)}
                   </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
@@ -147,7 +147,9 @@ export default function SearchPage() {
                     {language === 'dv' ? (d.name_dv || transliterateToDhivehi(d.name)) : d.name}
                   </div>
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {(language === 'dv' ? transliterateToDhivehi(d.specialty) : d.specialty)} • {(language === 'dv' ? (d.hospital_name_dv || transliterateToDhivehi(d.hospital_name)) : d.hospital_name)}
+                    {(language === 'dv'
+                      ? (d.specialty_dv || transliterateToDhivehi(d.specialty))
+                      : d.specialty)} • {(language === 'dv' ? (d.hospital_name_dv || transliterateToDhivehi(d.hospital_name)) : d.hospital_name)}
                   </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />

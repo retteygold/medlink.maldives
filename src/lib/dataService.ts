@@ -7,6 +7,7 @@ interface DBHospital {
   id: string
   name: string
   name_dv?: string | null
+  address_dv?: string | null
   registration_number: string | null
   operating_license_no: string | null
   address: string
@@ -111,6 +112,7 @@ interface DBDoctor {
   name: string
   name_dv?: string | null
   specialty: string
+  specialty_dv?: string | null
   hospital_id: string | null
   hospital_name: string
   hospital_name_dv?: string | null
@@ -145,6 +147,7 @@ function transformHospital(db: DBHospital): Hospital {
     registration_number: db.registration_number || '',
     operating_license_no: db.operating_license_no || '',
     address: db.address,
+    address_dv: db.address_dv || undefined,
     contact_phone: db.contact_phone || '',
     email: db.email || '',
     website: db.website || '',
@@ -197,6 +200,7 @@ function transformDoctor(db: DBDoctor): Doctor {
     name: db.name,
     name_dv: db.name_dv || undefined,
     specialty: db.specialty,
+    specialty_dv: db.specialty_dv || undefined,
     hospital_id: db.hospital_id || '',
     hospital_name: db.hospital_name,
     hospital_name_dv: db.hospital_name_dv || undefined,

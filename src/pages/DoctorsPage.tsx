@@ -187,7 +187,9 @@ export default function DoctorsPage() {
                       {language === 'dv' ? (doctor.name_dv || transliterateToDhivehi(doctor.name)) : doctor.name}
                     </h3>
                     <p className={`text-medical-600 font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                      {language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty}
+                      {language === 'dv'
+                        ? (doctor.specialty_dv || transliterateToDhivehi(doctor.specialty))
+                        : doctor.specialty}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 bg-yellow-50 px-2 py-1 rounded-lg">

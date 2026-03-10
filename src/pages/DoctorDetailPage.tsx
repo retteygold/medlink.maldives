@@ -121,7 +121,9 @@ export default function DoctorDetailPage() {
               {language === 'dv' ? (doctor.name_dv || transliterateToDhivehi(doctor.name)) : doctor.name}
             </h1>
             <p className={`text-white/80 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty}
+              {language === 'dv'
+                ? (doctor.specialty_dv || transliterateToDhivehi(doctor.specialty))
+                : doctor.specialty}
             </p>
             <div className="flex items-center gap-1 mt-1">
               <Star size={16} className="text-yellow-300 fill-yellow-300" />

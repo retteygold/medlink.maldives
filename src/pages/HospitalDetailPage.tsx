@@ -218,7 +218,9 @@ export default function HospitalDetailPage() {
             <div>
               <h3 className="font-bold text-gray-800">Address</h3>
               <p className={`text-gray-600 text-sm mt-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                {language === 'dv' ? transliterateToDhivehi(hospital.address || '') : hospital.address}
+                {language === 'dv'
+                  ? (hospital.address_dv || transliterateToDhivehi(hospital.address || ''))
+                  : hospital.address}
               </p>
             </div>
           </div>

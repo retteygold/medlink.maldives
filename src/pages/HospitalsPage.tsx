@@ -221,7 +221,9 @@ export default function HospitalsPage() {
                   {language === 'dv' ? (hospital.name_dv || transliterateToDhivehi(hospital.name)) : hospital.name}
                 </h3>
                 <p className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                  {language === 'dv' ? transliterateToDhivehi(hospital.address || '') : hospital.address}
+                  {language === 'dv'
+                    ? (hospital.address_dv || transliterateToDhivehi(hospital.address || ''))
+                    : hospital.address}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2">
                   {hospital.has_emergency && (

@@ -3,6 +3,7 @@ export interface Doctor {
   name: string;
   name_dv?: string;
   specialty: string;
+  specialty_dv?: string;
   hospital_id: string;
   hospital_name: string;
   hospital_name_dv?: string;
@@ -39,6 +40,7 @@ export interface Hospital {
   registration_number?: string;
   operating_license_no?: string;
   address: string;
+  address_dv?: string;
   contact_phone?: string;
   email?: string;
   website?: string;
