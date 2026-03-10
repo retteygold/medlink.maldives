@@ -97,8 +97,10 @@ export default function HospitalsPage() {
     const q = (searchQuery || '').toLowerCase().trim()
     const normalizedHospital = normalizeHospitalSearchText(`${hospital.name} ${hospital.address || ''}`)
     const normalizedQuery = normalizeHospitalSearchText(q)
-
-    const matchesSearch = !q || normalizedHospital.includes(q) || normalizedHospital.includes(normalizedQuery)
+    // Also search by Dhivehi names if available
+    const dhivehiText = `${hospital.name_dv || ''} ${hospital.address_dv || ''}`.toLowerCase()
+    
+    const matchesSearch = !q || normalizedHospital.includes(q) || normalizedHospital.includes(normalizedQuery) || dhivehiText.includes(q)
     const matchesCategory = selectedCategory === 'All' || hospital.category === selectedCategory
     const matchesLocation =
       selectedLocationType === 'All' ||

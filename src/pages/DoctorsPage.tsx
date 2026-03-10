@@ -84,8 +84,13 @@ export default function DoctorsPage() {
   }
 
   const filteredDoctors = doctors.filter(doc => {
-    const matchesSearch = doc.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.specialty.toLowerCase().includes(searchQuery.toLowerCase())
+    const q = searchQuery.toLowerCase()
+    // Search both English and Dhivehi fields
+    const matchesSearch = doc.name.toLowerCase().includes(q) ||
+                         doc.specialty.toLowerCase().includes(q) ||
+                         (doc.name_dv || '').toLowerCase().includes(q) ||
+                         (doc.specialty_dv || '').toLowerCase().includes(q) ||
+                         (doc.hospital_name_dv || '').toLowerCase().includes(q)
     const matchesSpecialty = selectedSpecialty === 'All' || doc.specialty === selectedSpecialty
     return matchesSearch && matchesSpecialty
   })
