@@ -420,14 +420,14 @@ export async function getSpecialties(): Promise<string[]> {
   }
 }
 
-// Search
+// Search - supports both English and Dhivehi (name_dv, specialty_dv, address_dv)
 export async function searchHospitals(query: string): Promise<Hospital[]> {
   try {
     const { data, error } = await supabase
       .from('hospitals')
       .select('*')
       .eq('is_active', true)
-      .or(`name.ilike.%${query}%,address.ilike.%${query}%,category.ilike.%${query}%`)
+      .or(`name.ilike.%${query}%,address.ilike.%${query}%,category.ilike.%${query}%,name_dv.ilike.%${query}%,address_dv.ilike.%${query}%`)
       .order('name')
     if (error) throw error
     return (data || []).map(transformHospital)
@@ -443,7 +443,7 @@ export async function searchDoctors(query: string): Promise<Doctor[]> {
       .from('doctors')
       .select('*')
       .eq('is_active', true)
-      .or(`name.ilike.%${query}%,specialty.ilike.%${query}%,hospital_name.ilike.%${query}%`)
+      .or(`name.ilike.%${query}%,specialty.ilike.%${query}%,hospital_name.ilike.%${query}%,name_dv.ilike.%${query}%,specialty_dv.ilike.%${query}%,hospital_name_dv.ilike.%${query}%`)
       .order('name')
     if (error) throw error
     return (data || []).map(transformDoctor)
