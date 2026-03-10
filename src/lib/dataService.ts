@@ -6,6 +6,7 @@ import type { Hospital, Doctor } from '../types'
 interface DBHospital {
   id: string
   name: string
+  name_dv?: string | null
   registration_number: string | null
   operating_license_no: string | null
   address: string
@@ -108,9 +109,11 @@ export interface DBPharmacyFinderRequest {
 interface DBDoctor {
   id: string
   name: string
+  name_dv?: string | null
   specialty: string
   hospital_id: string | null
   hospital_name: string
+  hospital_name_dv?: string | null
   qualifications: string[] | null
   languages?: string[] | null
   services?: string[] | null
@@ -138,6 +141,7 @@ function transformHospital(db: DBHospital): Hospital {
   return {
     id: db.id,
     name: db.name,
+    name_dv: db.name_dv || undefined,
     registration_number: db.registration_number || '',
     operating_license_no: db.operating_license_no || '',
     address: db.address,
@@ -191,9 +195,11 @@ function transformDoctor(db: DBDoctor): Doctor {
   return {
     id: db.id,
     name: db.name,
+    name_dv: db.name_dv || undefined,
     specialty: db.specialty,
     hospital_id: db.hospital_id || '',
     hospital_name: db.hospital_name,
+    hospital_name_dv: db.hospital_name_dv || undefined,
     qualifications: db.qualifications || [],
     languages: (db.languages || []) as string[],
     services: (db.services || []) as string[],

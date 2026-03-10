@@ -118,7 +118,7 @@ export default function DoctorDetailPage() {
           </div>
           <div>
             <h1 className={`text-2xl font-bold text-white ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name}
+              {language === 'dv' ? (doctor.name_dv || transliterateToDhivehi(doctor.name)) : doctor.name}
             </h1>
             <p className={`text-white/80 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
               {language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty}

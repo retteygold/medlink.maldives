@@ -115,7 +115,7 @@ export default function SearchPage() {
               <Link key={h.id} to={`/hospital/${h.id}`} className="card p-4 flex items-center justify-between">
                 <div className="min-w-0">
                   <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? transliterateToDhivehi(h.name) : h.name}
+                    {language === 'dv' ? (h.name_dv || transliterateToDhivehi(h.name)) : h.name}
                   </div>
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
                     {(language === 'dv' ? transliterateToDhivehi(h.category) : h.category)} • {(language === 'dv' ? transliterateToDhivehi(h.address) : h.address)}
@@ -144,10 +144,10 @@ export default function SearchPage() {
               <Link key={d.id} to={`/doctor/${d.id}`} className="card p-4 flex items-center justify-between">
                 <div className="min-w-0">
                   <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? transliterateToDhivehi(d.name) : d.name}
+                    {language === 'dv' ? (d.name_dv || transliterateToDhivehi(d.name)) : d.name}
                   </div>
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {(language === 'dv' ? transliterateToDhivehi(d.specialty) : d.specialty)} • {(language === 'dv' ? transliterateToDhivehi(d.hospital_name) : d.hospital_name)}
+                    {(language === 'dv' ? transliterateToDhivehi(d.specialty) : d.specialty)} • {(language === 'dv' ? (d.hospital_name_dv || transliterateToDhivehi(d.hospital_name)) : d.hospital_name)}
                   </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />

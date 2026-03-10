@@ -1,9 +1,11 @@
 export interface Doctor {
   id: string;
   name: string;
+  name_dv?: string;
   specialty: string;
   hospital_id: string;
   hospital_name: string;
+  hospital_name_dv?: string;
   qualifications?: string[];
   experience_years?: number;
   languages?: string[];
@@ -33,6 +35,7 @@ export interface Doctor {
 export interface Hospital {
   id: string;
   name: string;
+  name_dv?: string;
   registration_number?: string;
   operating_license_no?: string;
   address: string;

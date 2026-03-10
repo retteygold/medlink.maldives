@@ -184,7 +184,7 @@ export default function DoctorsPage() {
                 <div className="flex items-start justify-between">
                   <div>
                     <h3 className={`font-bold text-gray-800 truncate text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                      {language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name}
+                      {language === 'dv' ? (doctor.name_dv || transliterateToDhivehi(doctor.name)) : doctor.name}
                     </h3>
                     <p className={`text-medical-600 font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>
                       {language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty}
@@ -199,7 +199,7 @@ export default function DoctorsPage() {
                 <div className="flex items-center gap-1 text-gray-500 text-sm mt-2">
                   <MapPin size={14} className="text-medical-500" />
                   <span className={`truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? transliterateToDhivehi(doctor.hospital_name) : doctor.hospital_name}
+                    {language === 'dv' ? (doctor.hospital_name_dv || transliterateToDhivehi(doctor.hospital_name)) : doctor.hospital_name}
                   </span>
                 </div>
                 

@@ -218,7 +218,7 @@ export default function HospitalsPage() {
               <HospitalAvatar hospital={hospital} />
               <div className="flex-1 min-w-0">
                 <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                  {language === 'dv' ? transliterateToDhivehi(hospital.name) : hospital.name}
+                  {language === 'dv' ? (hospital.name_dv || transliterateToDhivehi(hospital.name)) : hospital.name}
                 </h3>
                 <p className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
                   {language === 'dv' ? transliterateToDhivehi(hospital.address || '') : hospital.address}

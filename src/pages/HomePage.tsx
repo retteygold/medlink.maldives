@@ -243,10 +243,10 @@ export default function HomePage() {
               >
                 <div className="min-w-0">
                   <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? transliterateToDhivehi(doctor.name) : doctor.name}
+                    {language === 'dv' ? (doctor.name_dv || transliterateToDhivehi(doctor.name)) : doctor.name}
                   </div>
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {(language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty)} • {(language === 'dv' ? transliterateToDhivehi(doctor.hospital_name) : doctor.hospital_name)}
+                    {(language === 'dv' ? transliterateToDhivehi(doctor.specialty) : doctor.specialty)} • {(language === 'dv' ? (doctor.hospital_name_dv || transliterateToDhivehi(doctor.hospital_name)) : doctor.hospital_name)}
                   </div>
                 </div>
                 <ChevronRight size={18} className="text-gray-400" />
@@ -276,7 +276,7 @@ export default function HomePage() {
               >
                 <div className="min-w-0">
                   <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? transliterateToDhivehi(hospital.name) : hospital.name}
+                    {language === 'dv' ? (hospital.name_dv || transliterateToDhivehi(hospital.name)) : hospital.name}
                   </div>
                   <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
                     {(language === 'dv' ? transliterateToDhivehi(hospital.category) : hospital.category)} • {(language === 'dv' ? transliterateToDhivehi(hospital.address) : hospital.address)}
