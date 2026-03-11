@@ -374,6 +374,19 @@ export async function getHospitalById(id: string): Promise<Hospital | undefined>
   }
 }
 
+async function fetchAllPages<T>(fetchPage: (from: number, to: number) => Promise<T[]>, pageSize: number) {
+  const all: T[] = []
+  let from = 0
+  while (true) {
+    const to = from + pageSize - 1
+    const page = await fetchPage(from, to)
+    all.push(...page)
+    if (page.length < pageSize) break
+    from += pageSize
+  }
+  return all
+}
+
 // Doctors
 export async function getDoctors(): Promise<Doctor[]> {
   try {
@@ -386,6 +399,28 @@ export async function getDoctors(): Promise<Doctor[]> {
     return (data || []).map(transformDoctor)
   } catch (err) {
     console.error('Error fetching doctors:', err)
+    return []
+  }
+}
+
+export async function getAllDoctors(pageSize: number = 1000): Promise<Doctor[]> {
+  try {
+    const rows = await fetchAllPages<any>(
+      async (from, to) => {
+        const { data, error } = await supabase
+          .from('doctors')
+          .select('*')
+          .eq('is_active', true)
+          .order('name')
+          .range(from, to)
+        if (error) throw error
+        return (data || []) as any[]
+      },
+      pageSize
+    )
+    return rows.map(transformDoctor)
+  } catch (err) {
+    console.error('Error fetching all doctors:', err)
     return []
   }
 }

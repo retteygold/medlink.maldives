@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Search, SlidersHorizontal, MapPin, Star, Phone, Calendar } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Doctor } from '../types'
-import { getDoctors, getSpecialties } from '../lib/dataService'
+import { getAllDoctors, getSpecialties } from '../lib/dataService'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { transliterateToDhivehi } from '../lib/transliteration'
@@ -68,7 +68,7 @@ export default function DoctorsPage() {
       setError(null)
       console.log('Loading doctors data...')
       const [doctorsData, specialtiesData] = await Promise.all([
-        getDoctors(),
+        getAllDoctors(),
         getSpecialties()
       ])
       console.log('Loaded doctors:', doctorsData.length)
