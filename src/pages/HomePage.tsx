@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity, Building2 } from 'lucide-react'
+import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity, Building2, Pill } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { getDatabaseStats } from '../lib/dataService'
@@ -228,6 +228,27 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </Link>
+
+          <Link
+            to="/pharmacies"
+            className="relative overflow-hidden bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all col-span-2"
+          >
+            <div className="absolute -right-6 -top-6 w-20 h-20 rounded-full bg-purple-50" />
+            <div className="flex items-center justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <div className="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center shrink-0">
+                    <Pill size={20} className="text-purple-700" />
+                  </div>
+                  <h3 className={`font-bold text-gray-800 leading-tight ${language === 'dv' ? 'dhivehi-font' : ''}`}>{language === 'dv' ? 'ފާރމަސީތައް' : 'Pharmacies'}</h3>
+                </div>
+                <div className={`mt-2 text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                  {language === 'dv' ? 'އަތޮޅުތަކުން ފާރމަސީ ހޯދާ' : 'Find pharmacies by atoll and location'}
+                </div>
+              </div>
+              <ChevronRight size={18} className="text-gray-400" />
             </div>
           </Link>
         </div>

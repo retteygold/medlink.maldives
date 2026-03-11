@@ -20,6 +20,7 @@ import MedicineHelpNewPage from './pages/MedicineHelpNewPage'
 import MedicineHelpDetailPage from './pages/MedicineHelpDetailPage'
 import PharmacyFinderPage from './pages/PharmacyFinderPage'
 import PharmacyFinderInboxPage from './pages/PharmacyFinderInboxPage'
+import PharmaciesPage from './pages/PharmaciesPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminHospitals from './pages/admin/AdminHospitals'
 import AdminDoctors from './pages/admin/AdminDoctors'
@@ -100,6 +101,8 @@ function App() {
             <Route path="/pharmacy-finder" element={<PharmacyFinderPage />} />
             <Route path="/pharmacy-finder/inbox" element={<PharmacyFinderInboxPage />} />
           </Route>
+
+          <Route path="/pharmacies" element={<PharmaciesPage />} />
           
           {/* Admin Routes */}
           <Route path="/admin/login" element={<AdminLogin />} />
