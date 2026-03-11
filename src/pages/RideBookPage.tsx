@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, MapPin, Navigation, Car } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { createRideRequest } from '../lib/dataService'
+import { MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet'
 
 type VehicleType = 'bike' | 'car' | 'van' | 'pickup'
 
@@ -37,6 +38,12 @@ export default function RideBookPage() {
   const destWrapRef = useRef<HTMLDivElement | null>(null)
 
   const fare = useMemo(() => fares[vehicleType] ?? 0, [vehicleType])
+
+  const mapCenter = useMemo<[number, number]>(() => {
+    if (originCoords) return [originCoords.lat, originCoords.lng]
+    if (destinationCoords) return [destinationCoords.lat, destinationCoords.lng]
+    return [4.1755, 73.5093]
+  }, [destinationCoords, originCoords])
 
   async function searchPhoton(query: string): Promise<PlaceOption[]> {
     const q = (query || '').trim()
@@ -141,12 +148,24 @@ export default function RideBookPage() {
   }
 
   return (
-    <div className={`min-h-screen pb-24 ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
-      <div className="gradient-header px-4 pt-12 pb-6 rounded-b-3xl">
+    <div className={`min-h-screen pb-24 relative ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
+      <div className="absolute inset-0">
+        <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+          <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {originCoords ? <Marker position={[originCoords.lat, originCoords.lng]} /> : null}
+          {destinationCoords ? <Marker position={[destinationCoords.lat, destinationCoords.lng]} /> : null}
+          {originCoords && destinationCoords ? (
+            <Polyline positions={[[originCoords.lat, originCoords.lng], [destinationCoords.lat, destinationCoords.lng]]} />
+          ) : null}
+        </MapContainer>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/40 pointer-events-none" />
+      </div>
+
+      <div className="relative z-10 px-4 pt-12">
         <div className="flex items-center justify-between">
           <Link
             to="/ride"
-            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"
+            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur"
             aria-label="Back"
           >
             <ChevronLeft size={20} className="text-white" />
@@ -158,7 +177,7 @@ export default function RideBookPage() {
         </div>
 
         <div className="mt-4 flex items-center gap-3">
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur">
             <Car size={22} className="text-white" />
           </div>
           <div className="min-w-0">
@@ -172,9 +191,9 @@ export default function RideBookPage() {
         </div>
       </div>
 
-      <div className="px-4 mt-5">
+      <div className="relative z-10 px-4 mt-5">
         <form onSubmit={onSubmit} className="space-y-3">
-          <div className="card p-4 space-y-3">
+          <div className="card p-4 space-y-3 bg-white/95 backdrop-blur border border-white/40">
             <div>
               <label className={`block text-sm font-semibold text-gray-800 mb-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
                 {language === 'dv' ? 'ނަގާ ތަން' : 'Pickup location'}
