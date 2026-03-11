@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { ChevronLeft, MapPin, Navigation, Car } from 'lucide-react'
+import { ChevronLeft, MapPin, Navigation, Car, LocateFixed } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { createRideRequest } from '../lib/dataService'
-import { MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet'
+import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
+import type { Map as LeafletMap } from 'leaflet'
 
 type VehicleType = 'bike' | 'car' | 'van' | 'pickup'
 
@@ -22,6 +23,7 @@ export default function RideBookPage() {
   const [destination, setDestination] = useState('')
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [destinationCoords, setDestinationCoords] = useState<{ lat: number; lng: number } | null>(null)
+  const [myCoords, setMyCoords] = useState<{ lat: number; lng: number } | null>(null)
   const [vehicleType, setVehicleType] = useState<VehicleType>('bike')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -44,6 +46,16 @@ export default function RideBookPage() {
     if (destinationCoords) return [destinationCoords.lat, destinationCoords.lng]
     return [4.1755, 73.5093]
   }, [destinationCoords, originCoords])
+
+  const mapRef = useRef<LeafletMap | null>(null)
+
+  function MapRefCapture() {
+    const map = useMap()
+    useEffect(() => {
+      mapRef.current = map
+    }, [map])
+    return null
+  }
 
   async function searchPhoton(query: string): Promise<PlaceOption[]> {
     const q = (query || '').trim()
@@ -149,19 +161,56 @@ export default function RideBookPage() {
 
   return (
     <div className={`min-h-screen pb-24 relative ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
-      <div className="absolute inset-0">
-        <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+      <div className="absolute inset-0 z-0">
+        <MapContainer
+          center={mapCenter}
+          zoom={13}
+          style={{ height: '100%', width: '100%' }}
+          scrollWheelZoom={false}
+        >
+          <MapRefCapture />
           <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {originCoords ? <Marker position={[originCoords.lat, originCoords.lng]} /> : null}
           {destinationCoords ? <Marker position={[destinationCoords.lat, destinationCoords.lng]} /> : null}
+          {myCoords ? <Marker position={[myCoords.lat, myCoords.lng]} /> : null}
           {originCoords && destinationCoords ? (
             <Polyline positions={[[originCoords.lat, originCoords.lng], [destinationCoords.lat, destinationCoords.lng]]} />
           ) : null}
         </MapContainer>
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/40 pointer-events-none" />
+
+        <div className="absolute right-4 bottom-28 z-[1000]">
+          <button
+            type="button"
+            onClick={() => {
+              setError(null)
+              if (!('geolocation' in navigator)) {
+                setError('Geolocation is not supported on this device')
+                return
+              }
+              navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                  const lat = pos.coords.latitude
+                  const lng = pos.coords.longitude
+                  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
+                  setMyCoords({ lat, lng })
+                  mapRef.current?.setView([lat, lng], 16, { animate: true })
+                },
+                () => {
+                  setError('Location permission denied')
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+              )
+            }}
+            className="w-11 h-11 rounded-2xl bg-white shadow-lg border border-gray-200 flex items-center justify-center"
+            aria-label="Current location"
+          >
+            <LocateFixed size={18} className="text-gray-800" />
+          </button>
+        </div>
       </div>
 
-      <div className="relative z-10 px-4 pt-12">
+      <div className="relative z-20 px-4 pt-12">
         <div className="flex items-center justify-between">
           <Link
             to="/ride"
@@ -191,7 +240,7 @@ export default function RideBookPage() {
         </div>
       </div>
 
-      <div className="relative z-10 px-4 mt-5">
+      <div className="relative z-20 px-4 mt-5">
         <form onSubmit={onSubmit} className="space-y-3">
           <div className="card p-4 space-y-3 bg-white/95 backdrop-blur border border-white/40">
             <div>
