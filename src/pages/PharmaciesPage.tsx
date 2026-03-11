@@ -128,6 +128,13 @@ export default function PharmaciesPage() {
       .sort((a, b) => a.name.localeCompare(b.name))
   }, [pharmacies, searchQuery, selectedAtoll])
 
+  const countLabel = useMemo(() => {
+    if (loading) return t('doctors.loading')
+    if (error) return ''
+    if (filtered.length === pharmacies.length) return `${pharmacies.length}`
+    return `${filtered.length} / ${pharmacies.length}`
+  }, [error, filtered.length, loading, pharmacies.length, t])
+
   return (
     <div className={`min-h-screen pb-24 ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
       <div className="gradient-header px-4 pt-12 pb-6 rounded-b-3xl">
@@ -166,9 +173,18 @@ export default function PharmaciesPage() {
             ))}
           </select>
         </div>
+
+        <div className="mt-3">
+          <div className="inline-flex items-center gap-2 bg-white/15 text-white px-3 py-1.5 rounded-full text-sm">
+            <span className={language === 'dv' ? 'dhivehi-font' : ''}>
+              {language === 'dv' ? 'ފާރމަސީތައް' : 'Pharmacies'}
+            </span>
+            <span className="font-bold tabular-nums">{countLabel}</span>
+          </div>
+        </div>
       </div>
 
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-5">
         {loading ? (
           <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.loading')}</div>
         ) : error ? (

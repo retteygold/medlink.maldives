@@ -97,22 +97,40 @@ export default function DoctorsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 pb-4">
-      <div className="bg-white px-4 pt-12 pb-4 shadow-sm">
-        <div className="flex justify-between items-center mb-4">
-          <h1 className={`text-xl font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.title')}</h1>
+      <div className="gradient-header px-4 pt-12 pb-6 rounded-b-3xl">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className={`text-white text-2xl font-extrabold ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.title')}</h1>
+            <div className="mt-2">
+              {loading ? (
+                <div className="inline-flex items-center gap-2 bg-white/15 text-white px-3 py-1.5 rounded-full text-sm">
+                  <span className={language === 'dv' ? 'dhivehi-font' : ''}>{t('doctors.loading')}</span>
+                </div>
+              ) : error ? null : (
+                <div className="inline-flex items-center gap-2 bg-white/15 text-white px-3 py-1.5 rounded-full text-sm">
+                  <span className={language === 'dv' ? 'dhivehi-font' : ''}>{t('doctors.found')}</span>
+                  <span className="font-bold tabular-nums">
+                    {filteredDoctors.length === doctors.length
+                      ? `${doctors.length}`
+                      : `${filteredDoctors.length} / ${doctors.length}`}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
           <LanguageToggle />
         </div>
-        
-        <div className="relative">
+
+        <div className="mt-4 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
             placeholder={t('doctors.searchPlaceholder')}
-            className="input-field pl-12 pr-12"
+            className="w-full pl-12 pr-12 py-4 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none shadow-lg"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button 
+          <button
             onClick={() => setShowFilters(!showFilters)}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg"
           >
@@ -145,26 +163,14 @@ export default function DoctorsPage() {
       </div>
 
       <div className="px-4 py-3">
-        {loading ? (
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <div className="w-4 h-4 border-2 border-medical-500 border-t-transparent rounded-full animate-spin"></div>
-            {t('doctors.loading')}
-          </div>
-        ) : error ? (
+        {error ? (
           <div className="flex flex-col gap-2">
             <p className="text-sm text-red-600">{error}</p>
-            <button 
-              onClick={loadData}
-              className="text-sm text-medical-600 font-medium underline"
-            >
+            <button onClick={loadData} className="text-sm text-medical-600 font-medium underline">
               Retry
             </button>
           </div>
-        ) : (
-          <p className={`text-sm text-gray-600 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-            {filteredDoctors.length} {t('doctors.found')}
-          </p>
-        )}
+        ) : null}
       </div>
 
       <div className="px-4 space-y-4">

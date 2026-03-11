@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Search, Star, Filter, Building2 } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Hospital } from '../types'
@@ -109,21 +109,39 @@ export default function HospitalsPage() {
     return matchesSearch && matchesCategory && matchesLocation && matchesAtoll
   })
 
+  const countLabel = useMemo(() => {
+    if (loading) return language === 'dv' ? 'ލޯޑް ވަނީ...' : 'Loading...'
+    if (filteredHospitals.length === hospitals.length) return `${hospitals.length}`
+    return `${filteredHospitals.length} / ${hospitals.length}`
+  }, [filteredHospitals.length, hospitals.length, language, loading])
+
   return (
     <div className="min-h-screen bg-gray-50 pb-4">
-      <div className="bg-white px-4 pt-12 pb-4 shadow-sm">
-        <h1 className="text-xl font-bold text-gray-800 mb-4">Find Hospitals</h1>
-        
-        <div className="relative">
+      <div className="gradient-header px-4 pt-12 pb-6 rounded-b-3xl">
+        <div>
+          <h1 className={`text-white text-2xl font-extrabold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+            {language === 'dv' ? 'ހޮސްޕިޓަލްތައް' : 'Hospitals'}
+          </h1>
+          <div className="mt-2">
+            <div className="inline-flex items-center gap-2 bg-white/15 text-white px-3 py-1.5 rounded-full text-sm">
+              <span className={language === 'dv' ? 'dhivehi-font' : ''}>
+                {language === 'dv' ? 'ހޯދާ' : 'Found'}
+              </span>
+              <span className="font-bold tabular-nums">{countLabel}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4 relative">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
           <input
             type="text"
             placeholder={language === 'dv' ? 'ހޯދާ...' : 'Search hospitals...'}
-            className="input-field pl-12 pr-12"
+            className="w-full pl-12 pr-12 py-4 rounded-xl bg-white text-gray-800 placeholder-gray-400 focus:outline-none shadow-lg"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
-          <button 
+          <button
             onClick={() => setShowFilters(!showFilters)}
             className="absolute right-3 top-1/2 -translate-y-1/2 p-2 hover:bg-gray-100 rounded-lg"
           >
@@ -203,11 +221,7 @@ export default function HospitalsPage() {
         )}
       </div>
 
-      <div className="px-4 py-3">
-        <p className="text-sm text-gray-600">
-          {loading ? 'Loading hospitals...' : `${filteredHospitals.length} hospitals found`}
-        </p>
-      </div>
+      <div className="px-4 py-3" />
 
       <div className="px-4 space-y-3">
         {filteredHospitals.map((hospital) => (
