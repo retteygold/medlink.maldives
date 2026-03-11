@@ -143,7 +143,7 @@ export default function AdminDashboard() {
           <div className="bg-white/10 rounded-xl p-3">
             <Building2 size={20} className="text-white/80 mb-1" />
             <p className="text-2xl font-bold">{stats.hospitals}</p>
-            <p className="text-xs text-white/70">Hospitals</p>
+            <p className="text-xs text-white/70">Hospitals/Clinics</p>
           </div>
           <div className="bg-white/10 rounded-xl p-3">
             <Users size={20} className="text-white/80 mb-1" />

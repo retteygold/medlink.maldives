@@ -1295,16 +1295,29 @@ export async function getRecentVisitsWithUsers(limit: number = 100): Promise<(Ap
 }
 export async function getDatabaseStats() {
   try {
-    // Use working functions instead of count queries
-    const [hospitals, doctors, specialties] = await Promise.all([
-      getHospitals(),
-      getDoctors(),
-      getSpecialties()
+    const [hospitalsCountResult, doctorsCountResult, specialtiesCountResult] = await Promise.all([
+      supabase.from('hospitals').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('doctors').select('id', { count: 'exact', head: true }).eq('is_active', true),
+      supabase.from('specialties').select('id', { count: 'exact', head: true })
     ])
+
+    if (hospitalsCountResult.error || doctorsCountResult.error || specialtiesCountResult.error) {
+      const [hospitals, doctors, specialties] = await Promise.all([
+        getHospitals(),
+        getDoctors(),
+        getSpecialties()
+      ])
+      return {
+        total_facilities: hospitals.length,
+        total_doctors: doctors.length,
+        total_specialties: specialties.length
+      }
+    }
+
     return {
-      total_facilities: hospitals.length,
-      total_doctors: doctors.length,
-      total_specialties: specialties.length
+      total_facilities: hospitalsCountResult.count || 0,
+      total_doctors: doctorsCountResult.count || 0,
+      total_specialties: specialtiesCountResult.count || 0
     }
   } catch (err) {
     console.error('Error fetching database stats:', err)
