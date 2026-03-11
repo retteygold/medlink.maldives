@@ -122,7 +122,11 @@ export interface RideRequest {
   id: string
   rider_user_id: string
   origin_text: string
+  origin_lat?: number | null
+  origin_lng?: number | null
   destination_text: string
+  destination_lat?: number | null
+  destination_lng?: number | null
   vehicle_type: RideVehicleType
   fare: number
   status: 'open' | 'matched' | 'cancelled'
@@ -138,6 +142,9 @@ export interface RideTrip {
   arrived_at?: string | null
   started_at?: string | null
   finished_at?: string | null
+  driver_lat?: number | null
+  driver_lng?: number | null
+  driver_updated_at?: string | null
   cash_paid: boolean
   amount: number
   rider_rating?: number | null

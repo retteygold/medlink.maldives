@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, Car, CheckCircle2, MapPin, Play, Flag, Star } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
@@ -7,8 +7,10 @@ import {
   getDriverActiveTrip,
   getDriverOpenRideRequests,
   getMyRideDriverProfile,
+  updateDriverTripLocation,
   updateRideTripStatus
 } from '../lib/dataService'
+import { MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet'
 
 export default function RideDriverDashboardPage() {
   const { language } = useLanguage()
@@ -22,6 +24,9 @@ export default function RideDriverDashboardPage() {
   const [rating, setRating] = useState('5')
   const [ratingComment, setRatingComment] = useState('')
   const [savingFinish, setSavingFinish] = useState(false)
+
+  const [myPos, setMyPos] = useState<{ lat: number; lng: number } | null>(null)
+  const lastSentRef = useRef<number>(0)
 
   useEffect(() => {
     load()
@@ -59,6 +64,36 @@ export default function RideDriverDashboardPage() {
   }
 
   const canDrive = useMemo(() => String(profile?.status) === 'approved', [profile?.status])
+
+  useEffect(() => {
+    const tripId = activeTrip?.id
+    if (!tripId) return
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) return
+
+    let stopped = false
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        if (stopped) return
+        const lat = pos.coords.latitude
+        const lng = pos.coords.longitude
+        if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
+        setMyPos({ lat, lng })
+
+        const now = Date.now()
+        if (now - lastSentRef.current < 3000) return
+        lastSentRef.current = now
+        updateDriverTripLocation(tripId, lat, lng)
+      },
+      () => {
+      },
+      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+    )
+
+    return () => {
+      stopped = true
+      navigator.geolocation.clearWatch(watchId)
+    }
+  }, [activeTrip?.id])
 
   async function onAccept(requestId: string) {
     try {
@@ -184,6 +219,40 @@ export default function RideDriverDashboardPage() {
                 <span className="truncate">{activeTrip.request?.destination_text}</span>
               </div>
             </div>
+
+            {typeof activeTrip.request?.origin_lat === 'number' && typeof activeTrip.request?.origin_lng === 'number' ? (
+              <div className="mt-4 w-full h-64 rounded-xl overflow-hidden">
+                <MapContainer
+                  center={[activeTrip.request.origin_lat, activeTrip.request.origin_lng]}
+                  zoom={13}
+                  style={{ height: '100%', width: '100%' }}
+                  scrollWheelZoom={false}
+                >
+                  <TileLayer
+                    attribution="&copy; OpenStreetMap contributors"
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <Marker position={[activeTrip.request.origin_lat, activeTrip.request.origin_lng]} />
+                  {typeof activeTrip.request?.destination_lat === 'number' && typeof activeTrip.request?.destination_lng === 'number' ? (
+                    <>
+                      <Marker position={[activeTrip.request.destination_lat, activeTrip.request.destination_lng]} />
+                      <Polyline
+                        positions={[
+                          [activeTrip.request.origin_lat, activeTrip.request.origin_lng],
+                          [activeTrip.request.destination_lat, activeTrip.request.destination_lng]
+                        ]}
+                      />
+                    </>
+                  ) : null}
+
+                  {myPos ? (
+                    <Marker position={[myPos.lat, myPos.lng]} />
+                  ) : typeof activeTrip.driver_lat === 'number' && typeof activeTrip.driver_lng === 'number' ? (
+                    <Marker position={[activeTrip.driver_lat, activeTrip.driver_lng]} />
+                  ) : null}
+                </MapContainer>
+              </div>
+            ) : null}
 
             <div className="mt-4 grid grid-cols-2 gap-2">
               {String(activeTrip.status) === 'accepted' ? (

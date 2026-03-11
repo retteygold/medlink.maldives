@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom'
 import { ChevronLeft, Car, MapPin, X } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { cancelMyOpenRideRequest, getMyLatestRideState } from '../lib/dataService'
+import { MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet'
+import { supabase } from '../lib/supabase'
 
 export default function RideStatusPage() {
   const { language } = useLanguage()
@@ -38,14 +40,46 @@ export default function RideStatusPage() {
     return {
       origin: req.origin_text,
       destination: req.destination_text,
+      originLat: req.origin_lat,
+      originLng: req.origin_lng,
+      destinationLat: req.destination_lat,
+      destinationLng: req.destination_lng,
       vehicleType: req.vehicle_type,
       fare: req.fare,
       status,
       driverName: trip?.driver?.full_name || null,
       driverPhone: trip?.driver?.phone || null,
-      vehicleNumber: trip?.driver?.vehicle_number || null
+      vehicleNumber: trip?.driver?.vehicle_number || null,
+      tripId: trip?.id || null,
+      driverLat: trip?.driver_lat,
+      driverLng: trip?.driver_lng
     }
   }, [state])
+
+  useEffect(() => {
+    const tripId = summary?.tripId
+    if (!tripId) return
+
+    const channel = supabase
+      .channel(`ride_trip:${tripId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'ride_trips',
+          filter: `id=eq.${tripId}`
+        },
+        () => {
+          load()
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [summary?.tripId])
 
   async function onCancel() {
     setCancelling(true)
@@ -164,6 +198,39 @@ export default function RideStatusPage() {
                 </button>
               ) : null}
             </div>
+
+            {typeof summary.originLat === 'number' && typeof summary.originLng === 'number' ? (
+              <div className="card p-3">
+                <div className="w-full h-64 rounded-xl overflow-hidden">
+                  <MapContainer
+                    center={[summary.originLat, summary.originLng]}
+                    zoom={13}
+                    style={{ height: '100%', width: '100%' }}
+                    scrollWheelZoom={false}
+                  >
+                    <TileLayer
+                      attribution="&copy; OpenStreetMap contributors"
+                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                    />
+                    <Marker position={[summary.originLat, summary.originLng]} />
+                    {typeof summary.destinationLat === 'number' && typeof summary.destinationLng === 'number' ? (
+                      <>
+                        <Marker position={[summary.destinationLat, summary.destinationLng]} />
+                        <Polyline
+                          positions={[
+                            [summary.originLat, summary.originLng],
+                            [summary.destinationLat, summary.destinationLng]
+                          ]}
+                        />
+                      </>
+                    ) : null}
+                    {typeof summary.driverLat === 'number' && typeof summary.driverLng === 'number' ? (
+                      <Marker position={[summary.driverLat, summary.driverLng]} />
+                    ) : null}
+                  </MapContainer>
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
       </div>

@@ -31,6 +31,27 @@ interface DBHospital {
   review_count: number
 }
 
+export async function updateDriverTripLocation(tripId: string, lat: number, lng: number): Promise<boolean> {
+  try {
+    const payload: any = {
+      driver_lat: typeof lat === 'number' ? lat : null,
+      driver_lng: typeof lng === 'number' ? lng : null,
+      driver_updated_at: new Date().toISOString()
+    }
+
+    const { error } = await supabase
+      .from('ride_trips')
+      .update(payload)
+      .eq('id', tripId)
+
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error updating driver trip location:', err)
+    return false
+  }
+}
+
 export async function uploadRideDriverImage(file: File, kind: 'driver' | 'license' | 'vehicle'): Promise<string> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   if (sessionError) throw sessionError
@@ -1447,7 +1468,11 @@ export async function createRideDriverProfile(payload: {
 
 export async function createRideRequest(payload: {
   origin_text: string
+  origin_lat?: number | null
+  origin_lng?: number | null
   destination_text: string
+  destination_lat?: number | null
+  destination_lng?: number | null
   vehicle_type: RideVehicleType
   fare: number
 }): Promise<RideRequest | undefined> {
@@ -1462,7 +1487,11 @@ export async function createRideRequest(payload: {
       .insert({
         rider_user_id: user.id,
         origin_text: payload.origin_text.trim(),
+        origin_lat: typeof payload.origin_lat === 'number' ? payload.origin_lat : null,
+        origin_lng: typeof payload.origin_lng === 'number' ? payload.origin_lng : null,
         destination_text: payload.destination_text.trim(),
+        destination_lat: typeof payload.destination_lat === 'number' ? payload.destination_lat : null,
+        destination_lng: typeof payload.destination_lng === 'number' ? payload.destination_lng : null,
         vehicle_type: payload.vehicle_type,
         fare: typeof payload.fare === 'number' ? payload.fare : 0,
         status: 'open'

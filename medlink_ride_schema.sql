@@ -62,12 +62,28 @@ CREATE TABLE IF NOT EXISTS public.ride_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   rider_user_id uuid NOT NULL,
   origin_text text NOT NULL,
+  origin_lat double precision,
+  origin_lng double precision,
   destination_text text NOT NULL,
+  destination_lat double precision,
+  destination_lng double precision,
   vehicle_type public.ride_vehicle_type NOT NULL,
   fare numeric NOT NULL DEFAULT 0,
   status public.ride_request_status NOT NULL DEFAULT 'open',
   created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.ride_requests
+ADD COLUMN IF NOT EXISTS origin_lat double precision;
+
+ALTER TABLE public.ride_requests
+ADD COLUMN IF NOT EXISTS origin_lng double precision;
+
+ALTER TABLE public.ride_requests
+ADD COLUMN IF NOT EXISTS destination_lat double precision;
+
+ALTER TABLE public.ride_requests
+ADD COLUMN IF NOT EXISTS destination_lng double precision;
 
 CREATE INDEX IF NOT EXISTS ride_requests_status_vehicle_idx ON public.ride_requests(status, vehicle_type);
 CREATE INDEX IF NOT EXISTS ride_requests_rider_idx ON public.ride_requests(rider_user_id);
@@ -82,11 +98,23 @@ CREATE TABLE IF NOT EXISTS public.ride_trips (
   arrived_at timestamptz,
   started_at timestamptz,
   finished_at timestamptz,
+  driver_lat double precision,
+  driver_lng double precision,
+  driver_updated_at timestamptz,
   cash_paid boolean NOT NULL DEFAULT false,
   amount numeric NOT NULL DEFAULT 0,
   rider_rating int,
   rider_rating_comment text
 );
+
+ALTER TABLE public.ride_trips
+ADD COLUMN IF NOT EXISTS driver_lat double precision;
+
+ALTER TABLE public.ride_trips
+ADD COLUMN IF NOT EXISTS driver_lng double precision;
+
+ALTER TABLE public.ride_trips
+ADD COLUMN IF NOT EXISTS driver_updated_at timestamptz;
 
 CREATE UNIQUE INDEX IF NOT EXISTS ride_trips_request_id_key ON public.ride_trips(request_id);
 CREATE INDEX IF NOT EXISTS ride_trips_driver_idx ON public.ride_trips(driver_user_id);
