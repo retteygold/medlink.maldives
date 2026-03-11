@@ -97,7 +97,7 @@ export default function HomePage() {
           <img 
             src="/images/storyset/Doctors-pana.svg" 
             alt="Healthcare" 
-            className="w-40 h-40 object-contain drop-shadow-lg"
+            className="w-48 h-48 object-contain drop-shadow-lg"
           />
         </div>
 
@@ -121,62 +121,67 @@ export default function HomePage() {
         </form>
       </div>
 
+      {/* Smart Matcher CTA */}
       <div className="px-4 -mt-4">
-        <div className="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <Link
-            to="/smart-match"
-            className="shrink-0 w-72 bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/30 text-white"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center">
-                  <Stethoscope size={22} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className={`font-bold text-base leading-tight ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.smartMatch.title')}</h3>
-                  <p className={`text-white/80 text-xs line-clamp-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.smartMatch.subtitle')}</p>
-                </div>
+        <Link
+          to="/smart-match"
+          className="block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/30 text-white"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Stethoscope size={24} />
               </div>
-              <ChevronRight size={22} />
+              <div>
+                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.smartMatch.title')}</h3>
+                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.smartMatch.subtitle')}</p>
+              </div>
             </div>
-          </Link>
+            <ChevronRight size={24} />
+          </div>
+        </Link>
+      </div>
 
-          <Link
-            to="/medicine-help"
-            className="shrink-0 w-72 bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl p-4 shadow-lg shadow-pink-500/20 text-white"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center">
-                  <Activity size={22} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className={`font-bold text-base leading-tight ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('medicineHelp.title')}</h3>
-                  <p className={`text-white/80 text-xs line-clamp-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('medicineHelp.subtitle')}</p>
-                </div>
+      {/* Medicine Help CTA */}
+      <div className="px-4 mt-4">
+        <Link
+          to="/medicine-help"
+          className="block bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl p-4 shadow-lg shadow-pink-500/20 text-white"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <Activity size={24} />
               </div>
-              <ChevronRight size={22} />
+              <div>
+                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('medicineHelp.title')}</h3>
+                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('medicineHelp.subtitle')}</p>
+              </div>
             </div>
-          </Link>
+            <ChevronRight size={24} />
+          </div>
+        </Link>
+      </div>
 
-          <Link
-            to="/pharmacy-finder"
-            className="shrink-0 w-72 bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/20 text-white"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-11 h-11 bg-white/20 rounded-full flex items-center justify-center">
-                  <MapPin size={22} />
-                </div>
-                <div className="min-w-0">
-                  <h3 className={`font-bold text-base leading-tight ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.title')}</h3>
-                  <p className={`text-white/80 text-xs line-clamp-2 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.subtitle')}</p>
-                </div>
+      {/* Pharmacy Finder CTA */}
+      <div className="px-4 mt-4">
+        <Link
+          to="/pharmacy-finder"
+          className="block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/20 text-white"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                <MapPin size={24} />
               </div>
-              <ChevronRight size={22} />
+              <div>
+                <h3 className={`font-bold text-lg ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.title')}</h3>
+                <p className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('pharmacyFinder.subtitle')}</p>
+              </div>
             </div>
-          </Link>
-        </div>
+            <ChevronRight size={24} />
+          </div>
+        </Link>
       </div>
 
       {/* Quick Access - Hospitals & Doctors */}
