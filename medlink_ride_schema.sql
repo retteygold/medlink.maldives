@@ -127,6 +127,93 @@ ADD COLUMN IF NOT EXISTS delay_reported_at timestamptz;
 CREATE UNIQUE INDEX IF NOT EXISTS ride_trips_request_id_key ON public.ride_trips(request_id);
 CREATE INDEX IF NOT EXISTS ride_trips_driver_idx ON public.ride_trips(driver_user_id);
 
+-- RLS (required for production Supabase)
+ALTER TABLE public.ride_requests ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ride_trips ENABLE ROW LEVEL SECURITY;
+
+-- Ride requests
+DROP POLICY IF EXISTS "ride_requests_select_own" ON public.ride_requests;
+CREATE POLICY "ride_requests_select_own"
+ON public.ride_requests
+FOR SELECT
+TO authenticated
+USING (auth.uid() = rider_user_id);
+
+DROP POLICY IF EXISTS "ride_requests_insert_own" ON public.ride_requests;
+CREATE POLICY "ride_requests_insert_own"
+ON public.ride_requests
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = rider_user_id);
+
+DROP POLICY IF EXISTS "ride_requests_update_own" ON public.ride_requests;
+CREATE POLICY "ride_requests_update_own"
+ON public.ride_requests
+FOR UPDATE
+TO authenticated
+USING (auth.uid() = rider_user_id)
+WITH CHECK (auth.uid() = rider_user_id);
+
+-- Ride trips
+-- Rider can read their trip (through request ownership)
+DROP POLICY IF EXISTS "ride_trips_select_rider" ON public.ride_trips;
+CREATE POLICY "ride_trips_select_rider"
+ON public.ride_trips
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (
+    SELECT 1
+    FROM public.ride_requests r
+    WHERE r.id = request_id
+      AND r.rider_user_id = auth.uid()
+  )
+);
+
+-- Driver can read their own trip
+DROP POLICY IF EXISTS "ride_trips_select_driver" ON public.ride_trips;
+CREATE POLICY "ride_trips_select_driver"
+ON public.ride_trips
+FOR SELECT
+TO authenticated
+USING (driver_user_id = auth.uid());
+
+-- Driver can insert trip only for themselves (accept ride)
+DROP POLICY IF EXISTS "ride_trips_insert_driver" ON public.ride_trips;
+CREATE POLICY "ride_trips_insert_driver"
+ON public.ride_trips
+FOR INSERT
+TO authenticated
+WITH CHECK (driver_user_id = auth.uid());
+
+-- Driver can update own trip (status + location)
+DROP POLICY IF EXISTS "ride_trips_update_driver" ON public.ride_trips;
+CREATE POLICY "ride_trips_update_driver"
+ON public.ride_trips
+FOR UPDATE
+TO authenticated
+USING (driver_user_id = auth.uid())
+WITH CHECK (driver_user_id = auth.uid());
+
+-- Admin can read all trips + requests
+DROP POLICY IF EXISTS "ride_trips_select_admin" ON public.ride_trips;
+CREATE POLICY "ride_trips_select_admin"
+ON public.ride_trips
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_requests_select_admin" ON public.ride_requests;
+CREATE POLICY "ride_requests_select_admin"
+ON public.ride_requests
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
 -- Simple update trigger for updated_at
 CREATE OR REPLACE FUNCTION public.set_updated_at() RETURNS trigger AS $$
 BEGIN

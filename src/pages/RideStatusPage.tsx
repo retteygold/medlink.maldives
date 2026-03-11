@@ -397,6 +397,14 @@ export default function RideStatusPage() {
                 </div>
               ) : null}
 
+              {String(summary.status) === 'accepted' && !(typeof summary.driverLat === 'number' && typeof summary.driverLng === 'number') ? (
+                <div className="mt-2 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-xl p-2">
+                  {language === 'dv'
+                    ? 'ޑްރައިވަރު ލޮކޭޝަން ލޯޑް ވަނީ...'
+                    : 'Waiting for driver location...'}
+                </div>
+              ) : null}
+
               <div className="mt-3 grid grid-cols-2 gap-3">
                 <div className="text-sm text-gray-600">
                   {language === 'dv' ? 'ނަގާ' : 'Pickup'}

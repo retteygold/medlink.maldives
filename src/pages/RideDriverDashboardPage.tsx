@@ -37,6 +37,7 @@ export default function RideDriverDashboardPage() {
   const [toast, setToast] = useState<string | null>(null)
   const lastToastRef = useRef<string>('')
   const lastTripStatusRef = useRef<string>('')
+  const [lastLocationSentAt, setLastLocationSentAt] = useState<number | null>(null)
 
   const [pickupEtaSeconds, setPickupEtaSeconds] = useState<number | null>(null)
   const askedDelayRef = useRef(false)
@@ -191,7 +192,7 @@ export default function RideDriverDashboardPage() {
 
     let stopped = false
     const watchId = navigator.geolocation.watchPosition(
-      (pos) => {
+      async (pos) => {
         if (stopped) return
         const lat = pos.coords.latitude
         const lng = pos.coords.longitude
@@ -201,7 +202,12 @@ export default function RideDriverDashboardPage() {
         const now = Date.now()
         if (now - lastSentRef.current < 3000) return
         lastSentRef.current = now
-        updateDriverTripLocation(tripId, lat, lng)
+        const ok = await updateDriverTripLocation(tripId, lat, lng)
+        if (ok) {
+          setLastLocationSentAt(Date.now())
+        } else {
+          emitToast(language === 'dv' ? 'ލޮކޭޝަން ސެންޑް ނުކުރެވުނު' : 'Failed to send location')
+        }
       },
       () => {
       },
@@ -414,7 +420,9 @@ export default function RideDriverDashboardPage() {
               const lng = pos.coords.longitude
               if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
               setMyPos({ lat, lng })
-              updateDriverTripLocation(String(trip.id), lat, lng)
+              updateDriverTripLocation(String(trip.id), lat, lng).then((ok) => {
+                if (ok) setLastLocationSentAt(Date.now())
+              })
             },
             () => {
             },
@@ -623,6 +631,17 @@ export default function RideDriverDashboardPage() {
                 </div>
               </div>
             ) : null}
+
+            <div className="mt-3 text-xs text-gray-500">
+              {language === 'dv' ? 'GPS:' : 'GPS:'}{' '}
+              <span className="font-semibold text-gray-700">{myPos ? 'ON' : 'OFF'}</span>
+              {lastLocationSentAt ? (
+                <>
+                  {' '}• {language === 'dv' ? 'އެންމެ ފަހު ސެންޑް' : 'Last sent'}:{' '}
+                  {new Date(lastLocationSentAt).toLocaleTimeString()}
+                </>
+              ) : null}
+            </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
               {String(activeTrip.status) === 'accepted' ? (
