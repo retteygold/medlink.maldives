@@ -11,6 +11,7 @@ import {
   updateRideTripStatus
 } from '../lib/dataService'
 import { MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet'
+import L from 'leaflet'
 
 export default function RideDriverDashboardPage() {
   const { language } = useLanguage()
@@ -72,6 +73,36 @@ export default function RideDriverDashboardPage() {
   }
 
   const canDrive = useMemo(() => String(profile?.status) === 'approved', [profile?.status])
+
+  const pickupIcon = useMemo(() => {
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="16" fill="#0f766e" stroke="white" stroke-width="3" />
+        <circle cx="18" cy="14" r="4" fill="white" />
+        <path d="M10 28c1.5-5 14.5-5 16 0" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" />
+      </svg>
+    `.trim()
+
+    return L.divIcon({ html: svg, className: '', iconSize: [36, 36], iconAnchor: [18, 18] })
+  }, [])
+
+  const driverIcon = useMemo(() => {
+    const type = String(profile?.vehicle_type || '').toLowerCase()
+    const isBike = type === 'bike'
+    const color = isBike ? '#1d4ed8' : '#7c3aed'
+    const glyph = isBike ?
+      '<path d="M12 22a4 4 0 1 0 0 8a4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4a2 2 0 0 1 0-4Zm14-2a4 4 0 1 0 0 8a4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4a2 2 0 0 1 0-4ZM14 12h4l3 6h-3l-2-4h-1l-3 8h-2l4-10Z" fill="white"/>'
+      : '<path d="M10 22h16l2 4v6h-2a2 2 0 1 1-4 0H14a2 2 0 1 1-4 0H8v-6l2-4Zm2 2-1 2h18l-1-2H12Z" fill="white"/>'
+
+    const svg = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 36 36">
+        <circle cx="18" cy="18" r="16" fill="${color}" stroke="white" stroke-width="3" />
+        ${glyph}
+      </svg>
+    `.trim()
+
+    return L.divIcon({ html: svg, className: '', iconSize: [36, 36], iconAnchor: [18, 18] })
+  }, [profile?.vehicle_type])
 
   const resolvedOrigin = useMemo(() => {
     const lat = activeTrip?.request?.origin_lat
@@ -389,7 +420,7 @@ export default function RideDriverDashboardPage() {
                     attribution="&copy; OpenStreetMap contributors"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-                  <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} />
+                  <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} icon={pickupIcon} />
                   {resolvedDestination ? (
                     <>
                       <Marker position={[resolvedDestination.lat, resolvedDestination.lng]} />
@@ -398,9 +429,9 @@ export default function RideDriverDashboardPage() {
                   ) : null}
 
                   {myPos ? (
-                    <Marker position={[myPos.lat, myPos.lng]} />
+                    <Marker position={[myPos.lat, myPos.lng]} icon={driverIcon} />
                   ) : typeof activeTrip.driver_lat === 'number' && typeof activeTrip.driver_lng === 'number' ? (
-                    <Marker position={[activeTrip.driver_lat, activeTrip.driver_lng]} />
+                    <Marker position={[activeTrip.driver_lat, activeTrip.driver_lng]} icon={driverIcon} />
                   ) : null}
                 </MapContainer>
               </div>
