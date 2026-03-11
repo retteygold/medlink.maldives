@@ -41,9 +41,13 @@ CREATE TABLE IF NOT EXISTS public.ride_driver_profiles (
   driver_image_path text,
   license_image_path text,
   status public.ride_driver_status NOT NULL DEFAULT 'pending',
+  rejection_reason text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.ride_driver_profiles
+ADD COLUMN IF NOT EXISTS rejection_reason text;
 
 CREATE UNIQUE INDEX IF NOT EXISTS ride_driver_profiles_user_id_key ON public.ride_driver_profiles(user_id);
 CREATE INDEX IF NOT EXISTS ride_driver_profiles_vehicle_type_idx ON public.ride_driver_profiles(vehicle_type);

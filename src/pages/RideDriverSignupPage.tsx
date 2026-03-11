@@ -149,6 +149,12 @@ export default function RideDriverSignupPage() {
             <div className="mt-2 text-sm text-gray-600">
               {language === 'dv' ? 'ސްޓޭޓަސް:' : 'Status:'} <span className="font-bold">{statusLabel}</span>
             </div>
+            {String(existing?.status) === 'rejected' && existing?.rejection_reason ? (
+              <div className="mt-3 text-sm text-red-700 bg-red-50 border border-red-200 rounded-xl p-3">
+                {language === 'dv' ? 'ރިޖެކްޓް ސަބަބު:' : 'Rejection reason:'}{' '}
+                <span className="font-semibold">{existing.rejection_reason}</span>
+              </div>
+            ) : null}
             <Link to="/ride/driver/dashboard" className="btn-primary inline-flex mt-4">
               {language === 'dv' ? 'ޑޭޝްބޯރޑް' : 'Go to dashboard'}
             </Link>

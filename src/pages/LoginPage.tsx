@@ -6,6 +6,9 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation() as any
 
+  const fromPath = String(location.state?.from?.pathname || '')
+  const isMedicineHelp = fromPath.startsWith('/medicine-help')
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -149,7 +152,9 @@ export default function LoginPage() {
         <div className="mt-6 flex items-center gap-4">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Sign In</h1>
-            <p className="text-white/80 text-sm mt-1">Sign in to continue to Medicine Help</p>
+            <p className="text-white/80 text-sm mt-1">
+              {isMedicineHelp ? 'Sign in to continue to Medicine Help' : 'Sign in to continue'}
+            </p>
           </div>
           <img
             src="/images/storyset/Online Doctor-pana.svg"

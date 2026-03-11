@@ -31,11 +31,25 @@ export default function AdminRideDrivers() {
     }
   }
 
-  async function setStatus(id: string, status: 'approved' | 'rejected') {
+  function getImageUrl(path?: string | null): string | null {
+    if (!path) return null
     try {
+      const { data } = supabase.storage.from('medicine-requests').getPublicUrl(path)
+      return data.publicUrl || null
+    } catch {
+      return null
+    }
+  }
+
+  async function setStatus(id: string, status: 'approved' | 'rejected', rejectionReason?: string) {
+    try {
+      const payload: any = { status }
+      if (status === 'approved') payload.rejection_reason = null
+      if (status === 'rejected') payload.rejection_reason = (rejectionReason || '').trim() || null
+
       const { error } = await supabase
         .from('ride_driver_profiles')
-        .update({ status })
+        .update(payload)
         .eq('id', id)
 
       if (error) throw error
@@ -88,6 +102,11 @@ export default function AdminRideDrivers() {
                   <div className="mt-1 text-xs">
                     Status: <span className="font-bold">{String(d.status || '').toUpperCase()}</span>
                   </div>
+                  {d.status === 'rejected' && d.rejection_reason ? (
+                    <div className="mt-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-xl p-2">
+                      Rejection reason: <span className="font-semibold">{d.rejection_reason}</span>
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
@@ -99,12 +118,55 @@ export default function AdminRideDrivers() {
                   <CheckCircle2 size={16} /> Approve
                 </button>
                 <button
-                  onClick={() => setStatus(d.id, 'rejected')}
+                  onClick={() => {
+                    const reason = window.prompt('Reason for rejecting this driver? (optional)') || ''
+                    setStatus(d.id, 'rejected', reason)
+                  }}
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-gray-800 text-sm font-semibold border border-gray-200"
                 >
                   <XCircle size={16} /> Reject
                 </button>
               </div>
+            </div>
+
+            <div className="mt-3 grid grid-cols-2 gap-3">
+              {getImageUrl(d.driver_image_path) ? (
+                <a
+                  href={getImageUrl(d.driver_image_path) || undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
+                >
+                  <div className="text-xs text-gray-600 mb-1">Driver photo</div>
+                  <img
+                    src={getImageUrl(d.driver_image_path) || undefined}
+                    alt="Driver"
+                    className="w-full h-28 object-cover rounded-xl border border-gray-200"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <div className="text-xs text-gray-500">No driver photo</div>
+              )}
+
+              {getImageUrl(d.license_image_path) ? (
+                <a
+                  href={getImageUrl(d.license_image_path) || undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
+                >
+                  <div className="text-xs text-gray-600 mb-1">License photo</div>
+                  <img
+                    src={getImageUrl(d.license_image_path) || undefined}
+                    alt="License"
+                    className="w-full h-28 object-cover rounded-xl border border-gray-200"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <div className="text-xs text-gray-500">No license photo</div>
+              )}
             </div>
           </div>
         ))}

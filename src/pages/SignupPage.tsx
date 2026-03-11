@@ -10,10 +10,13 @@ export default function SignupPage() {
   const navigate = useNavigate()
   const location = useLocation() as any
 
+  const fromPath = String(location.state?.from?.pathname || '')
+  const showMedicineHelpRole = fromPath.startsWith('/medicine-help')
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
-  const [role, setRole] = useState<MedicineHelpRole>('need_service')
+  const [role, setRole] = useState<MedicineHelpRole>(showMedicineHelpRole ? 'need_service' : 'both')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -72,7 +75,7 @@ export default function SignupPage() {
       password,
       options: {
         data: {
-          user_role: role
+          user_role: showMedicineHelpRole ? role : 'both'
         }
       }
     })
@@ -116,7 +119,9 @@ export default function SignupPage() {
         <div className="mt-6 flex items-center gap-4">
           <div className="flex-1">
             <h1 className="text-2xl font-bold text-white">Create Account</h1>
-            <p className="text-white/80 text-sm mt-1">Choose how you want to use medicine help</p>
+            <p className="text-white/80 text-sm mt-1">
+              {showMedicineHelpRole ? 'Choose how you want to use medicine help' : 'Create an account to continue'}
+            </p>
           </div>
           <img
             src="/images/storyset/Doctors-cuate.svg"
@@ -135,42 +140,44 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={onSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">I am here to</label>
-              <div className="grid grid-cols-1 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRole('need_service')}
-                  className={`p-4 rounded-2xl border text-left transition-colors ${
-                    role === 'need_service' ? 'border-medical-500 bg-medical-50' : 'border-gray-200 bg-white hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="font-bold text-gray-800">Request medicine help</div>
-                  <div className="text-xs text-gray-500 mt-1">I need medicine from abroad / not available locally</div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setRole('provide_service')}
-                  className={`p-4 rounded-2xl border text-left transition-colors ${
-                    role === 'provide_service' ? 'border-medical-500 bg-medical-50' : 'border-gray-200 bg-white hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="font-bold text-gray-800">Help others bring medicine</div>
-                  <div className="text-xs text-gray-500 mt-1">I can purchase abroad and deliver</div>
-                </button>
+            {showMedicineHelpRole ? (
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">I am here to</label>
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setRole('need_service')}
+                    className={`p-4 rounded-2xl border text-left transition-colors ${
+                      role === 'need_service' ? 'border-medical-500 bg-medical-50' : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-gray-800">Request medicine help</div>
+                    <div className="text-xs text-gray-500 mt-1">I need medicine from abroad / not available locally</div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('provide_service')}
+                    className={`p-4 rounded-2xl border text-left transition-colors ${
+                      role === 'provide_service' ? 'border-medical-500 bg-medical-50' : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-gray-800">Help others bring medicine</div>
+                    <div className="text-xs text-gray-500 mt-1">I can purchase abroad and deliver</div>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => setRole('both')}
-                  className={`p-4 rounded-2xl border text-left transition-colors ${
-                    role === 'both' ? 'border-medical-500 bg-medical-50' : 'border-gray-200 bg-white hover:bg-gray-50'
-                  }`}
-                >
-                  <div className="font-bold text-gray-800">Both</div>
-                  <div className="text-xs text-gray-500 mt-1">I may request help and also help others</div>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setRole('both')}
+                    className={`p-4 rounded-2xl border text-left transition-colors ${
+                      role === 'both' ? 'border-medical-500 bg-medical-50' : 'border-gray-200 bg-white hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="font-bold text-gray-800">Both</div>
+                    <div className="text-xs text-gray-500 mt-1">I may request help and also help others</div>
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : null}
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
