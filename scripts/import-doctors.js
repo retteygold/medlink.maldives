@@ -102,7 +102,28 @@ function isDoctor(profession) {
     'neurologist',
     'psychiatrist',
     'dentist',
-    'dental surgeon'
+    'dental surgeon',
+    'ophthalmologist',
+    'pathologist',
+    'urologist',
+    'nephrologist',
+    'endocrinologist',
+    'gastroenterologist',
+    'pulmonologist',
+    'hematologist',
+    'oncologist',
+    'rheumatologist',
+    'immunologist',
+    'geriatrician',
+    'family medicine',
+    'internal medicine',
+    'emergency medicine',
+    'sports medicine',
+    'occupational medicine',
+    'forensic medicine',
+    'tropical medicine',
+    'public health',
+    'community medicine'
   ]
   return doctorTitles.some(title => p.includes(title))
 }
@@ -166,17 +187,33 @@ console.log('👨‍⚕️ Medical doctors found:', doctors.length)
 
 // Check for existing doctors
 async function fetchExistingDoctorNames() {
-  const { data, error } = await supabase
-    .from('doctors')
-    .select('name')
-    .eq('is_active', true)
-  
-  if (error) {
-    console.error('❌ Could not fetch existing doctors:', error)
-    return new Set()
+  const existing = new Set()
+  const pageSize = 1000
+  let from = 0
+  while (true) {
+    const to = from + pageSize - 1
+    const { data, error } = await supabase
+      .from('doctors')
+      .select('name')
+      .eq('is_active', true)
+      .order('name')
+      .range(from, to)
+
+    if (error) {
+      console.error('❌ Could not fetch existing doctors:', error)
+      return existing
+    }
+
+    for (const d of (data || [])) {
+      if (!d?.name) continue
+      existing.add(d.name.toLowerCase().trim())
+    }
+
+    if (!data || data.length < pageSize) break
+    from += pageSize
   }
-  
-  return new Set((data || []).map(d => d.name.toLowerCase().trim()))
+
+  return existing
 }
 
 const BATCH_SIZE = 500
@@ -221,7 +258,7 @@ async function run() {
         is_active: true,
         // We'll need to link to hospitals later
         hospital_id: null,
-        hospital_name: null
+        hospital_name: 'Independent Practice'
       }
     })
 
