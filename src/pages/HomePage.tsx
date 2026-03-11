@@ -200,9 +200,11 @@ export default function HomePage() {
                 {language === 'dv' ? 'ހޮސްޕިޓަލް/ކްލިނިކް' : 'Hospitals/Clinics'}
               </p>
             </div>
-            <div className="text-right">
-              <div className="text-xl font-extrabold text-blue-700 tabular-nums leading-none">{stats.hospitals}</div>
-              <div className="text-[10px] text-gray-400">Total</div>
+            <div className="shrink-0">
+              <div className="px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-sm font-extrabold tabular-nums leading-none border border-blue-100">
+                {stats.hospitals}
+              </div>
+              <div className="mt-1 text-[10px] text-gray-400 text-center">Total</div>
             </div>
           </Link>
           <Link
@@ -218,9 +220,11 @@ export default function HomePage() {
                 {language === 'dv' ? 'ޑޮކްޓަރުން' : 'Doctors'}
               </p>
             </div>
-            <div className="text-right">
-              <div className="text-xl font-extrabold text-green-700 tabular-nums leading-none">{stats.doctors}</div>
-              <div className="text-[10px] text-gray-400">Total</div>
+            <div className="shrink-0">
+              <div className="px-2.5 py-1 rounded-full bg-green-50 text-green-700 text-sm font-extrabold tabular-nums leading-none border border-green-100">
+                {stats.doctors}
+              </div>
+              <div className="mt-1 text-[10px] text-gray-400 text-center">Total</div>
             </div>
           </Link>
         </div>
