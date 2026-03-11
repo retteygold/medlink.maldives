@@ -138,6 +138,12 @@ export default function AdminRideTrips() {
                 Finished: {t.finished_at ? new Date(t.finished_at).toLocaleString() : '—'}
               </div>
             </div>
+
+            {t.delay_reason ? (
+              <div className="mt-3 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2">
+                Delay reason: <span className="font-semibold">{String(t.delay_reason)}</span>
+              </div>
+            ) : null}
           </div>
         ))}
       </div>

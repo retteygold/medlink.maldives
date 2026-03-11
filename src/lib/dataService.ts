@@ -52,6 +52,23 @@ export async function updateDriverTripLocation(tripId: string, lat: number, lng:
   }
 }
 
+export async function setRideTripDelayReason(tripId: string, reason: string): Promise<boolean> {
+  try {
+    const msg = String(reason || '').trim()
+    if (!msg) return false
+
+    const { error } = await supabase
+      .from('ride_trips')
+      .update({ delay_reason: msg, delay_reported_at: new Date().toISOString() })
+      .eq('id', tripId)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error setting ride trip delay reason:', err)
+    return false
+  }
+}
+
 export async function listAdminRideTrips(limit: number = 200): Promise<
   Array<RideTrip & { request?: RideRequest | null; driver?: RideDriverProfile | null }>
 > {

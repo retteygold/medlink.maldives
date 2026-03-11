@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Car, MapPin, X, LocateFixed } from 'lucide-react'
+import { ChevronLeft, Car, X, LocateFixed } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { cancelMyOpenRideRequest, getMyLatestRideState } from '../lib/dataService'
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
@@ -385,29 +385,34 @@ export default function RideStatusPage() {
         ) : (
           <div className="space-y-3">
             <div className="card p-4">
-              <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                {language === 'dv' ? 'ސްޓޭޓަސް' : 'Status'}
+              <div className="text-sm text-gray-600">
+                {language === 'dv' ? 'ސްޓޭޓަސް' : 'Status'}:{' '}
+                <span className="font-bold text-gray-900">{String(summary.status || '').toUpperCase()}</span>
               </div>
-              <div className="mt-1 text-xl font-extrabold text-gray-900">{String(summary.status).toUpperCase()}</div>
 
-              <div className="mt-3 space-y-2 text-sm text-gray-700">
-                <div className="flex items-center gap-2">
-                  <MapPin size={16} className="text-medical-700" />
-                  <span className="font-semibold">{language === 'dv' ? 'ނަގާ' : 'Pickup'}:</span>
-                  <span className="truncate">{summary.origin}</span>
+              {state?.trip?.delay_reason ? (
+                <div className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2">
+                  {language === 'dv' ? 'ޑްރައިވަރު ލަސް ވާ ސަބަބު:' : 'Driver delay reason:'}{' '}
+                  <span className="font-semibold">{String(state.trip.delay_reason)}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <MapPin size={16} className="text-medical-700" />
-                  <span className="font-semibold">{language === 'dv' ? 'ދާން' : 'Destination'}:</span>
-                  <span className="truncate">{summary.destination}</span>
+              ) : null}
+
+              <div className="mt-3 grid grid-cols-2 gap-3">
+                <div className="text-sm text-gray-600">
+                  {language === 'dv' ? 'ނަގާ' : 'Pickup'}
+                  <div className="font-bold text-gray-900 truncate">{summary.origin}</div>
                 </div>
-                <div className="flex items-center justify-between pt-2 border-t">
-                  <span className={`text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{language === 'dv' ? 'ވާހަން' : 'Vehicle'}</span>
-                  <span className="font-bold">{String(summary.vehicleType).toUpperCase()}</span>
+                <div className="text-sm text-gray-600">
+                  {language === 'dv' ? 'ދާން' : 'Destination'}
+                  <div className="font-bold text-gray-900 truncate">{summary.destination}</div>
                 </div>
-                <div className="flex items-center justify-between">
-                  <span className={`text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{language === 'dv' ? 'އަގު' : 'Fare'}</span>
-                  <span className="font-bold tabular-nums">{summary.fare}</span>
+                <div className="text-sm text-gray-600">
+                  {language === 'dv' ? 'ވެހިކަލް' : 'Vehicle'}
+                  <div className="font-bold text-gray-900">{String(summary.vehicleType || '').toUpperCase()}</div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {language === 'dv' ? 'ފީ' : 'Fare'}
+                  <div className="font-bold text-gray-900">{summary.fare}</div>
                 </div>
               </div>
 
@@ -471,8 +476,8 @@ export default function RideStatusPage() {
                       type="button"
                       onClick={() => {
                         setFollowDriver(true)
-                        const lat = summary?.driverLat
-                        const lng = summary?.driverLng
+                        const lat = summary.driverLat
+                        const lng = summary.driverLng
                         if (typeof lat === 'number' && typeof lng === 'number') {
                           mapRef.current?.setView([lat, lng], 16, { animate: true } as any)
                           return

@@ -101,6 +101,8 @@ CREATE TABLE IF NOT EXISTS public.ride_trips (
   driver_lat double precision,
   driver_lng double precision,
   driver_updated_at timestamptz,
+  delay_reason text,
+  delay_reported_at timestamptz,
   cash_paid boolean NOT NULL DEFAULT false,
   amount numeric NOT NULL DEFAULT 0,
   rider_rating int,
@@ -115,6 +117,12 @@ ADD COLUMN IF NOT EXISTS driver_lng double precision;
 
 ALTER TABLE public.ride_trips
 ADD COLUMN IF NOT EXISTS driver_updated_at timestamptz;
+
+ALTER TABLE public.ride_trips
+ADD COLUMN IF NOT EXISTS delay_reason text;
+
+ALTER TABLE public.ride_trips
+ADD COLUMN IF NOT EXISTS delay_reported_at timestamptz;
 
 CREATE UNIQUE INDEX IF NOT EXISTS ride_trips_request_id_key ON public.ride_trips(request_id);
 CREATE INDEX IF NOT EXISTS ride_trips_driver_idx ON public.ride_trips(driver_user_id);

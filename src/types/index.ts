@@ -145,6 +145,8 @@ export interface RideTrip {
   driver_lat?: number | null
   driver_lng?: number | null
   driver_updated_at?: string | null
+  delay_reason?: string | null
+  delay_reported_at?: string | null
   cash_paid: boolean
   amount: number
   rider_rating?: number | null

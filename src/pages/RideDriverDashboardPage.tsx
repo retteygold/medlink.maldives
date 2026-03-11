@@ -7,6 +7,7 @@ import {
   getDriverActiveTrip,
   getDriverOpenRideRequests,
   getMyRideDriverProfile,
+  setRideTripDelayReason,
   updateDriverTripLocation,
   updateRideTripStatus
 } from '../lib/dataService'
@@ -36,6 +37,9 @@ export default function RideDriverDashboardPage() {
   const [toast, setToast] = useState<string | null>(null)
   const lastToastRef = useRef<string>('')
   const lastTripStatusRef = useRef<string>('')
+
+  const [pickupEtaSeconds, setPickupEtaSeconds] = useState<number | null>(null)
+  const askedDelayRef = useRef(false)
 
   const mapRef = useRef<L.Map | null>(null)
   const [followMe, setFollowMe] = useState(true)
@@ -313,6 +317,72 @@ export default function RideDriverDashboardPage() {
     if (typeof lat !== 'number' || typeof lng !== 'number') return
     mapRef.current?.setView([lat, lng], Math.max(mapRef.current?.getZoom?.() || 13, 15), { animate: true } as any)
   }, [followMe, myPos?.lat, myPos?.lng])
+
+  useEffect(() => {
+    askedDelayRef.current = false
+    setPickupEtaSeconds(null)
+  }, [activeTrip?.id])
+
+  useEffect(() => {
+    async function fetchPickupEta() {
+      if (!activeTrip?.id) return
+      if (String(activeTrip.status) !== 'accepted') return
+      if (!myPos || !resolvedOrigin) return
+      if (typeof myPos.lat !== 'number' || typeof myPos.lng !== 'number') return
+
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${myPos.lng},${myPos.lat};${resolvedOrigin.lng},${resolvedOrigin.lat}?overview=false`
+        const res = await fetch(url)
+        if (!res.ok) return
+        const json: any = await res.json()
+        const seconds = Number(json?.routes?.[0]?.duration)
+        if (!Number.isFinite(seconds) || seconds <= 0) return
+        setPickupEtaSeconds(seconds)
+      } catch {
+      }
+    }
+
+    fetchPickupEta()
+    const t = window.setInterval(fetchPickupEta, 30_000)
+    return () => window.clearInterval(t)
+  }, [activeTrip?.id, activeTrip?.status, myPos?.lat, myPos?.lng, resolvedOrigin?.lat, resolvedOrigin?.lng])
+
+  useEffect(() => {
+    async function checkLate() {
+      if (!activeTrip?.id) return
+      if (String(activeTrip.status) !== 'accepted') return
+      if (activeTrip.delay_reason) return
+      if (askedDelayRef.current) return
+
+      const acceptedAtMs = activeTrip.accepted_at ? Date.parse(activeTrip.accepted_at) : NaN
+      if (!Number.isFinite(acceptedAtMs)) return
+
+      const elapsedMs = Date.now() - acceptedAtMs
+
+      const etaMs = typeof pickupEtaSeconds === 'number' ? pickupEtaSeconds * 1000 : 10 * 60 * 1000
+      const thresholdMs = etaMs * 2 + 5 * 60 * 1000
+
+      if (elapsedMs < thresholdMs) return
+
+      askedDelayRef.current = true
+      const reason = window.prompt(
+        language === 'dv'
+          ? 'ނަގާ ތަނަށް ދަންނަވާއިރު ލަސް ކަމަށް ވެފައިވޭ. ސަބަބެއް ލިޔެލާށެވެ:'
+          : 'Your arrival is taking longer than expected. Please type the reason (this will be shown to the user):'
+      )
+
+      const msg = String(reason || '').trim()
+      if (!msg) return
+
+      await setRideTripDelayReason(activeTrip.id, msg)
+      await load()
+      emitToast(language === 'dv' ? 'ލަސް ކަމުގެ ސަބަބު ރަޖިސްޓްރީ ކުރެވިއްޖެ' : 'Delay reason sent to user')
+    }
+
+    checkLate()
+    const t = window.setInterval(checkLate, 10_000)
+    return () => window.clearInterval(t)
+  }, [activeTrip?.id, activeTrip?.status, activeTrip?.accepted_at, activeTrip?.delay_reason, pickupEtaSeconds, language])
 
   function openGoogleMapsDirections(dest: { lat?: number | null; lng?: number | null; text?: string | null }) {
     const lat = dest?.lat
