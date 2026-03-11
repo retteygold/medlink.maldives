@@ -12,7 +12,8 @@ import {
   Eye,
   X,
   MapPin,
-  Car
+  Car,
+  Clock
 } from 'lucide-react'
 import { getDatabaseStats, getVisitAnalytics, getRecentVisitsWithUsers, type AppVisit, type VisitAnalytics } from '../../lib/dataService'
 import { supabase } from '../../lib/supabase'
@@ -111,6 +112,14 @@ export default function AdminDashboard() {
       count: 0,
       path: '/admin/ride-drivers',
       color: 'bg-orange-500'
+    },
+    {
+      title: 'Ride Trips',
+      description: 'Monitor active trips (live timer)',
+      icon: Clock,
+      count: 0,
+      path: '/admin/ride-trips',
+      color: 'bg-amber-500'
     },
     {
       title: 'Visitors',

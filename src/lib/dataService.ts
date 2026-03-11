@@ -52,6 +52,49 @@ export async function updateDriverTripLocation(tripId: string, lat: number, lng:
   }
 }
 
+export async function listAdminRideTrips(limit: number = 200): Promise<
+  Array<RideTrip & { request?: RideRequest | null; driver?: RideDriverProfile | null }>
+> {
+  try {
+    const { data: trips, error } = await supabase
+      .from('ride_trips')
+      .select('*')
+      .order('accepted_at', { ascending: false })
+      .limit(limit)
+
+    if (error) throw error
+    const list = (trips || []) as any[]
+    if (list.length === 0) return []
+
+    const requestIds = Array.from(new Set(list.map((t) => String(t.request_id)).filter(Boolean)))
+    const driverUserIds = Array.from(new Set(list.map((t) => String(t.driver_user_id)).filter(Boolean)))
+
+    const [reqRes, drvRes] = await Promise.all([
+      supabase.from('ride_requests').select('*').in('id', requestIds),
+      supabase.from('ride_driver_profiles').select('*').in('user_id', driverUserIds)
+    ])
+
+    const reqById = new Map<string, any>()
+    if (!reqRes.error) {
+      for (const r of reqRes.data || []) reqById.set(String((r as any).id), r)
+    }
+
+    const drvByUser = new Map<string, any>()
+    if (!drvRes.error) {
+      for (const d of drvRes.data || []) drvByUser.set(String((d as any).user_id), d)
+    }
+
+    return list.map((t) => {
+      const request = reqById.get(String(t.request_id)) || null
+      const driver = drvByUser.get(String(t.driver_user_id)) || null
+      return ({ ...(t as any), request, driver } as any)
+    })
+  } catch (err) {
+    console.error('Error listing admin ride trips:', err)
+    return []
+  }
+}
+
 export async function uploadRideDriverImage(file: File, kind: 'driver' | 'license' | 'vehicle'): Promise<string> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   if (sessionError) throw sessionError
