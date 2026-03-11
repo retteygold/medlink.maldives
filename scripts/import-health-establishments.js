@@ -135,21 +135,44 @@ console.log('📄 Loaded CSV rows:', rows.length)
 
 const BATCH_SIZE = 500
 
-async function upsertInBatches(tableName, rowsToInsert) {
-  let upserted = 0
+async function fetchExistingHospitalNames() {
+  const { data, error } = await supabase
+    .from('hospitals')
+    .select('name')
+    .eq('is_active', true)
+  
+  if (error) {
+    console.error('❌ Could not fetch existing hospitals:', error)
+    return new Set()
+  }
+  
+  return new Set((data || []).map(h => h.name.toLowerCase().trim()))
+}
+
+async function insertInBatches(tableName, rowsToInsert) {
+  if (rowsToInsert.length === 0) {
+    console.log(`ℹ️ No new rows to insert for ${tableName}`)
+    return
+  }
+  
+  let inserted = 0
   for (let i = 0; i < rowsToInsert.length; i += BATCH_SIZE) {
     const batch = rowsToInsert.slice(i, i + BATCH_SIZE)
-    const { error } = await supabase.from(tableName).upsert(batch, { onConflict: 'name' })
+    const { error } = await supabase.from(tableName).insert(batch)
     if (error) {
-      throw new Error(`${tableName} upsert failed at batch ${i}-${i + batch.length}: ${error.message}`)
+      throw new Error(`${tableName} insert failed at batch ${i}-${i + batch.length}: ${error.message}`)
     }
-    upserted += batch.length
-    console.log(`✅ ${tableName}: upserted ${upserted}/${rowsToInsert.length}`)
+    inserted += batch.length
+    console.log(`✅ ${tableName}: inserted ${inserted}/${rowsToInsert.length}`)
   }
 }
 
 async function run() {
-  const toUpsert = rows
+  console.log('🔍 Fetching existing hospitals from database...')
+  const existingNames = await fetchExistingHospitalNames()
+  console.log(`📊 Found ${existingNames.size} existing hospitals`)
+
+  const toInsert = rows
     .filter(r => (r.name || '').trim().length > 0)
     .map(r => {
       const name = (r.name || '').trim()
@@ -173,9 +196,12 @@ async function run() {
         is_active: true
       }
     })
+    .filter(h => !existingNames.has(h.name.toLowerCase()))
 
-  await upsertInBatches('hospitals', toUpsert)
-  console.log('\n🎉 Import complete!')
+  console.log(`📝 New hospitals to insert: ${toInsert.length}`)
+  
+  await insertInBatches('hospitals', toInsert)
+  console.log(`\n🎉 Import complete! Added ${toInsert.length} new hospitals/clinics.`)
 }
 
 run().catch(err => {

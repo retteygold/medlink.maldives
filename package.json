@@ -9,6 +9,7 @@
     "preview": "vite preview",
     "seed:supabase": "node scripts/seed-supabase.js",
     "import:facilities": "node scripts/import-health-establishments.js",
+    "import:doctors": "node scripts/import-doctors.js",
     "generate:filenames": "node scripts/generate-image-filenames.js",
     "generate:images": "node scripts/generate-sample-images.js"
   },
