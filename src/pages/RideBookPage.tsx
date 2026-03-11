@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { ChevronLeft, MapPin, Navigation, Car } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
-import { createRideRequest } from '../lib/dataService'
+import { createRideRequest, getHospitals } from '../lib/dataService'
 
 type VehicleType = 'bike' | 'car' | 'van' | 'pickup'
 
@@ -23,7 +23,129 @@ export default function RideBookPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [places, setPlaces] = useState<string[]>([])
+  const [originOpen, setOriginOpen] = useState(false)
+  const [destOpen, setDestOpen] = useState(false)
+  const originWrapRef = useRef<HTMLDivElement | null>(null)
+  const destWrapRef = useRef<HTMLDivElement | null>(null)
+
   const fare = useMemo(() => fares[vehicleType] ?? 0, [vehicleType])
+
+  function normalizeText(value: string) {
+    return (value || '').toLowerCase().trim()
+  }
+
+  function parseCsvLine(line: string): string[] {
+    const out: string[] = []
+    let cur = ''
+    let inQuotes = false
+
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i]
+
+      if (ch === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          cur += '"'
+          i++
+        } else {
+          inQuotes = !inQuotes
+        }
+        continue
+      }
+
+      if (ch === ',' && !inQuotes) {
+        out.push(cur)
+        cur = ''
+        continue
+      }
+
+      cur += ch
+    }
+
+    out.push(cur)
+    return out
+  }
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadPlaces() {
+      const all: string[] = []
+
+      try {
+        const hospitals = await getHospitals()
+        for (const h of hospitals) {
+          const label = [h.name, h.address].filter(Boolean).join(' - ').trim()
+          if (label) all.push(label)
+        }
+      } catch {
+      }
+
+      try {
+        const res = await fetch('/maldives_pharmacies.csv', { cache: 'no-store' })
+        if (res.ok) {
+          const text = await res.text()
+          const lines = text.split(/\r?\n/).filter(Boolean)
+          if (lines.length > 1) {
+            const headers = parseCsvLine(lines[0]).map(h => normalizeText(h))
+            const idxName = headers.indexOf('name')
+            const idxAddress = headers.indexOf('address')
+            for (let i = 1; i < lines.length; i++) {
+              const cols = parseCsvLine(lines[i])
+              const name = (cols[idxName] ?? '').trim()
+              if (!name) continue
+              const addr = (cols[idxAddress] ?? '').trim()
+              const label = [name, addr].filter(Boolean).join(' - ').trim()
+              if (label) all.push(label)
+            }
+          }
+        }
+      } catch {
+      }
+
+      const seen = new Set<string>()
+      const unique: string[] = []
+      for (const p of all) {
+        const key = normalizeText(p)
+        if (!key || seen.has(key)) continue
+        seen.add(key)
+        unique.push(p)
+      }
+
+      if (!cancelled) setPlaces(unique)
+    }
+
+    loadPlaces()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  useEffect(() => {
+    function onDocMouseDown(e: MouseEvent) {
+      const target = e.target as any
+      if (originWrapRef.current && !originWrapRef.current.contains(target)) setOriginOpen(false)
+      if (destWrapRef.current && !destWrapRef.current.contains(target)) setDestOpen(false)
+    }
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [])
+
+  const originSuggestions = useMemo(() => {
+    const q = normalizeText(origin)
+    if (q.length < 2) return []
+    return places
+      .filter(p => normalizeText(p).includes(q))
+      .slice(0, 6)
+  }, [origin, places])
+
+  const destinationSuggestions = useMemo(() => {
+    const q = normalizeText(destination)
+    if (q.length < 2) return []
+    return places
+      .filter(p => normalizeText(p).includes(q))
+      .slice(0, 6)
+  }, [destination, places])
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -85,15 +207,34 @@ export default function RideBookPage() {
               <label className={`block text-sm font-semibold text-gray-800 mb-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
                 {language === 'dv' ? 'ނަގާ ތަން' : 'Pickup location'}
               </label>
-              <div className="relative">
+              <div className="relative" ref={originWrapRef}>
                 <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   value={origin}
                   onChange={(e) => setOrigin(e.target.value)}
+                  onFocus={() => setOriginOpen(true)}
                   className="w-full pl-9 pr-3 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none"
                   placeholder={language === 'dv' ? 'މާލެ...' : 'Male...'}
                   required
                 />
+
+                {originOpen && originSuggestions.length > 0 ? (
+                  <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                    {originSuggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setOrigin(s)
+                          setOriginOpen(false)
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
 
@@ -101,15 +242,34 @@ export default function RideBookPage() {
               <label className={`block text-sm font-semibold text-gray-800 mb-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
                 {language === 'dv' ? 'ދާން ތަން' : 'Destination'}
               </label>
-              <div className="relative">
+              <div className="relative" ref={destWrapRef}>
                 <Navigation size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
+                  onFocus={() => setDestOpen(true)}
                   className="w-full pl-9 pr-3 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none"
                   placeholder={language === 'dv' ? 'ހޮސްޕިޓަލް...' : 'Hospital...'}
                   required
                 />
+
+                {destOpen && destinationSuggestions.length > 0 ? (
+                  <div className="absolute left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-lg overflow-hidden z-50">
+                    {destinationSuggestions.map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => {
+                          setDestination(s)
+                          setDestOpen(false)
+                        }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50"
+                      >
+                        {s}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
               </div>
             </div>
 
