@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Car, CheckCircle2, MapPin, Play, Flag, Star } from 'lucide-react'
+import { ChevronLeft, Car, CheckCircle2, MapPin, Play, Flag, Star, LocateFixed } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import {
   acceptRideRequest,
@@ -10,7 +10,7 @@ import {
   updateDriverTripLocation,
   updateRideTripStatus
 } from '../lib/dataService'
-import { MapContainer, Marker, Polyline, TileLayer } from 'react-leaflet'
+import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
 import L from 'leaflet'
 
 export default function RideDriverDashboardPage() {
@@ -36,6 +36,24 @@ export default function RideDriverDashboardPage() {
   const [toast, setToast] = useState<string | null>(null)
   const lastToastRef = useRef<string>('')
   const lastTripStatusRef = useRef<string>('')
+
+  const mapRef = useRef<L.Map | null>(null)
+  const [followMe, setFollowMe] = useState(true)
+  const hasFittedRef = useRef(false)
+
+  function MapRefCapture() {
+    const map = useMap()
+    useEffect(() => {
+      mapRef.current = map
+      map.on('dragstart', () => setFollowMe(false))
+      map.on('zoomstart', () => setFollowMe(false))
+      return () => {
+        map.off('dragstart')
+        map.off('zoomstart')
+      }
+    }, [map])
+    return null
+  }
 
   useEffect(() => {
     load()
@@ -276,6 +294,26 @@ export default function RideDriverDashboardPage() {
     fetchRoute()
   }, [activeTrip?.id, resolvedOrigin?.lat, resolvedOrigin?.lng, resolvedDestination?.lat, resolvedDestination?.lng])
 
+  useEffect(() => {
+    if (!resolvedOrigin) {
+      hasFittedRef.current = false
+      return
+    }
+
+    if (routePoints.length >= 2 && !hasFittedRef.current) {
+      hasFittedRef.current = true
+      mapRef.current?.fitBounds(routePoints as any, { padding: [30, 30] } as any)
+    }
+  }, [resolvedOrigin, routePoints])
+
+  useEffect(() => {
+    if (!followMe) return
+    const lat = myPos?.lat
+    const lng = myPos?.lng
+    if (typeof lat !== 'number' || typeof lng !== 'number') return
+    mapRef.current?.setView([lat, lng], Math.max(mapRef.current?.getZoom?.() || 13, 15), { animate: true } as any)
+  }, [followMe, myPos?.lat, myPos?.lng])
+
   async function onAccept(requestId: string) {
     try {
       setLoading(true)
@@ -409,13 +447,14 @@ export default function RideDriverDashboardPage() {
             </div>
 
             {resolvedOrigin ? (
-              <div className="mt-4 w-full h-64 rounded-xl overflow-hidden">
+              <div className="mt-4 w-full h-64 rounded-xl overflow-hidden relative">
                 <MapContainer
                   center={[resolvedOrigin.lat, resolvedOrigin.lng]}
                   zoom={13}
                   style={{ height: '100%', width: '100%' }}
                   scrollWheelZoom={false}
                 >
+                  <MapRefCapture />
                   <TileLayer
                     attribution="&copy; OpenStreetMap contributors"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -434,6 +473,28 @@ export default function RideDriverDashboardPage() {
                     <Marker position={[activeTrip.driver_lat, activeTrip.driver_lng]} icon={driverIcon} />
                   ) : null}
                 </MapContainer>
+
+                <div className="absolute right-3 bottom-3 z-[1000]">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setFollowMe(true)
+                      const lat = myPos?.lat
+                      const lng = myPos?.lng
+                      if (typeof lat === 'number' && typeof lng === 'number') {
+                        mapRef.current?.setView([lat, lng], 16, { animate: true } as any)
+                        return
+                      }
+                      if (routePoints.length >= 2) {
+                        mapRef.current?.fitBounds(routePoints as any, { padding: [30, 30] } as any)
+                      }
+                    }}
+                    className="w-11 h-11 rounded-2xl bg-white shadow-lg border border-gray-200 flex items-center justify-center"
+                    aria-label="Recenter"
+                  >
+                    <LocateFixed size={18} className="text-gray-800" />
+                  </button>
+                </div>
               </div>
             ) : null}
 
