@@ -11,7 +11,8 @@ import {
   MessageCircle,
   Eye,
   X,
-  MapPin
+  MapPin,
+  Car
 } from 'lucide-react'
 import { getDatabaseStats, getVisitAnalytics, getRecentVisitsWithUsers, type AppVisit, type VisitAnalytics } from '../../lib/dataService'
 import { supabase } from '../../lib/supabase'
@@ -102,6 +103,14 @@ export default function AdminDashboard() {
       count: 0,
       path: '/admin/pharmacy-finder',
       color: 'bg-teal-500'
+    },
+    {
+      title: 'Medlink Ride',
+      description: 'Approve ride drivers',
+      icon: Car,
+      count: 0,
+      path: '/admin/ride-drivers',
+      color: 'bg-orange-500'
     },
     {
       title: 'Visitors',

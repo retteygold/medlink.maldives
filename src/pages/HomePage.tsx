@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity, Building2, Pill } from 'lucide-react'
+import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity, Building2, Pill, Car } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
 import { getDatabaseStats } from '../lib/dataService'
@@ -136,6 +136,37 @@ export default function HomePage() {
               <div className="min-w-0">
                 <h3 className={`font-extrabold text-lg leading-tight ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.smartMatch.title')}</h3>
                 <p className={`text-white/85 text-sm leading-snug mt-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.smartMatch.subtitle')}</p>
+              </div>
+            </div>
+            <ChevronRight size={24} className="opacity-90" />
+          </div>
+        </Link>
+      </div>
+
+      {/* Medlink Ride CTA */}
+      <div className="px-4 mt-4">
+        <Link
+          to="/ride"
+          className="relative overflow-hidden block bg-gradient-to-r from-amber-500 to-orange-500 rounded-2xl p-5 shadow-lg shadow-orange-500/20 text-white min-h-[116px]"
+        >
+          <img
+            src="/images/storyset/Doctors-pana.svg"
+            alt=""
+            className="absolute right-3 bottom-2 w-28 h-28 opacity-95 pointer-events-none"
+            loading="lazy"
+          />
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3 pr-20">
+              <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
+                <Car size={24} />
+              </div>
+              <div className="min-w-0">
+                <h3 className={`font-extrabold text-lg leading-tight ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                  {language === 'dv' ? 'މެޑްލިންކް ރައިޑް' : 'Medlink Ride'}
+                </h3>
+                <p className={`text-white/85 text-sm leading-snug mt-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                  {language === 'dv' ? 'މަގު ހޯދާ — ބައިކް / ކާރ / ވޭން / ޕިކަޕް' : 'Book a ride — Bike / Car / Van / Pickup'}
+                </p>
               </div>
             </div>
             <ChevronRight size={24} className="opacity-90" />

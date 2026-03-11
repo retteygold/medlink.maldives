@@ -21,6 +21,11 @@ import MedicineHelpDetailPage from './pages/MedicineHelpDetailPage'
 import PharmacyFinderPage from './pages/PharmacyFinderPage'
 import PharmacyFinderInboxPage from './pages/PharmacyFinderInboxPage'
 import PharmaciesPage from './pages/PharmaciesPage'
+import RidePage from './pages/RidePage'
+import RideBookPage from './pages/RideBookPage'
+import RideStatusPage from './pages/RideStatusPage'
+import RideDriverSignupPage from './pages/RideDriverSignupPage'
+import RideDriverDashboardPage from './pages/RideDriverDashboardPage'
 import AdminDashboard from './pages/admin/AdminDashboard'
 import AdminHospitals from './pages/admin/AdminHospitals'
 import AdminDoctors from './pages/admin/AdminDoctors'
@@ -29,6 +34,7 @@ import AdminLogin from './pages/admin/AdminLogin'
 import AdminCommunity from './pages/admin/AdminCommunity'
 import AdminMedicineHelp from './pages/admin/AdminMedicineHelp'
 import AdminPharmacyFinder from './pages/admin/AdminPharmacyFinder'
+import AdminRideDrivers from './pages/admin/AdminRideDrivers'
 import RequireAdmin from './components/RequireAdmin'
 import RequireAuth from './components/RequireAuth'
 import { Footer } from './components/Footer'
@@ -86,6 +92,8 @@ function App() {
           <Route path="/doctor/:id" element={<DoctorDetailPage />} />
           <Route path="/hospital/:id" element={<HospitalDetailPage />} />
           <Route path="/smart-match" element={<SmartMatcherPage />} />
+
+          <Route path="/ride" element={<RidePage />} />
           
           {/* Community Routes */}
           <Route path="/community" element={<CommunityPage />} />
@@ -100,6 +108,12 @@ function App() {
 
             <Route path="/pharmacy-finder" element={<PharmacyFinderPage />} />
             <Route path="/pharmacy-finder/inbox" element={<PharmacyFinderInboxPage />} />
+
+            {/* Medlink Ride */}
+            <Route path="/ride/book" element={<RideBookPage />} />
+            <Route path="/ride/status" element={<RideStatusPage />} />
+            <Route path="/ride/driver/signup" element={<RideDriverSignupPage />} />
+            <Route path="/ride/driver/dashboard" element={<RideDriverDashboardPage />} />
           </Route>
 
           <Route path="/pharmacies" element={<PharmaciesPage />} />
@@ -114,6 +128,7 @@ function App() {
             <Route path="/admin/community" element={<AdminCommunity />} />
             <Route path="/admin/medicine-help" element={<AdminMedicineHelp />} />
             <Route path="/admin/pharmacy-finder" element={<AdminPharmacyFinder />} />
+            <Route path="/admin/ride-drivers" element={<AdminRideDrivers />} />
           </Route>
         </Routes>
       </main>

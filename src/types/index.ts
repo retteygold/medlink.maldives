@@ -95,3 +95,49 @@ export interface UserLocation {
   longitude: number;
   accuracy?: number;
 }
+
+export type RideVehicleType = 'bike' | 'car' | 'van' | 'pickup'
+
+export interface RideDriverProfile {
+  id: string
+  user_id: string
+  full_name: string
+  phone: string
+  vehicle_type: RideVehicleType
+  vehicle_brand: string
+  vehicle_color: string
+  vehicle_number: string
+  license_number: string
+  annual_fee: number
+  driver_image_path?: string | null
+  license_image_path?: string | null
+  status: 'pending' | 'approved' | 'rejected'
+  created_at: string
+  updated_at: string
+}
+
+export interface RideRequest {
+  id: string
+  rider_user_id: string
+  origin_text: string
+  destination_text: string
+  vehicle_type: RideVehicleType
+  fare: number
+  status: 'open' | 'matched' | 'cancelled'
+  created_at: string
+}
+
+export interface RideTrip {
+  id: string
+  request_id: string
+  driver_user_id: string
+  status: 'accepted' | 'arrived' | 'started' | 'finished' | 'cancelled'
+  accepted_at: string
+  arrived_at?: string | null
+  started_at?: string | null
+  finished_at?: string | null
+  cash_paid: boolean
+  amount: number
+  rider_rating?: number | null
+  rider_rating_comment?: string | null
+}

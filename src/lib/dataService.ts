@@ -1,5 +1,5 @@
 import { supabase } from './supabase'
-import type { Hospital, Doctor } from '../types'
+import type { Hospital, Doctor, RideDriverProfile, RideRequest, RideTrip, RideVehicleType } from '../types'
 import { containsThaana, transliterateFromDhivehi } from './transliteration'
 
 
@@ -29,6 +29,23 @@ interface DBHospital {
   created_at: string
   rating: number
   review_count: number
+}
+
+export async function uploadRideDriverImage(file: File, kind: 'driver' | 'license'): Promise<string> {
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+  if (sessionError) throw sessionError
+  const user = sessionData.session?.user
+  if (!user) throw new Error('Not authenticated')
+
+  const safeName = (file.name || 'image').replace(/[^a-zA-Z0-9._-]+/g, '-')
+  const path = `ride/${kind}/${user.id}/${Date.now()}-${safeName}`
+
+  const { error } = await supabase.storage.from('medicine-requests').upload(path, file, {
+    upsert: false,
+    contentType: file.type || undefined
+  })
+  if (error) throw error
+  return path
 }
 
 // Medicine Help (must match Supabase schema)
@@ -1357,5 +1374,293 @@ export async function getDatabaseStats() {
   } catch (err) {
     console.error('Error fetching database stats:', err)
     return { total_facilities: 0, total_doctors: 0, total_specialties: 0 }
+  }
+}
+
+export async function getMyRideDriverProfile(): Promise<RideDriverProfile | null> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data, error } = await supabase
+      .from('ride_driver_profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle()
+    if (error) throw error
+    return (data || null) as any
+  } catch (err) {
+    console.error('Error fetching my ride driver profile:', err)
+    return null
+  }
+}
+
+export async function createRideDriverProfile(payload: {
+  full_name: string
+  phone: string
+  vehicle_type: RideVehicleType
+  vehicle_brand: string
+  vehicle_color: string
+  vehicle_number: string
+  license_number: string
+  annual_fee: number
+  driver_image_path?: string | null
+  license_image_path?: string | null
+}): Promise<RideDriverProfile | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const insertPayload: any = {
+      user_id: user.id,
+      full_name: payload.full_name.trim(),
+      phone: payload.phone.trim(),
+      vehicle_type: payload.vehicle_type,
+      vehicle_brand: payload.vehicle_brand.trim(),
+      vehicle_color: payload.vehicle_color.trim(),
+      vehicle_number: payload.vehicle_number.trim(),
+      license_number: payload.license_number.trim(),
+      annual_fee: typeof payload.annual_fee === 'number' ? payload.annual_fee : 0,
+      driver_image_path: payload.driver_image_path || null,
+      license_image_path: payload.license_image_path || null,
+      status: 'pending'
+    }
+
+    const { data, error } = await supabase
+      .from('ride_driver_profiles')
+      .insert(insertPayload)
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error creating ride driver profile:', err)
+    return undefined
+  }
+}
+
+export async function createRideRequest(payload: {
+  origin_text: string
+  destination_text: string
+  vehicle_type: RideVehicleType
+  fare: number
+}): Promise<RideRequest | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data, error } = await supabase
+      .from('ride_requests')
+      .insert({
+        rider_user_id: user.id,
+        origin_text: payload.origin_text.trim(),
+        destination_text: payload.destination_text.trim(),
+        vehicle_type: payload.vehicle_type,
+        fare: typeof payload.fare === 'number' ? payload.fare : 0,
+        status: 'open'
+      })
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error creating ride request:', err)
+    return undefined
+  }
+}
+
+export async function cancelMyOpenRideRequest(): Promise<boolean> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { error } = await supabase
+      .from('ride_requests')
+      .update({ status: 'cancelled' })
+      .eq('rider_user_id', user.id)
+      .eq('status', 'open')
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error cancelling ride request:', err)
+    return false
+  }
+}
+
+export async function getMyLatestRideState(): Promise<{
+  request: RideRequest | null
+  trip: (RideTrip & { driver?: RideDriverProfile | null; request?: RideRequest | null }) | null
+} | null> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data: req, error: reqError } = await supabase
+      .from('ride_requests')
+      .select('*')
+      .eq('rider_user_id', user.id)
+      .in('status', ['open', 'matched'])
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (reqError) throw reqError
+    if (!req?.id) return { request: null, trip: null }
+
+    const { data: trip, error: tripError } = await supabase
+      .from('ride_trips')
+      .select('*')
+      .eq('request_id', req.id)
+      .maybeSingle()
+    if (tripError) throw tripError
+
+    let driver: RideDriverProfile | null = null
+    if (trip?.driver_user_id) {
+      const { data: d, error: dErr } = await supabase
+        .from('ride_driver_profiles')
+        .select('*')
+        .eq('user_id', trip.driver_user_id)
+        .maybeSingle()
+      if (!dErr) driver = (d || null) as any
+    }
+
+    return {
+      request: (req || null) as any,
+      trip: trip ? ({ ...(trip as any), driver, request: req } as any) : null
+    }
+  } catch (err) {
+    console.error('Error getting ride state:', err)
+    return null
+  }
+}
+
+export async function getDriverOpenRideRequests(vehicleType: string): Promise<RideRequest[]> {
+  try {
+    const { data, error } = await supabase
+      .from('ride_requests')
+      .select('*')
+      .eq('status', 'open')
+      .eq('vehicle_type', vehicleType)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error listing open ride requests:', err)
+    return []
+  }
+}
+
+export async function acceptRideRequest(requestId: string): Promise<RideTrip | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data: request, error: reqError } = await supabase
+      .from('ride_requests')
+      .select('*')
+      .eq('id', requestId)
+      .maybeSingle()
+    if (reqError) throw reqError
+    if (!request?.id) throw new Error('Request not found')
+    if (String(request.status) !== 'open') throw new Error('Request is not available')
+
+    const { error: updError } = await supabase
+      .from('ride_requests')
+      .update({ status: 'matched' })
+      .eq('id', requestId)
+      .eq('status', 'open')
+    if (updError) throw updError
+
+    const { data: trip, error: tripError } = await supabase
+      .from('ride_trips')
+      .insert({
+        request_id: requestId,
+        driver_user_id: user.id,
+        status: 'accepted',
+        amount: request.fare || 0
+      })
+      .select('*')
+      .maybeSingle()
+    if (tripError) throw tripError
+    return (trip || undefined) as any
+  } catch (err) {
+    console.error('Error accepting ride request:', err)
+    return undefined
+  }
+}
+
+export async function getDriverActiveTrip(): Promise<(RideTrip & { request?: RideRequest | null }) | null> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data: trip, error } = await supabase
+      .from('ride_trips')
+      .select('*')
+      .eq('driver_user_id', user.id)
+      .in('status', ['accepted', 'arrived', 'started'])
+      .order('accepted_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (error) throw error
+    if (!trip?.id) return null
+
+    const { data: req, error: reqError } = await supabase
+      .from('ride_requests')
+      .select('*')
+      .eq('id', trip.request_id)
+      .maybeSingle()
+    if (reqError) throw reqError
+
+    return ({ ...(trip as any), request: req || null } as any)
+  } catch (err) {
+    console.error('Error getting driver active trip:', err)
+    return null
+  }
+}
+
+export async function updateRideTripStatus(
+  tripId: string,
+  status: 'arrived' | 'started' | 'finished' | 'cancelled',
+  extra?: {
+    cash_paid?: boolean
+    amount?: number
+    rider_rating?: number
+    rider_rating_comment?: string
+  }
+): Promise<boolean> {
+  try {
+    const payload: any = { status }
+    const now = new Date().toISOString()
+    if (status === 'arrived') payload.arrived_at = now
+    if (status === 'started') payload.started_at = now
+    if (status === 'finished') payload.finished_at = now
+    if (typeof extra?.cash_paid === 'boolean') payload.cash_paid = extra.cash_paid
+    if (typeof extra?.amount === 'number') payload.amount = extra.amount
+    if (typeof extra?.rider_rating === 'number') payload.rider_rating = extra.rider_rating
+    if (typeof extra?.rider_rating_comment === 'string') payload.rider_rating_comment = extra.rider_rating_comment
+
+    const { error } = await supabase
+      .from('ride_trips')
+      .update(payload)
+      .eq('id', tripId)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error updating ride trip status:', err)
+    return false
   }
 }
