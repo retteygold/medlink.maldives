@@ -31,7 +31,7 @@ interface DBHospital {
   review_count: number
 }
 
-export async function uploadRideDriverImage(file: File, kind: 'driver' | 'license'): Promise<string> {
+export async function uploadRideDriverImage(file: File, kind: 'driver' | 'license' | 'vehicle'): Promise<string> {
   const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
   if (sessionError) throw sessionError
   const user = sessionData.session?.user
@@ -1408,6 +1408,7 @@ export async function createRideDriverProfile(payload: {
   annual_fee: number
   driver_image_path?: string | null
   license_image_path?: string | null
+  vehicle_image_path?: string | null
 }): Promise<RideDriverProfile | undefined> {
   try {
     const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
@@ -1427,6 +1428,7 @@ export async function createRideDriverProfile(payload: {
       annual_fee: typeof payload.annual_fee === 'number' ? payload.annual_fee : 0,
       driver_image_path: payload.driver_image_path || null,
       license_image_path: payload.license_image_path || null,
+      vehicle_image_path: payload.vehicle_image_path || null,
       status: 'pending'
     }
 

@@ -28,6 +28,7 @@ export default function RideDriverSignupPage() {
 
   const [driverImage, setDriverImage] = useState<File | null>(null)
   const [licenseImage, setLicenseImage] = useState<File | null>(null)
+  const [vehicleImage, setVehicleImage] = useState<File | null>(null)
 
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -78,6 +79,7 @@ export default function RideDriverSignupPage() {
 
       const driverImagePath = driverImage ? await uploadRideDriverImage(driverImage, 'driver') : null
       const licenseImagePath = licenseImage ? await uploadRideDriverImage(licenseImage, 'license') : null
+      const vehicleImagePath = vehicleImage ? await uploadRideDriverImage(vehicleImage, 'vehicle') : null
 
       const created = await createRideDriverProfile({
         full_name: fullName,
@@ -89,7 +91,8 @@ export default function RideDriverSignupPage() {
         license_number: licenseNumber,
         annual_fee: annualFee ? Number(annualFee) : 0,
         driver_image_path: driverImagePath,
-        license_image_path: licenseImagePath
+        license_image_path: licenseImagePath,
+        vehicle_image_path: vehicleImagePath
       })
 
       if (!created?.id) throw new Error('Failed to register driver')
@@ -242,6 +245,17 @@ export default function RideDriverSignupPage() {
                   <Upload size={16} className="text-gray-500" />
                   <span className="text-sm text-gray-700">{licenseImage?.name || (language === 'dv' ? 'ފައިލް ނަގާ' : 'Choose file')}</span>
                   <input type="file" accept="image/*" className="hidden" onChange={(e) => setLicenseImage(e.target.files?.[0] || null)} />
+                </label>
+              </div>
+
+              <div>
+                <label className={`block text-sm font-semibold text-gray-800 mb-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                  {language === 'dv' ? 'ވާހަނު ފޮޓޯ' : 'Vehicle photo'}
+                </label>
+                <label className="flex items-center gap-2 px-3 py-3 rounded-xl bg-white border border-gray-200 cursor-pointer">
+                  <Upload size={16} className="text-gray-500" />
+                  <span className="text-sm text-gray-700">{vehicleImage?.name || (language === 'dv' ? 'ފައިލް ނަގާ' : 'Choose file')}</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => setVehicleImage(e.target.files?.[0] || null)} />
                 </label>
               </div>
 

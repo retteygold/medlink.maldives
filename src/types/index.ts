@@ -111,6 +111,7 @@ export interface RideDriverProfile {
   annual_fee: number
   driver_image_path?: string | null
   license_image_path?: string | null
+  vehicle_image_path?: string | null
   status: 'pending' | 'approved' | 'rejected'
   rejection_reason?: string | null
   created_at: string

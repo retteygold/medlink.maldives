@@ -8,6 +8,7 @@ export default function AdminRideDrivers() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [drivers, setDrivers] = useState<any[]>([])
+  const [imageUrls, setImageUrls] = useState<Record<string, { driver?: string | null; license?: string | null; vehicle?: string | null }>>({})
 
   useEffect(() => {
     load()
@@ -23,7 +24,19 @@ export default function AdminRideDrivers() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setDrivers(data || [])
+      const list = data || []
+      setDrivers(list)
+
+      const urls: Record<string, { driver?: string | null; license?: string | null; vehicle?: string | null }> = {}
+      for (const d of list) {
+        const id = String(d.id)
+        urls[id] = {
+          driver: await getSignedUrl(d.driver_image_path),
+          license: await getSignedUrl(d.license_image_path),
+          vehicle: await getSignedUrl(d.vehicle_image_path)
+        }
+      }
+      setImageUrls(urls)
     } catch (err: any) {
       setError(err?.message || 'Failed to load drivers')
     } finally {
@@ -31,11 +44,12 @@ export default function AdminRideDrivers() {
     }
   }
 
-  function getImageUrl(path?: string | null): string | null {
+  async function getSignedUrl(path?: string | null): Promise<string | null> {
     if (!path) return null
     try {
-      const { data } = supabase.storage.from('medicine-requests').getPublicUrl(path)
-      return data.publicUrl || null
+      const { data, error } = await supabase.storage.from('medicine-requests').createSignedUrl(path, 60 * 60)
+      if (error) return null
+      return data?.signedUrl || null
     } catch {
       return null
     }
@@ -130,16 +144,16 @@ export default function AdminRideDrivers() {
             </div>
 
             <div className="mt-3 grid grid-cols-2 gap-3">
-              {getImageUrl(d.driver_image_path) ? (
+              {imageUrls[String(d.id)]?.driver ? (
                 <a
-                  href={getImageUrl(d.driver_image_path) || undefined}
+                  href={imageUrls[String(d.id)]?.driver || undefined}
                   target="_blank"
                   rel="noreferrer"
                   className="block"
                 >
                   <div className="text-xs text-gray-600 mb-1">Driver photo</div>
                   <img
-                    src={getImageUrl(d.driver_image_path) || undefined}
+                    src={imageUrls[String(d.id)]?.driver || undefined}
                     alt="Driver"
                     className="w-full h-28 object-cover rounded-xl border border-gray-200"
                     loading="lazy"
@@ -149,16 +163,16 @@ export default function AdminRideDrivers() {
                 <div className="text-xs text-gray-500">No driver photo</div>
               )}
 
-              {getImageUrl(d.license_image_path) ? (
+              {imageUrls[String(d.id)]?.license ? (
                 <a
-                  href={getImageUrl(d.license_image_path) || undefined}
+                  href={imageUrls[String(d.id)]?.license || undefined}
                   target="_blank"
                   rel="noreferrer"
                   className="block"
                 >
                   <div className="text-xs text-gray-600 mb-1">License photo</div>
                   <img
-                    src={getImageUrl(d.license_image_path) || undefined}
+                    src={imageUrls[String(d.id)]?.license || undefined}
                     alt="License"
                     className="w-full h-28 object-cover rounded-xl border border-gray-200"
                     loading="lazy"
@@ -166,6 +180,27 @@ export default function AdminRideDrivers() {
                 </a>
               ) : (
                 <div className="text-xs text-gray-500">No license photo</div>
+              )}
+            </div>
+
+            <div className="mt-3">
+              {imageUrls[String(d.id)]?.vehicle ? (
+                <a
+                  href={imageUrls[String(d.id)]?.vehicle || undefined}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="block"
+                >
+                  <div className="text-xs text-gray-600 mb-1">Vehicle photo</div>
+                  <img
+                    src={imageUrls[String(d.id)]?.vehicle || undefined}
+                    alt="Vehicle"
+                    className="w-full h-36 object-cover rounded-xl border border-gray-200"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <div className="text-xs text-gray-500">No vehicle photo</div>
               )}
             </div>
           </div>
