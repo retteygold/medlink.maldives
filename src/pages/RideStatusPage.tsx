@@ -13,6 +13,8 @@ export default function RideStatusPage() {
   const [state, setState] = useState<any>(null)
   const [cancelling, setCancelling] = useState(false)
   const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
+  const [geoOrigin, setGeoOrigin] = useState<{ lat: number; lng: number } | null>(null)
+  const [geoDestination, setGeoDestination] = useState<{ lat: number; lng: number } | null>(null)
 
   useEffect(() => {
     load()
@@ -57,6 +59,39 @@ export default function RideStatusPage() {
     }
   }, [state])
 
+  const resolvedOrigin = useMemo(() => {
+    if (typeof summary?.originLat === 'number' && typeof summary?.originLng === 'number') {
+      return { lat: summary.originLat, lng: summary.originLng }
+    }
+    return geoOrigin
+  }, [geoOrigin, summary?.originLat, summary?.originLng])
+
+  const resolvedDestination = useMemo(() => {
+    if (typeof summary?.destinationLat === 'number' && typeof summary?.destinationLng === 'number') {
+      return { lat: summary.destinationLat, lng: summary.destinationLng }
+    }
+    return geoDestination
+  }, [geoDestination, summary?.destinationLat, summary?.destinationLng])
+
+  async function geocodePhoton(text: string): Promise<{ lat: number; lng: number } | null> {
+    const q = String(text || '').trim()
+    if (q.length < 2) return null
+    try {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1&lat=4.1755&lon=73.5093`
+      const res = await fetch(url)
+      if (!res.ok) return null
+      const json: any = await res.json()
+      const f = Array.isArray(json?.features) ? json.features[0] : null
+      const coords = f?.geometry?.coordinates
+      const lng = Array.isArray(coords) ? Number(coords[0]) : NaN
+      const lat = Array.isArray(coords) ? Number(coords[1]) : NaN
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+      return { lat, lng }
+    } catch {
+      return null
+    }
+  }
+
   useEffect(() => {
     const tripId = summary?.tripId
     if (!tripId) return
@@ -83,11 +118,43 @@ export default function RideStatusPage() {
   }, [summary?.tripId])
 
   useEffect(() => {
+    let cancelled = false
+    async function ensureGeocoded() {
+      if (!summary?.origin || !summary?.destination) {
+        setGeoOrigin(null)
+        setGeoDestination(null)
+        return
+      }
+
+      const needsOrigin = !(typeof summary.originLat === 'number' && typeof summary.originLng === 'number')
+      const needsDest = !(typeof summary.destinationLat === 'number' && typeof summary.destinationLng === 'number')
+
+      if (!needsOrigin) setGeoOrigin(null)
+      if (!needsDest) setGeoDestination(null)
+
+      if (needsOrigin) {
+        const o = await geocodePhoton(summary.origin)
+        if (!cancelled) setGeoOrigin(o)
+      }
+
+      if (needsDest) {
+        const d = await geocodePhoton(summary.destination)
+        if (!cancelled) setGeoDestination(d)
+      }
+    }
+
+    ensureGeocoded()
+    return () => {
+      cancelled = true
+    }
+  }, [summary?.origin, summary?.destination, summary?.originLat, summary?.originLng, summary?.destinationLat, summary?.destinationLng])
+
+  useEffect(() => {
     async function fetchRoute() {
-      const fromLat = summary?.originLat
-      const fromLng = summary?.originLng
-      const toLat = summary?.destinationLat
-      const toLng = summary?.destinationLng
+      const fromLat = resolvedOrigin?.lat
+      const fromLng = resolvedOrigin?.lng
+      const toLat = resolvedDestination?.lat
+      const toLng = resolvedDestination?.lng
       if (typeof fromLat !== 'number' || typeof fromLng !== 'number' || typeof toLat !== 'number' || typeof toLng !== 'number') {
         setRoutePoints([])
         return
@@ -119,7 +186,7 @@ export default function RideStatusPage() {
     }
 
     fetchRoute()
-  }, [summary?.originLat, summary?.originLng, summary?.destinationLat, summary?.destinationLng])
+  }, [resolvedOrigin?.lat, resolvedOrigin?.lng, resolvedDestination?.lat, resolvedDestination?.lng])
 
   async function onCancel() {
     setCancelling(true)
@@ -239,11 +306,11 @@ export default function RideStatusPage() {
               ) : null}
             </div>
 
-            {typeof summary.originLat === 'number' && typeof summary.originLng === 'number' ? (
+            {resolvedOrigin ? (
               <div className="card p-3">
                 <div className="w-full h-64 rounded-xl overflow-hidden">
                   <MapContainer
-                    center={[summary.originLat, summary.originLng]}
+                    center={[resolvedOrigin.lat, resolvedOrigin.lng]}
                     zoom={13}
                     style={{ height: '100%', width: '100%' }}
                     scrollWheelZoom={false}
@@ -252,10 +319,10 @@ export default function RideStatusPage() {
                       attribution="&copy; OpenStreetMap contributors"
                       url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                     />
-                    <Marker position={[summary.originLat, summary.originLng]} />
-                    {typeof summary.destinationLat === 'number' && typeof summary.destinationLng === 'number' ? (
+                    <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} />
+                    {resolvedDestination ? (
                       <>
-                        <Marker position={[summary.destinationLat, summary.destinationLng]} />
+                        <Marker position={[resolvedDestination.lat, resolvedDestination.lng]} />
                         {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
                       </>
                     ) : null}
