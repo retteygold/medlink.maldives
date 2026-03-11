@@ -3,9 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity, Building2 } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
-import { getDoctors, getHospitals, getDatabaseStats } from '../lib/dataService'
+import { getDatabaseStats } from '../lib/dataService'
 import { transliterateToDhivehi } from '../lib/transliteration'
-import type { Doctor, Hospital } from '../types'
 
 const specialties = [
   { name: 'Cardiology', icon: HeartPulse, color: 'bg-red-100 text-red-600' },
@@ -21,10 +20,7 @@ export default function HomePage() {
   const { t, language } = useLanguage()
   const [searchQuery, setSearchQuery] = useState('')
   const [greeting, setGreeting] = useState('Hello')
-  const [featuredDoctors, setFeaturedDoctors] = useState<Doctor[]>([])
-  const [featuredHospitals, setFeaturedHospitals] = useState<Hospital[]>([])
   const [stats, setStats] = useState({ hospitals: 0, doctors: 0 })
-  const [loadingFeatured, setLoadingFeatured] = useState(true)
 
   useEffect(() => {
     const hour = new Date().getHours()
@@ -34,7 +30,6 @@ export default function HomePage() {
   }, [t])
 
   useEffect(() => {
-    loadFeatured()
     loadStats()
   }, [])
 
@@ -48,20 +43,6 @@ export default function HomePage() {
     } catch (err) {
       console.error('Error loading stats:', err)
       setStats({ hospitals: 0, doctors: 0 })
-    }
-  }
-
-  async function loadFeatured() {
-    try {
-      setLoadingFeatured(true)
-      const [doctors, hospitals] = await Promise.all([getDoctors(), getHospitals()])
-      setFeaturedDoctors(doctors.slice(0, 3))
-      setFeaturedHospitals(hospitals.slice(0, 3))
-    } catch {
-      setFeaturedDoctors([])
-      setFeaturedHospitals([])
-    } finally {
-      setLoadingFeatured(false)
     }
   }
 
@@ -235,7 +216,7 @@ export default function HomePage() {
       </div>
 
       {/* Specialties */}
-      <div className="px-4 mt-6">
+      <div className="px-4 mt-6 mb-6">
         <div className="flex justify-between items-center mb-3">
           <h2 className={`text-lg font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.specialties.title')}</h2>
           <Link to="/search" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.specialties.seeAll')}</Link>
@@ -255,74 +236,6 @@ export default function HomePage() {
               </span>
             </Link>
           ))}
-        </div>
-      </div>
-
-      {/* Featured Doctors */}
-      <div className="px-4 mt-6">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className={`text-lg font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.title')}</h2>
-          <Link to="/doctors" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.viewAll')}</Link>
-        </div>
-        <div className="space-y-3">
-          {loadingFeatured ? (
-            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.loading')}</div>
-          ) : featuredDoctors.length === 0 ? (
-            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.loading')}</div>
-          ) : (
-            featuredDoctors.map((doctor) => (
-              <Link
-                key={doctor.id}
-                to={`/doctor/${doctor.id}`}
-                className="card p-4 flex items-center justify-between"
-              >
-                <div className="min-w-0">
-                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? (doctor.name_dv || transliterateToDhivehi(doctor.name)) : doctor.name}
-                  </div>
-                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {(language === 'dv'
-                      ? (doctor.specialty_dv || transliterateToDhivehi(doctor.specialty))
-                      : doctor.specialty)} • {(language === 'dv' ? (doctor.hospital_name_dv || transliterateToDhivehi(doctor.hospital_name)) : doctor.hospital_name)}
-                  </div>
-                </div>
-                <ChevronRight size={18} className="text-gray-400" />
-              </Link>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Featured Hospitals */}
-      <div className="px-4 mt-6 mb-6">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className={`text-lg font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.title')}</h2>
-          <Link to="/hospitals" className={`text-medical-600 text-sm font-medium ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.viewAll')}</Link>
-        </div>
-        <div className="space-y-3">
-          {loadingFeatured ? (
-            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('hospitals.loading')}</div>
-          ) : featuredHospitals.length === 0 ? (
-            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('hospitals.loading')}</div>
-          ) : (
-            featuredHospitals.map((hospital) => (
-              <Link
-                key={hospital.id}
-                to={`/hospital/${hospital.id}`}
-                className="card p-4 flex items-center justify-between"
-              >
-                <div className="min-w-0">
-                  <div className={`font-bold text-gray-800 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? (hospital.name_dv || transliterateToDhivehi(hospital.name)) : hospital.name}
-                  </div>
-                  <div className={`text-sm text-gray-500 truncate ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {(language === 'dv' ? transliterateToDhivehi(hospital.category) : hospital.category)} • {(language === 'dv' ? (hospital.address_dv || transliterateToDhivehi(hospital.address)) : hospital.address)}
-                  </div>
-                </div>
-                <ChevronRight size={18} className="text-gray-400" />
-              </Link>
-            ))
-          )}
         </div>
       </div>
     </div>
