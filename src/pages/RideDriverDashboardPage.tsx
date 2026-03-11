@@ -314,6 +314,22 @@ export default function RideDriverDashboardPage() {
     mapRef.current?.setView([lat, lng], Math.max(mapRef.current?.getZoom?.() || 13, 15), { animate: true } as any)
   }, [followMe, myPos?.lat, myPos?.lng])
 
+  function openGoogleMapsDirections(dest: { lat?: number | null; lng?: number | null; text?: string | null }) {
+    const lat = dest?.lat
+    const lng = dest?.lng
+    const text = String(dest?.text || '').trim()
+
+    let url = ''
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving`
+    } else if (text) {
+      url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(text)}&travelmode=driving`
+    }
+
+    if (!url) return
+    window.open(url, '_blank', 'noopener,noreferrer')
+  }
+
   async function onAccept(requestId: string) {
     try {
       setLoading(true)
@@ -332,6 +348,28 @@ export default function RideDriverDashboardPage() {
       setLoading(true)
       await updateRideTripStatus(activeTrip.id, next)
       await load()
+
+      if (next === 'arrived') {
+        const ok = window.confirm(language === 'dv' ? 'Google Maps އެކަށައިގެން ނަގާ ތަނަށް ދަންނަވާ؟' : 'Open Google Maps directions to pickup?')
+        if (ok) {
+          openGoogleMapsDirections({
+            lat: resolvedOrigin?.lat ?? null,
+            lng: resolvedOrigin?.lng ?? null,
+            text: activeTrip?.request?.origin_text || ''
+          })
+        }
+      }
+
+      if (next === 'started') {
+        const ok = window.confirm(language === 'dv' ? 'Google Maps އެކަށައިގެން ދާން ތަނަށް ދަންނަވާ؟' : 'Open Google Maps navigation to destination?')
+        if (ok) {
+          openGoogleMapsDirections({
+            lat: resolvedDestination?.lat ?? null,
+            lng: resolvedDestination?.lng ?? null,
+            text: activeTrip?.request?.destination_text || ''
+          })
+        }
+      }
     } catch (err: any) {
       setError(err?.message || 'Failed to update')
       setLoading(false)
