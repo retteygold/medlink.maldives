@@ -71,7 +71,7 @@ function App() {
   const isAdmin = location.pathname.startsWith('/admin')
 
   return (
-    <div className={`min-h-screen bg-gray-50 w-full relative ${isRTL ? 'rtl-layout' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-gray-50 max-w-md mx-auto relative shadow-2xl ${isRTL ? 'rtl-layout' : ''}`} dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Main Content */}
       <main className={`${showNav && !isAdmin ? 'pb-20' : ''} safe-top`}>
         <Routes>
@@ -127,7 +127,7 @@ function App() {
 
       {/* Bottom Navigation */}
       {showNav && (
-        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom z-50">
+        <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom z-50 max-w-md mx-auto">
           <div className="flex justify-around items-center h-16">
             <NavLink to="/" icon={<Home size={24} />} label="Home" />
             <NavLink to="/search" icon={<Search size={24} />} label="Search" />
