@@ -91,11 +91,6 @@ export function transliterateToDhivehi(text: string): string {
   return result || text; // Fallback to original if empty
 }
 
-// Reverse mapping for Dhivehi to English (for search support)
-const reverseTransliterationMap: Record<string, string> = Object.fromEntries(
-  Object.entries(transliterationMap).map(([en, dv]) => [dv, en])
-);
-
 // Common Thaana characters to Latin mapping
 const thaanaToLatinMap: Record<string, string> = {
   'ަ': 'a', 'ާ': 'aa', 'ި': 'i', 'ީ': 'ee', 'ު': 'u', 'ޫ': 'oo',
