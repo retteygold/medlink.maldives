@@ -154,6 +154,31 @@ TO authenticated
 USING (auth.uid() = rider_user_id)
 WITH CHECK (auth.uid() = rider_user_id);
 
+-- Drivers can view open requests (dashboard listing)
+DROP POLICY IF EXISTS "ride_requests_select_open" ON public.ride_requests;
+CREATE POLICY "ride_requests_select_open"
+ON public.ride_requests
+FOR SELECT
+TO authenticated
+USING (status = 'open');
+
+-- Drivers can mark request as matched when accepting
+DROP POLICY IF EXISTS "ride_requests_update_match" ON public.ride_requests;
+CREATE POLICY "ride_requests_update_match"
+ON public.ride_requests
+FOR UPDATE
+TO authenticated
+USING (
+  status = 'open'
+  AND EXISTS (
+    SELECT 1
+    FROM public.ride_driver_profiles p
+    WHERE p.user_id = auth.uid()
+      AND p.status = 'approved'
+  )
+)
+WITH CHECK (status = 'matched');
+
 -- Ride trips
 -- Rider can read their trip (through request ownership)
 DROP POLICY IF EXISTS "ride_trips_select_rider" ON public.ride_trips;
