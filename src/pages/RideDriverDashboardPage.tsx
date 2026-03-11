@@ -29,6 +29,13 @@ export default function RideDriverDashboardPage() {
   const lastSentRef = useRef<number>(0)
   const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
 
+  const [geoOrigin, setGeoOrigin] = useState<{ lat: number; lng: number } | null>(null)
+  const [geoDestination, setGeoDestination] = useState<{ lat: number; lng: number } | null>(null)
+
+  const [toast, setToast] = useState<string | null>(null)
+  const lastToastRef = useRef<string>('')
+  const lastTripStatusRef = useRef<string>('')
+
   useEffect(() => {
     load()
     const t = window.setInterval(load, 5000)
@@ -66,6 +73,57 @@ export default function RideDriverDashboardPage() {
 
   const canDrive = useMemo(() => String(profile?.status) === 'approved', [profile?.status])
 
+  const resolvedOrigin = useMemo(() => {
+    const lat = activeTrip?.request?.origin_lat
+    const lng = activeTrip?.request?.origin_lng
+    if (typeof lat === 'number' && typeof lng === 'number') return { lat, lng }
+    return geoOrigin
+  }, [activeTrip?.request?.origin_lat, activeTrip?.request?.origin_lng, geoOrigin])
+
+  const resolvedDestination = useMemo(() => {
+    const lat = activeTrip?.request?.destination_lat
+    const lng = activeTrip?.request?.destination_lng
+    if (typeof lat === 'number' && typeof lng === 'number') return { lat, lng }
+    return geoDestination
+  }, [activeTrip?.request?.destination_lat, activeTrip?.request?.destination_lng, geoDestination])
+
+  async function geocodePhoton(text: string): Promise<{ lat: number; lng: number } | null> {
+    const q = String(text || '').trim()
+    if (q.length < 2) return null
+    try {
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1&lat=4.1755&lon=73.5093`
+      const res = await fetch(url)
+      if (!res.ok) return null
+      const json: any = await res.json()
+      const f = Array.isArray(json?.features) ? json.features[0] : null
+      const coords = f?.geometry?.coordinates
+      const lng = Array.isArray(coords) ? Number(coords[0]) : NaN
+      const lat = Array.isArray(coords) ? Number(coords[1]) : NaN
+      if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+      return { lat, lng }
+    } catch {
+      return null
+    }
+  }
+
+  function emitToast(message: string) {
+    const msg = String(message || '').trim()
+    if (!msg) return
+    if (lastToastRef.current === msg) return
+    lastToastRef.current = msg
+    setToast(msg)
+    window.setTimeout(() => {
+      setToast((cur) => (cur === msg ? null : cur))
+    }, 3500)
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('Medlink Ride', { body: msg })
+      } catch {
+      }
+    }
+  }
+
   useEffect(() => {
     const tripId = activeTrip?.id
     if (!tripId) return
@@ -97,11 +155,56 @@ export default function RideDriverDashboardPage() {
   }, [activeTrip?.id])
 
   useEffect(() => {
+    let cancelled = false
+    async function ensureGeocoded() {
+      const needsOrigin = !(typeof activeTrip?.request?.origin_lat === 'number' && typeof activeTrip?.request?.origin_lng === 'number')
+      const needsDest = !(typeof activeTrip?.request?.destination_lat === 'number' && typeof activeTrip?.request?.destination_lng === 'number')
+      if (!needsOrigin) setGeoOrigin(null)
+      if (!needsDest) setGeoDestination(null)
+
+      if (needsOrigin) {
+        const o = await geocodePhoton(activeTrip?.request?.origin_text || '')
+        if (!cancelled) setGeoOrigin(o)
+      }
+      if (needsDest) {
+        const d = await geocodePhoton(activeTrip?.request?.destination_text || '')
+        if (!cancelled) setGeoDestination(d)
+      }
+    }
+
+    if (activeTrip?.id) ensureGeocoded()
+    return () => {
+      cancelled = true
+    }
+  }, [activeTrip?.id, activeTrip?.request?.origin_text, activeTrip?.request?.destination_text, activeTrip?.request?.origin_lat, activeTrip?.request?.origin_lng, activeTrip?.request?.destination_lat, activeTrip?.request?.destination_lng])
+
+  useEffect(() => {
+    const status = String(activeTrip?.status || '')
+    if (!activeTrip?.id || !status) {
+      lastTripStatusRef.current = ''
+      return
+    }
+
+    const prev = lastTripStatusRef.current
+    if (!prev) {
+      lastTripStatusRef.current = status
+      return
+    }
+
+    if (prev !== status) {
+      lastTripStatusRef.current = status
+      if (status === 'arrived') emitToast('You marked ARRIVED')
+      if (status === 'started') emitToast('Ride STARTED')
+      if (status === 'finished') emitToast('Ride FINISHED')
+    }
+  }, [activeTrip?.id, activeTrip?.status])
+
+  useEffect(() => {
     async function fetchRoute() {
-      const fromLat = activeTrip?.request?.origin_lat
-      const fromLng = activeTrip?.request?.origin_lng
-      const toLat = activeTrip?.request?.destination_lat
-      const toLng = activeTrip?.request?.destination_lng
+      const fromLat = resolvedOrigin?.lat
+      const fromLng = resolvedOrigin?.lng
+      const toLat = resolvedDestination?.lat
+      const toLng = resolvedDestination?.lng
       if (typeof fromLat !== 'number' || typeof fromLng !== 'number' || typeof toLat !== 'number' || typeof toLng !== 'number') {
         setRoutePoints([])
         return
@@ -133,13 +236,14 @@ export default function RideDriverDashboardPage() {
     }
 
     fetchRoute()
-  }, [activeTrip?.id, activeTrip?.request?.origin_lat, activeTrip?.request?.origin_lng, activeTrip?.request?.destination_lat, activeTrip?.request?.destination_lng])
+  }, [activeTrip?.id, resolvedOrigin?.lat, resolvedOrigin?.lng, resolvedDestination?.lat, resolvedDestination?.lng])
 
   async function onAccept(requestId: string) {
     try {
       setLoading(true)
       await acceptRideRequest(requestId)
       await load()
+      emitToast('Ride ACCEPTED')
     } catch (err: any) {
       setError(err?.message || 'Failed to accept')
       setLoading(false)
@@ -215,6 +319,12 @@ export default function RideDriverDashboardPage() {
       </div>
 
       <div className="px-4 mt-5 space-y-3">
+        {toast ? (
+          <div className="fixed left-1/2 -translate-x-1/2 top-4 z-[2000] bg-gray-900 text-white text-sm px-4 py-2 rounded-2xl shadow-lg">
+            {toast}
+          </div>
+        ) : null}
+
         {!profile?.id ? (
           <div className="card p-4">
             <div className={`font-bold text-gray-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
@@ -260,10 +370,10 @@ export default function RideDriverDashboardPage() {
               </div>
             </div>
 
-            {typeof activeTrip.request?.origin_lat === 'number' && typeof activeTrip.request?.origin_lng === 'number' ? (
+            {resolvedOrigin ? (
               <div className="mt-4 w-full h-64 rounded-xl overflow-hidden">
                 <MapContainer
-                  center={[activeTrip.request.origin_lat, activeTrip.request.origin_lng]}
+                  center={[resolvedOrigin.lat, resolvedOrigin.lng]}
                   zoom={13}
                   style={{ height: '100%', width: '100%' }}
                   scrollWheelZoom={false}
@@ -272,10 +382,10 @@ export default function RideDriverDashboardPage() {
                     attribution="&copy; OpenStreetMap contributors"
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
-                  <Marker position={[activeTrip.request.origin_lat, activeTrip.request.origin_lng]} />
-                  {typeof activeTrip.request?.destination_lat === 'number' && typeof activeTrip.request?.destination_lng === 'number' ? (
+                  <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} />
+                  {resolvedDestination ? (
                     <>
-                      <Marker position={[activeTrip.request.destination_lat, activeTrip.request.destination_lng]} />
+                      <Marker position={[resolvedDestination.lat, resolvedDestination.lng]} />
                       {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
                     </>
                   ) : null}

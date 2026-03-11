@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ChevronLeft, Car, MapPin, X } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
@@ -15,12 +15,33 @@ export default function RideStatusPage() {
   const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
   const [geoOrigin, setGeoOrigin] = useState<{ lat: number; lng: number } | null>(null)
   const [geoDestination, setGeoDestination] = useState<{ lat: number; lng: number } | null>(null)
+  const [toast, setToast] = useState<string | null>(null)
+  const lastToastRef = useRef<string>('')
+  const lastStatusRef = useRef<string>('')
 
   useEffect(() => {
     load()
     const t = window.setInterval(load, 5000)
     return () => window.clearInterval(t)
   }, [])
+
+  function emitToast(message: string) {
+    const msg = String(message || '').trim()
+    if (!msg) return
+    if (lastToastRef.current === msg) return
+    lastToastRef.current = msg
+    setToast(msg)
+    window.setTimeout(() => {
+      setToast((cur) => (cur === msg ? null : cur))
+    }, 3500)
+
+    if ('Notification' in window && Notification.permission === 'granted') {
+      try {
+        new Notification('Medlink Ride', { body: msg })
+      } catch {
+      }
+    }
+  }
 
   async function load() {
     try {
@@ -58,6 +79,27 @@ export default function RideStatusPage() {
       driverLng: trip?.driver_lng
     }
   }, [state])
+
+  useEffect(() => {
+    const s = String(summary?.status || '')
+    if (!s) {
+      lastStatusRef.current = ''
+      return
+    }
+
+    const prev = lastStatusRef.current
+    if (!prev) {
+      lastStatusRef.current = s
+      return
+    }
+
+    if (prev !== s) {
+      lastStatusRef.current = s
+      if (s === 'accepted') emitToast('Driver accepted your ride')
+      if (s === 'arrived') emitToast('Driver arrived at pickup')
+      if (s === 'finished') emitToast('Ride finished')
+    }
+  }, [summary?.status])
 
   const resolvedOrigin = useMemo(() => {
     if (typeof summary?.originLat === 'number' && typeof summary?.originLng === 'number') {
@@ -200,6 +242,12 @@ export default function RideStatusPage() {
 
   return (
     <div className={`min-h-screen pb-24 ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
+      {toast ? (
+        <div className="fixed left-1/2 -translate-x-1/2 top-4 z-[2000] bg-gray-900 text-white text-sm px-4 py-2 rounded-2xl shadow-lg">
+          {toast}
+        </div>
+      ) : null}
+
       <div className="gradient-header px-4 pt-12 pb-6 rounded-b-3xl">
         <div className="flex items-center justify-between">
           <Link
