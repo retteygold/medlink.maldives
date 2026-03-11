@@ -40,9 +40,7 @@ export default function HomePage() {
 
   async function loadStats() {
     try {
-      console.log('Loading stats...')
       const data = await getDatabaseStats()
-      console.log('Stats loaded:', data)
       setStats({
         hospitals: data.total_facilities || 0,
         doctors: data.total_doctors || 0
@@ -188,10 +186,6 @@ export default function HomePage() {
 
       {/* Quick Access - Hospitals & Doctors */}
       <div className="px-4 mt-4">
-        {/* DEBUG: Remove this after testing */}
-        <div className="bg-yellow-400 text-black text-xs font-bold p-2 mb-2 rounded text-center">
-          DEBUG: Stats = {stats.hospitals} hospitals, {stats.doctors} doctors
-        </div>
         <div className="grid grid-cols-2 gap-3">
           <Link
             to="/hospitals"
@@ -200,9 +194,15 @@ export default function HomePage() {
             <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center shrink-0">
               <Building2 size={24} className="text-blue-600" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('nav.hospitals')}</h3>
-              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{stats.hospitals} {t('home.hospitals.count') || 'hospitals/clinics'}</p>
+              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                {language === 'dv' ? 'ހޮސްޕިޓަލް/ކްލިނިކް' : 'Hospitals/Clinics'}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-extrabold text-blue-700 tabular-nums leading-none">{stats.hospitals}</div>
+              <div className="text-[10px] text-gray-400">Total</div>
             </div>
           </Link>
           <Link
@@ -212,9 +212,15 @@ export default function HomePage() {
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center shrink-0">
               <Stethoscope size={24} className="text-green-600" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.title')}</h3>
-              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{stats.doctors} {t('home.doctors.count') || 'doctors'}</p>
+              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                {language === 'dv' ? 'ޑޮކްޓަރުން' : 'Doctors'}
+              </p>
+            </div>
+            <div className="text-right">
+              <div className="text-xl font-extrabold text-green-700 tabular-nums leading-none">{stats.doctors}</div>
+              <div className="text-[10px] text-gray-400">Total</div>
             </div>
           </Link>
         </div>
