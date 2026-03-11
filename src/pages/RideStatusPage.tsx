@@ -119,7 +119,13 @@ export default function RideStatusPage() {
     const q = String(text || '').trim()
     if (q.length < 2) return null
     try {
-      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1&lat=4.1755&lon=73.5093`
+      const bbox = {
+        minLat: 4.10,
+        maxLat: 4.27,
+        minLng: 73.42,
+        maxLng: 73.60
+      }
+      const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=1&lat=4.1755&lon=73.5093&bbox=${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}`
       const res = await fetch(url)
       if (!res.ok) return null
       const json: any = await res.json()
@@ -128,6 +134,7 @@ export default function RideStatusPage() {
       const lng = Array.isArray(coords) ? Number(coords[0]) : NaN
       const lat = Array.isArray(coords) ? Number(coords[1]) : NaN
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null
+      if (lat < bbox.minLat || lat > bbox.maxLat || lng < bbox.minLng || lng > bbox.maxLng) return null
       return { lat, lng }
     } catch {
       return null

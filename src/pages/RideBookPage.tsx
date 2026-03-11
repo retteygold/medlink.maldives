@@ -97,7 +97,13 @@ export default function RideBookPage() {
     const q = (query || '').trim()
     if (q.length < 2) return []
 
-    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=6&lat=4.1755&lon=73.5093`
+    const bbox = {
+      minLat: 4.10,
+      maxLat: 4.27,
+      minLng: 73.42,
+      maxLng: 73.60
+    }
+    const url = `https://photon.komoot.io/api/?q=${encodeURIComponent(q)}&limit=10&lat=4.1755&lon=73.5093&bbox=${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}`
     const res = await fetch(url)
     if (!res.ok) return []
     const json: any = await res.json()
@@ -110,6 +116,7 @@ export default function RideBookPage() {
       const lng = Array.isArray(coords) ? Number(coords[0]) : NaN
       const lat = Array.isArray(coords) ? Number(coords[1]) : NaN
       if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue
+      if (lat < bbox.minLat || lat > bbox.maxLat || lng < bbox.minLng || lng > bbox.maxLng) continue
       const name = String(props?.name || '').trim()
       const city = String(props?.city || props?.district || props?.county || '').trim()
       const state = String(props?.state || '').trim()
