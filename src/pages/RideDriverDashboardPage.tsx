@@ -27,6 +27,7 @@ export default function RideDriverDashboardPage() {
 
   const [myPos, setMyPos] = useState<{ lat: number; lng: number } | null>(null)
   const lastSentRef = useRef<number>(0)
+  const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
 
   useEffect(() => {
     load()
@@ -94,6 +95,45 @@ export default function RideDriverDashboardPage() {
       navigator.geolocation.clearWatch(watchId)
     }
   }, [activeTrip?.id])
+
+  useEffect(() => {
+    async function fetchRoute() {
+      const fromLat = activeTrip?.request?.origin_lat
+      const fromLng = activeTrip?.request?.origin_lng
+      const toLat = activeTrip?.request?.destination_lat
+      const toLng = activeTrip?.request?.destination_lng
+      if (typeof fromLat !== 'number' || typeof fromLng !== 'number' || typeof toLat !== 'number' || typeof toLng !== 'number') {
+        setRoutePoints([])
+        return
+      }
+
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('Route request failed')
+        const json: any = await res.json()
+        const coords = json?.routes?.[0]?.geometry?.coordinates
+        if (!Array.isArray(coords) || coords.length < 2) throw new Error('No route')
+        const pts: Array<[number, number]> = coords
+          .map((c: any) => {
+            const lng = Array.isArray(c) ? Number(c[0]) : NaN
+            const lat = Array.isArray(c) ? Number(c[1]) : NaN
+            return [lat, lng] as [number, number]
+          })
+          .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng))
+
+        if (pts.length < 2) throw new Error('No route')
+        setRoutePoints(pts)
+      } catch {
+        setRoutePoints([
+          [fromLat, fromLng],
+          [toLat, toLng]
+        ])
+      }
+    }
+
+    fetchRoute()
+  }, [activeTrip?.id, activeTrip?.request?.origin_lat, activeTrip?.request?.origin_lng, activeTrip?.request?.destination_lat, activeTrip?.request?.destination_lng])
 
   async function onAccept(requestId: string) {
     try {
@@ -236,12 +276,7 @@ export default function RideDriverDashboardPage() {
                   {typeof activeTrip.request?.destination_lat === 'number' && typeof activeTrip.request?.destination_lng === 'number' ? (
                     <>
                       <Marker position={[activeTrip.request.destination_lat, activeTrip.request.destination_lng]} />
-                      <Polyline
-                        positions={[
-                          [activeTrip.request.origin_lat, activeTrip.request.origin_lng],
-                          [activeTrip.request.destination_lat, activeTrip.request.destination_lng]
-                        ]}
-                      />
+                      {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
                     </>
                   ) : null}
 

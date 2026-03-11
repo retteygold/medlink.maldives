@@ -48,6 +48,7 @@ export default function RideBookPage() {
   }, [destinationCoords, originCoords])
 
   const mapRef = useRef<LeafletMap | null>(null)
+  const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
 
   function MapRefCapture() {
     const map = useMap()
@@ -56,6 +57,41 @@ export default function RideBookPage() {
     }, [map])
     return null
   }
+
+  async function fetchRoute(from: { lat: number; lng: number }, to: { lat: number; lng: number }) {
+    try {
+      const url = `https://router.project-osrm.org/route/v1/driving/${from.lng},${from.lat};${to.lng},${to.lat}?overview=full&geometries=geojson`
+      const res = await fetch(url)
+      if (!res.ok) throw new Error('Route request failed')
+      const json: any = await res.json()
+      const coords = json?.routes?.[0]?.geometry?.coordinates
+      if (!Array.isArray(coords) || coords.length < 2) throw new Error('No route')
+      const pts: Array<[number, number]> = coords
+        .map((c: any) => {
+          const lng = Array.isArray(c) ? Number(c[0]) : NaN
+          const lat = Array.isArray(c) ? Number(c[1]) : NaN
+          return [lat, lng] as [number, number]
+        })
+        .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng))
+
+      if (pts.length < 2) throw new Error('No route')
+      setRoutePoints(pts)
+      mapRef.current?.fitBounds(pts as any, { padding: [30, 30] } as any)
+    } catch {
+      setRoutePoints([
+        [from.lat, from.lng],
+        [to.lat, to.lng]
+      ])
+    }
+  }
+
+  useEffect(() => {
+    if (originCoords && destinationCoords) {
+      fetchRoute(originCoords, destinationCoords)
+    } else {
+      setRoutePoints([])
+    }
+  }, [originCoords, destinationCoords])
 
   async function searchPhoton(query: string): Promise<PlaceOption[]> {
     const q = (query || '').trim()
@@ -173,9 +209,7 @@ export default function RideBookPage() {
           {originCoords ? <Marker position={[originCoords.lat, originCoords.lng]} /> : null}
           {destinationCoords ? <Marker position={[destinationCoords.lat, destinationCoords.lng]} /> : null}
           {myCoords ? <Marker position={[myCoords.lat, myCoords.lng]} /> : null}
-          {originCoords && destinationCoords ? (
-            <Polyline positions={[[originCoords.lat, originCoords.lng], [destinationCoords.lat, destinationCoords.lng]]} />
-          ) : null}
+          {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
         </MapContainer>
         <div className="absolute inset-0 bg-gradient-to-b from-black/35 via-black/10 to-black/40 pointer-events-none" />
 

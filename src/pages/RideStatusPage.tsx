@@ -12,6 +12,7 @@ export default function RideStatusPage() {
   const [error, setError] = useState<string | null>(null)
   const [state, setState] = useState<any>(null)
   const [cancelling, setCancelling] = useState(false)
+  const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
 
   useEffect(() => {
     load()
@@ -80,6 +81,45 @@ export default function RideStatusPage() {
       supabase.removeChannel(channel)
     }
   }, [summary?.tripId])
+
+  useEffect(() => {
+    async function fetchRoute() {
+      const fromLat = summary?.originLat
+      const fromLng = summary?.originLng
+      const toLat = summary?.destinationLat
+      const toLng = summary?.destinationLng
+      if (typeof fromLat !== 'number' || typeof fromLng !== 'number' || typeof toLat !== 'number' || typeof toLng !== 'number') {
+        setRoutePoints([])
+        return
+      }
+
+      try {
+        const url = `https://router.project-osrm.org/route/v1/driving/${fromLng},${fromLat};${toLng},${toLat}?overview=full&geometries=geojson`
+        const res = await fetch(url)
+        if (!res.ok) throw new Error('Route request failed')
+        const json: any = await res.json()
+        const coords = json?.routes?.[0]?.geometry?.coordinates
+        if (!Array.isArray(coords) || coords.length < 2) throw new Error('No route')
+        const pts: Array<[number, number]> = coords
+          .map((c: any) => {
+            const lng = Array.isArray(c) ? Number(c[0]) : NaN
+            const lat = Array.isArray(c) ? Number(c[1]) : NaN
+            return [lat, lng] as [number, number]
+          })
+          .filter(([lat, lng]) => Number.isFinite(lat) && Number.isFinite(lng))
+
+        if (pts.length < 2) throw new Error('No route')
+        setRoutePoints(pts)
+      } catch {
+        setRoutePoints([
+          [fromLat, fromLng],
+          [toLat, toLng]
+        ])
+      }
+    }
+
+    fetchRoute()
+  }, [summary?.originLat, summary?.originLng, summary?.destinationLat, summary?.destinationLng])
 
   async function onCancel() {
     setCancelling(true)
@@ -216,12 +256,7 @@ export default function RideStatusPage() {
                     {typeof summary.destinationLat === 'number' && typeof summary.destinationLng === 'number' ? (
                       <>
                         <Marker position={[summary.destinationLat, summary.destinationLng]} />
-                        <Polyline
-                          positions={[
-                            [summary.originLat, summary.originLng],
-                            [summary.destinationLat, summary.destinationLng]
-                          ]}
-                        />
+                        {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
                       </>
                     ) : null}
                     {typeof summary.driverLat === 'number' && typeof summary.driverLng === 'number' ? (
