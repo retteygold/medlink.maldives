@@ -106,8 +106,14 @@ export default function HomePage() {
       <div className="px-4 -mt-4">
         <Link
           to="/smart-match"
-          className="block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/30 text-white"
+          className="relative overflow-hidden block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/30 text-white"
         >
+          <img
+            src="/images/storyset/Online Doctor-pana.svg"
+            alt=""
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-20 h-20 opacity-90 pointer-events-none"
+            loading="lazy"
+          />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -127,8 +133,14 @@ export default function HomePage() {
       <div className="px-4 mt-4">
         <Link
           to="/medicine-help"
-          className="block bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl p-4 shadow-lg shadow-pink-500/20 text-white"
+          className="relative overflow-hidden block bg-gradient-to-r from-pink-500 to-rose-500 rounded-xl p-4 shadow-lg shadow-pink-500/20 text-white"
         >
+          <img
+            src="/images/storyset/Medical care-amico.svg"
+            alt=""
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-20 h-20 opacity-90 pointer-events-none"
+            loading="lazy"
+          />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -148,8 +160,14 @@ export default function HomePage() {
       <div className="px-4 mt-4">
         <Link
           to="/pharmacy-finder"
-          className="block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/20 text-white"
+          className="relative overflow-hidden block bg-gradient-to-r from-medical-500 to-medical-600 rounded-xl p-4 shadow-lg shadow-medical-500/20 text-white"
         >
+          <img
+            src="/images/storyset/Health professional team-amico.svg"
+            alt=""
+            className="absolute right-2 top-1/2 -translate-y-1/2 w-20 h-20 opacity-90 pointer-events-none"
+            loading="lazy"
+          />
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
