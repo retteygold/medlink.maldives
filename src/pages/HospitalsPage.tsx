@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Search, Star, Filter, Building2 } from 'lucide-react'
+import { Search, Star, Filter, Building2, MapPin } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import type { Hospital } from '../types'
 import { getHospitals } from '../lib/dataService'
@@ -63,6 +63,13 @@ function HospitalAvatar({ hospital }: { hospital: Hospital }) {
       />
     </div>
   )
+}
+
+function getHospitalMapsUrl(hospital: Hospital) {
+  const explicit = (hospital.google_maps_url || '').trim()
+  if (explicit) return explicit
+  const query = encodeURIComponent(`${hospital.name} ${hospital.address || ''}`.trim())
+  return `https://www.google.com/maps/search/?api=1&query=${query}`
 }
 
 export default function HospitalsPage() {
@@ -259,6 +266,24 @@ export default function HospitalsPage() {
                     <span className="text-sm font-medium">{typeof hospital.rating === 'number' ? hospital.rating.toFixed(1) : Number(hospital.rating || 0).toFixed(1)}</span>
                     <span className="text-xs text-gray-400">({hospital.review_count || 0} {language === 'dv' ? 'ރިވިއޫ' : 'reviews'})</span>
                   </div>
+                </div>
+
+                <div className={`flex items-center gap-2 mt-3 ${language === 'dv' ? 'justify-end' : ''}`}>
+                  <a
+                    href={getHospitalMapsUrl(hospital)}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      e.preventDefault()
+                      window.open(getHospitalMapsUrl(hospital), '_blank', 'noopener,noreferrer')
+                    }}
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-medical-600 text-white text-sm font-semibold shadow-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}
+                    aria-label="Directions"
+                  >
+                    <MapPin size={16} className="text-white" />
+                    <span>{language === 'dv' ? 'މަގު' : 'Directions'}</span>
+                  </a>
                 </div>
               </div>
             </div>
