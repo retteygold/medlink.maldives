@@ -403,8 +403,26 @@ export default function RideDriverDashboardPage() {
   async function onAccept(requestId: string) {
     try {
       setLoading(true)
-      await acceptRideRequest(requestId)
+      const trip = await acceptRideRequest(requestId)
       await load()
+
+      if (trip?.id && typeof window !== 'undefined' && 'geolocation' in navigator) {
+        try {
+          navigator.geolocation.getCurrentPosition(
+            (pos) => {
+              const lat = pos.coords.latitude
+              const lng = pos.coords.longitude
+              if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
+              setMyPos({ lat, lng })
+              updateDriverTripLocation(String(trip.id), lat, lng)
+            },
+            () => {
+            },
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 8000 }
+          )
+        } catch {
+        }
+      }
       emitToast('Ride ACCEPTED')
     } catch (err: any) {
       setError(err?.message || 'Failed to accept')
