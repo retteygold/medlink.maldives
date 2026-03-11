@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { Search, MapPin, Stethoscope, ChevronRight, HeartPulse, Brain, Bone, Eye, Baby, Activity, Building2 } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { LanguageToggle } from '../components/LanguageToggle'
-import { getDoctors, getHospitals } from '../lib/dataService'
+import { getDoctors, getHospitals, getDatabaseStats } from '../lib/dataService'
 import { transliterateToDhivehi } from '../lib/transliteration'
 import type { Doctor, Hospital } from '../types'
 
@@ -23,6 +23,7 @@ export default function HomePage() {
   const [greeting, setGreeting] = useState('Hello')
   const [featuredDoctors, setFeaturedDoctors] = useState<Doctor[]>([])
   const [featuredHospitals, setFeaturedHospitals] = useState<Hospital[]>([])
+  const [stats, setStats] = useState({ hospitals: 0, doctors: 0 })
   const [loadingFeatured, setLoadingFeatured] = useState(true)
 
   useEffect(() => {
@@ -34,7 +35,23 @@ export default function HomePage() {
 
   useEffect(() => {
     loadFeatured()
+    loadStats()
   }, [])
+
+  async function loadStats() {
+    try {
+      console.log('Loading stats...')
+      const data = await getDatabaseStats()
+      console.log('Stats loaded:', data)
+      setStats({
+        hospitals: data.total_facilities || 0,
+        doctors: data.total_doctors || 0
+      })
+    } catch (err) {
+      console.error('Error loading stats:', err)
+      setStats({ hospitals: 0, doctors: 0 })
+    }
+  }
 
   async function loadFeatured() {
     try {
@@ -171,6 +188,10 @@ export default function HomePage() {
 
       {/* Quick Access - Hospitals & Doctors */}
       <div className="px-4 mt-4">
+        {/* DEBUG: Remove this after testing */}
+        <div className="bg-yellow-400 text-black text-xs font-bold p-2 mb-2 rounded text-center">
+          DEBUG: Stats = {stats.hospitals} hospitals, {stats.doctors} doctors
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Link
             to="/hospitals"
@@ -181,7 +202,7 @@ export default function HomePage() {
             </div>
             <div className="min-w-0">
               <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('nav.hospitals')}</h3>
-              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.hospitals.viewAll')}</p>
+              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{stats.hospitals} {t('home.hospitals.count') || 'hospitals/clinics'}</p>
             </div>
           </Link>
           <Link
@@ -193,7 +214,7 @@ export default function HomePage() {
             </div>
             <div className="min-w-0">
               <h3 className={`font-bold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('doctors.title')}</h3>
-              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{t('home.doctors.viewAll')}</p>
+              <p className={`text-xs text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{stats.doctors} {t('home.doctors.count') || 'doctors'}</p>
             </div>
           </Link>
         </div>
