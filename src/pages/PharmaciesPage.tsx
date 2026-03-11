@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, ExternalLink, MapPin, Phone, Search } from 'lucide-react'
+import { ChevronLeft, MapPin, Phone, Search } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 
 type Pharmacy = {
@@ -187,30 +187,50 @@ export default function PharmaciesPage() {
                           <span className="truncate">{p.atoll}</span>
                         </div>
                       ) : null}
-                      {p.address ? <div className="text-gray-500 truncate">{p.address}</div> : null}
+                      {p.address ? (
+                        p.googleMapsUrl ? (
+                          <a
+                            href={p.googleMapsUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-gray-500 truncate block hover:text-medical-700"
+                            aria-label="Open directions"
+                          >
+                            {p.address}
+                          </a>
+                        ) : (
+                          <div className="text-gray-500 truncate">{p.address}</div>
+                        )
+                      ) : null}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 shrink-0">
-                    {p.contact && normalizeText(p.contact) !== 'not available' ? (
-                      <a
-                        href={`tel:${p.contact.replace(/\s+/g, ' ').trim()}`}
-                        className="w-10 h-10 rounded-xl bg-medical-50 flex items-center justify-center border border-medical-100"
-                        aria-label="Call"
-                      >
-                        <Phone size={18} className="text-medical-700" />
-                      </a>
-                    ) : null}
-
+                  <div className="flex flex-col items-end gap-2 shrink-0">
                     {p.googleMapsUrl ? (
                       <a
                         href={p.googleMapsUrl}
                         target="_blank"
                         rel="noreferrer"
-                        className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center border border-gray-100"
-                        aria-label="Open map"
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-medical-600 text-white text-sm font-semibold shadow-sm"
+                        aria-label="Directions"
                       >
-                        <ExternalLink size={18} className="text-gray-700" />
+                        <MapPin size={16} className="text-white" />
+                        <span className={language === 'dv' ? 'dhivehi-font' : ''}>
+                          {language === 'dv' ? 'މަގު' : 'Directions'}
+                        </span>
+                      </a>
+                    ) : null}
+
+                    {p.contact && normalizeText(p.contact) !== 'not available' ? (
+                      <a
+                        href={`tel:${p.contact.replace(/\s+/g, ' ').trim()}`}
+                        className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-gray-800 text-sm font-semibold border border-gray-200"
+                        aria-label="Call"
+                      >
+                        <Phone size={16} className="text-medical-700" />
+                        <span className={language === 'dv' ? 'dhivehi-font' : ''}>
+                          {language === 'dv' ? 'ކޯލް' : 'Call'}
+                        </span>
                       </a>
                     ) : null}
                   </div>
