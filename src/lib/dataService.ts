@@ -1710,33 +1710,10 @@ export async function acceptRideRequest(requestId: string): Promise<RideTrip | u
     const user = sessionData.session?.user
     if (!user) throw new Error('Not authenticated')
 
-    const { data: request, error: reqError } = await supabase
-      .from('ride_requests')
-      .select('*')
-      .eq('id', requestId)
+    const { data: trip, error: rpcError } = await supabase
+      .rpc('accept_ride_request', { p_request_id: requestId })
       .maybeSingle()
-    if (reqError) throw reqError
-    if (!request?.id) throw new Error('Request not found')
-    if (String(request.status) !== 'open') throw new Error('Request is not available')
-
-    const { error: updError } = await supabase
-      .from('ride_requests')
-      .update({ status: 'matched' })
-      .eq('id', requestId)
-      .eq('status', 'open')
-    if (updError) throw updError
-
-    const { data: trip, error: tripError } = await supabase
-      .from('ride_trips')
-      .insert({
-        request_id: requestId,
-        driver_user_id: user.id,
-        status: 'accepted',
-        amount: request.fare || 0
-      })
-      .select('*')
-      .maybeSingle()
-    if (tripError) throw tripError
+    if (rpcError) throw rpcError
     return (trip || undefined) as any
   } catch (err) {
     console.error('Error accepting ride request:', err)

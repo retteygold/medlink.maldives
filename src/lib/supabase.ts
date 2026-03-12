@@ -14,6 +14,10 @@ if (!supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+if (import.meta.env.DEV && typeof window !== 'undefined') {
+  ;(window as any).supabase = supabase
+}
+
 // Database types and helper functions
 export type Database = {
   doctors: {

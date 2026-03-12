@@ -72,6 +72,46 @@ CREATE UNIQUE INDEX IF NOT EXISTS ride_driver_profiles_user_id_key ON public.rid
 CREATE INDEX IF NOT EXISTS ride_driver_profiles_vehicle_type_idx ON public.ride_driver_profiles(vehicle_type);
 CREATE INDEX IF NOT EXISTS ride_driver_profiles_status_idx ON public.ride_driver_profiles(status);
 
+-- RLS for driver profiles (needed for admin UI + for ride_requests accept policy EXISTS checks)
+ALTER TABLE public.ride_driver_profiles ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "ride_driver_profiles_select_own" ON public.ride_driver_profiles;
+CREATE POLICY "ride_driver_profiles_select_own"
+ON public.ride_driver_profiles
+FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "ride_driver_profiles_select_admin" ON public.ride_driver_profiles;
+CREATE POLICY "ride_driver_profiles_select_admin"
+ON public.ride_driver_profiles
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_driver_profiles_update_admin" ON public.ride_driver_profiles;
+CREATE POLICY "ride_driver_profiles_update_admin"
+ON public.ride_driver_profiles
+FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+)
+WITH CHECK (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_driver_profiles_delete_admin" ON public.ride_driver_profiles;
+CREATE POLICY "ride_driver_profiles_delete_admin"
+ON public.ride_driver_profiles
+FOR DELETE
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
 -- Ride requests (rider creates)
 CREATE TABLE IF NOT EXISTS public.ride_requests (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -196,7 +236,68 @@ USING (
       AND p.status = 'approved'
   )
 )
-WITH CHECK (status = 'matched');
+WITH CHECK (
+  status = 'matched'
+  AND EXISTS (
+    SELECT 1
+    FROM public.ride_driver_profiles p
+    WHERE p.user_id = auth.uid()
+      AND p.status = 'approved'
+  )
+);
+
+CREATE OR REPLACE FUNCTION public.accept_ride_request(p_request_id uuid)
+RETURNS public.ride_trips
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_user_id uuid;
+  v_req public.ride_requests;
+  v_trip public.ride_trips;
+BEGIN
+  v_user_id := auth.uid();
+  IF v_user_id IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated' USING ERRCODE = '28000';
+  END IF;
+
+  IF NOT EXISTS (
+    SELECT 1
+    FROM public.ride_driver_profiles p
+    WHERE p.user_id = v_user_id
+      AND p.status = 'approved'
+  ) THEN
+    RAISE EXCEPTION 'Driver not approved' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT *
+  INTO v_req
+  FROM public.ride_requests r
+  WHERE r.id = p_request_id
+  FOR UPDATE;
+
+  IF v_req.id IS NULL THEN
+    RAISE EXCEPTION 'Request not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  IF v_req.status <> 'open' THEN
+    RAISE EXCEPTION 'Request is not available' USING ERRCODE = 'P0001';
+  END IF;
+
+  UPDATE public.ride_requests
+  SET status = 'matched'
+  WHERE id = p_request_id;
+
+  INSERT INTO public.ride_trips (request_id, driver_user_id, status, amount)
+  VALUES (p_request_id, v_user_id, 'accepted', COALESCE(v_req.fare, 0))
+  RETURNING * INTO v_trip;
+
+  RETURN v_trip;
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.accept_ride_request(uuid) TO authenticated;
 
 -- Ride trips
 -- Rider can read their trip (through request ownership)
