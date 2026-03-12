@@ -371,3 +371,195 @@ DROP TRIGGER IF EXISTS ride_driver_profiles_set_updated_at ON public.ride_driver
 CREATE TRIGGER ride_driver_profiles_set_updated_at
 BEFORE UPDATE ON public.ride_driver_profiles
 FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+-- Zones + zone-based fare rules
+CREATE TABLE IF NOT EXISTS public.ride_zones (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  name text NOT NULL,
+  slug text NOT NULL,
+  description text,
+  is_active boolean NOT NULL DEFAULT true,
+  sort_order int NOT NULL DEFAULT 0,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ride_zones_slug_key ON public.ride_zones(slug);
+CREATE INDEX IF NOT EXISTS ride_zones_active_sort_idx ON public.ride_zones(is_active, sort_order, name);
+
+DROP TRIGGER IF EXISTS ride_zones_set_updated_at ON public.ride_zones;
+CREATE TRIGGER ride_zones_set_updated_at
+BEFORE UPDATE ON public.ride_zones
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+CREATE TABLE IF NOT EXISTS public.ride_fare_rules (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  origin_zone_id uuid NOT NULL REFERENCES public.ride_zones(id) ON DELETE CASCADE,
+  destination_zone_id uuid NOT NULL REFERENCES public.ride_zones(id) ON DELETE CASCADE,
+  vehicle_type public.ride_vehicle_type NOT NULL,
+  fare numeric NOT NULL DEFAULT 0,
+  is_active boolean NOT NULL DEFAULT true,
+  notes text,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT ride_fare_rules_zone_pair_not_same CHECK (origin_zone_id <> destination_zone_id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS ride_fare_rules_exact_key
+ON public.ride_fare_rules(origin_zone_id, destination_zone_id, vehicle_type);
+CREATE INDEX IF NOT EXISTS ride_fare_rules_active_lookup_idx
+ON public.ride_fare_rules(is_active, vehicle_type, origin_zone_id, destination_zone_id);
+
+DROP TRIGGER IF EXISTS ride_fare_rules_set_updated_at ON public.ride_fare_rules;
+CREATE TRIGGER ride_fare_rules_set_updated_at
+BEFORE UPDATE ON public.ride_fare_rules
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
+
+ALTER TABLE public.ride_zones ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.ride_fare_rules ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "ride_zones_select_active" ON public.ride_zones;
+CREATE POLICY "ride_zones_select_active"
+ON public.ride_zones
+FOR SELECT
+TO anon, authenticated
+USING (is_active = true);
+
+DROP POLICY IF EXISTS "ride_zones_select_admin" ON public.ride_zones;
+CREATE POLICY "ride_zones_select_admin"
+ON public.ride_zones
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_zones_insert_admin" ON public.ride_zones;
+CREATE POLICY "ride_zones_insert_admin"
+ON public.ride_zones
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_zones_update_admin" ON public.ride_zones;
+CREATE POLICY "ride_zones_update_admin"
+ON public.ride_zones
+FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+)
+WITH CHECK (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_zones_delete_admin" ON public.ride_zones;
+CREATE POLICY "ride_zones_delete_admin"
+ON public.ride_zones
+FOR DELETE
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_fare_rules_select_active" ON public.ride_fare_rules;
+CREATE POLICY "ride_fare_rules_select_active"
+ON public.ride_fare_rules
+FOR SELECT
+TO anon, authenticated
+USING (is_active = true);
+
+DROP POLICY IF EXISTS "ride_fare_rules_select_admin" ON public.ride_fare_rules;
+CREATE POLICY "ride_fare_rules_select_admin"
+ON public.ride_fare_rules
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_fare_rules_insert_admin" ON public.ride_fare_rules;
+CREATE POLICY "ride_fare_rules_insert_admin"
+ON public.ride_fare_rules
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_fare_rules_update_admin" ON public.ride_fare_rules;
+CREATE POLICY "ride_fare_rules_update_admin"
+ON public.ride_fare_rules
+FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+)
+WITH CHECK (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "ride_fare_rules_delete_admin" ON public.ride_fare_rules;
+CREATE POLICY "ride_fare_rules_delete_admin"
+ON public.ride_fare_rules
+FOR DELETE
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+-- SOS alerts table
+CREATE TABLE IF NOT EXISTS public.sos_alerts (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL,
+  trip_id uuid REFERENCES public.ride_trips(id) ON DELETE SET NULL,
+  location_lat double precision,
+  location_lng double precision,
+  notes text,
+  status text NOT NULL DEFAULT 'active',
+  created_at timestamptz NOT NULL DEFAULT now(),
+  resolved_at timestamptz
+);
+
+CREATE INDEX IF NOT EXISTS sos_alerts_user_idx ON public.sos_alerts(user_id);
+CREATE INDEX IF NOT EXISTS sos_alerts_status_idx ON public.sos_alerts(status);
+CREATE INDEX IF NOT EXISTS sos_alerts_trip_idx ON public.sos_alerts(trip_id);
+
+ALTER TABLE public.sos_alerts ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "sos_alerts_insert_own" ON public.sos_alerts;
+CREATE POLICY "sos_alerts_insert_own"
+ON public.sos_alerts
+FOR INSERT
+TO authenticated
+WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "sos_alerts_select_own" ON public.sos_alerts;
+CREATE POLICY "sos_alerts_select_own"
+ON public.sos_alerts
+FOR SELECT
+TO authenticated
+USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "sos_alerts_select_admin" ON public.sos_alerts;
+CREATE POLICY "sos_alerts_select_admin"
+ON public.sos_alerts
+FOR SELECT
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);
+
+DROP POLICY IF EXISTS "sos_alerts_update_admin" ON public.sos_alerts;
+CREATE POLICY "sos_alerts_update_admin"
+ON public.sos_alerts
+FOR UPDATE
+TO authenticated
+USING (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+)
+WITH CHECK (
+  EXISTS (SELECT 1 FROM public.admin_users au WHERE au.id = auth.uid())
+);

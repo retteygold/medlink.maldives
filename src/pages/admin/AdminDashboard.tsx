@@ -13,7 +13,8 @@ import {
   X,
   MapPin,
   Car,
-  Clock
+  Clock,
+  DollarSign
 } from 'lucide-react'
 import { getDatabaseStats, getVisitAnalytics, getRecentVisitsWithUsers, type AppVisit, type VisitAnalytics } from '../../lib/dataService'
 import { supabase } from '../../lib/supabase'
@@ -120,6 +121,22 @@ export default function AdminDashboard() {
       count: 0,
       path: '/admin/ride-trips',
       color: 'bg-amber-500'
+    },
+    {
+      title: 'Ride Zones',
+      description: 'Manage service zones',
+      icon: MapPin,
+      count: 0,
+      path: '/admin/ride-zones',
+      color: 'bg-cyan-600'
+    },
+    {
+      title: 'Ride Fares',
+      description: 'Zone-to-zone pricing rules',
+      icon: DollarSign,
+      count: 0,
+      path: '/admin/ride-fares',
+      color: 'bg-emerald-600'
     },
     {
       title: 'Visitors',

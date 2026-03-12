@@ -1801,3 +1801,196 @@ export async function updateRideTripStatus(
     return false
   }
 }
+
+// =====================
+// Ride Zones and Fares
+// =====================
+
+export interface RideZone {
+  id: string
+  name: string
+  slug: string
+  description?: string | null
+  is_active: boolean
+  sort_order: number
+  created_at: string
+  updated_at: string
+}
+
+export interface RideFareRule {
+  id: string
+  origin_zone_id: string
+  destination_zone_id: string
+  vehicle_type: RideVehicleType
+  fare: number
+  is_active: boolean
+  notes?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export async function getActiveRideZones(): Promise<RideZone[]> {
+  try {
+    const { data, error } = await supabase
+      .from('ride_zones')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .order('name', { ascending: true })
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error fetching ride zones:', err)
+    return []
+  }
+}
+
+export async function getActiveFareRules(): Promise<RideFareRule[]> {
+  try {
+    const { data, error } = await supabase
+      .from('ride_fare_rules')
+      .select('*')
+      .eq('is_active', true)
+    if (error) throw error
+    return (data || []) as any
+  } catch (err) {
+    console.error('Error fetching fare rules:', err)
+    return []
+  }
+}
+
+export function detectZoneByCoords(
+  zones: RideZone[],
+  lat: number,
+  lng: number
+): RideZone | null {
+  // Simplified zone detection based on coordinates
+  // For Maldives, we use coordinate boundaries for each zone
+  const zoneBounds: Record<string, { minLat: number; maxLat: number; minLng: number; maxLng: number }> = {
+    'male': { minLat: 4.16, maxLat: 4.19, minLng: 73.50, maxLng: 73.54 },
+    'hulhumale': { minLat: 4.20, maxLat: 4.24, minLng: 73.53, maxLng: 73.57 },
+    'airport': { minLat: 4.18, maxLat: 4.21, minLng: 73.52, maxLng: 73.55 },
+    'seaplane': { minLat: 4.17, maxLat: 4.20, minLng: 73.51, maxLng: 73.54 }
+  }
+
+  for (const zone of zones) {
+    const bounds = zoneBounds[zone.slug]
+    if (bounds) {
+      if (lat >= bounds.minLat && lat <= bounds.maxLat && lng >= bounds.minLng && lng <= bounds.maxLng) {
+        return zone
+      }
+    }
+  }
+  return null
+}
+
+export function findFareForTrip(
+  rules: RideFareRule[],
+  originZoneId: string,
+  destZoneId: string,
+  vehicleType: RideVehicleType,
+  fallbackFare: number
+): number {
+  // Try exact match (both directions for symmetric pricing)
+  const match = rules.find(r => 
+    r.is_active &&
+    r.vehicle_type === vehicleType &&
+    ((r.origin_zone_id === originZoneId && r.destination_zone_id === destZoneId) ||
+     (r.origin_zone_id === destZoneId && r.destination_zone_id === originZoneId))
+  )
+  return match ? Number(match.fare) : fallbackFare
+}
+
+// =====================
+// SOS Alerts
+// =====================
+
+export async function createSosAlert(payload: {
+  trip_id?: string | null
+  location_lat?: number | null
+  location_lng?: number | null
+  notes?: string | null
+}): Promise<{ id: string } | null> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data, error } = await supabase
+      .from('sos_alerts')
+      .insert({
+        user_id: user.id,
+        trip_id: payload.trip_id || null,
+        location_lat: typeof payload.location_lat === 'number' ? payload.location_lat : null,
+        location_lng: typeof payload.location_lng === 'number' ? payload.location_lng : null,
+        notes: payload.notes || null,
+        status: 'active'
+      })
+      .select('id')
+      .maybeSingle()
+    if (error) throw error
+    return data ? { id: data.id } : null
+  } catch (err) {
+    console.error('Error creating SOS alert:', err)
+    return null
+  }
+}
+
+// =====================
+// Ride History
+// =====================
+
+export async function getMyRideHistory(): Promise<
+  Array<{
+    request: RideRequest
+    trip: (RideTrip & { driver?: RideDriverProfile | null }) | null
+  }>
+> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const { data: requests, error: reqError } = await supabase
+      .from('ride_requests')
+      .select('*')
+      .eq('rider_user_id', user.id)
+      .in('status', ['matched', 'cancelled'])
+      .order('created_at', { ascending: false })
+    if (reqError) throw reqError
+
+    const list = (requests || []) as RideRequest[]
+    if (list.length === 0) return []
+
+    const requestIds = list.map(r => r.id)
+    const { data: trips, error: tripError } = await supabase
+      .from('ride_trips')
+      .select('*')
+      .in('request_id', requestIds)
+    if (tripError) throw tripError
+
+    const tripByReqId = new Map<string, RideTrip>()
+    for (const t of (trips || []) as RideTrip[]) {
+      tripByReqId.set(t.request_id, t)
+    }
+
+    const driverUserIds = Array.from(new Set((trips || []).map((t: any) => t.driver_user_id).filter(Boolean)))
+    const { data: drivers } = await supabase
+      .from('ride_driver_profiles')
+      .select('*')
+      .in('user_id', driverUserIds)
+    const driverByUserId = new Map<string, RideDriverProfile>()
+    for (const d of (drivers || []) as any) driverByUserId.set(d.user_id, d)
+
+    return list.map(req => {
+      const trip = tripByReqId.get(req.id) || null
+      const driver = trip?.driver_user_id ? driverByUserId.get(trip.driver_user_id) || null : null
+      return { request: req, trip: trip ? { ...trip, driver } : null }
+    })
+  } catch (err) {
+    console.error('Error fetching ride history:', err)
+    return []
+  }
+}

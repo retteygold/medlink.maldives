@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Car, X, LocateFixed } from 'lucide-react'
+import { ChevronLeft, Car, X, LocateFixed, Phone, AlertTriangle } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
-import { cancelMyOpenRideRequest, getMyLatestRideState } from '../lib/dataService'
+import { cancelMyOpenRideRequest, getMyLatestRideState, createSosAlert } from '../lib/dataService'
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
 import { supabase } from '../lib/supabase'
 import L from 'leaflet'
+import BottomSheet from '../components/BottomSheet'
+import RideStatusStepper from '../components/RideStatusStepper'
 
 export default function RideStatusPage() {
   const { language } = useLanguage()
@@ -158,6 +160,12 @@ export default function RideStatusPage() {
     }
     return geoDestination
   }, [geoDestination, summary?.destinationLat, summary?.destinationLng])
+
+  const mapCenter = useMemo<[number, number]>(() => {
+    if (typeof summary?.driverLat === 'number' && typeof summary?.driverLng === 'number') return [summary.driverLat, summary.driverLng]
+    if (resolvedOrigin) return [resolvedOrigin.lat, resolvedOrigin.lng]
+    return [4.1755, 73.5093]
+  }, [resolvedOrigin, summary?.driverLat, summary?.driverLng])
 
   const pickupIcon = useMemo(() => {
     const svg = `
@@ -351,192 +359,262 @@ export default function RideStatusPage() {
     }
   }
 
+  const [showSosConfirm, setShowSosConfirm] = useState(false)
+  const [sosSubmitting, setSosSubmitting] = useState(false)
+
+  async function onSos() {
+    setSosSubmitting(true)
+    try {
+      let location: { lat: number; lng: number } | null = null
+      if ('geolocation' in navigator) {
+        try {
+          const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 5000 })
+          })
+          location = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+        } catch {
+          // ignore
+        }
+      }
+
+      const alert = await createSosAlert({
+        trip_id: summary?.tripId || null,
+        location_lat: location?.lat ?? null,
+        location_lng: location?.lng ?? null,
+        notes: `SOS from rider during ride status: ${summary?.status || 'unknown'}`
+      })
+
+      if (alert) {
+        window.location.href = 'tel:999'
+      } else {
+        setError('Failed to send SOS alert')
+      }
+    } finally {
+      setSosSubmitting(false)
+      setShowSosConfirm(false)
+    }
+  }
+
   return (
-    <div className={`min-h-screen pb-24 ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
+    <div className={
+      `min-h-screen relative overflow-hidden ${language === 'dv' ? 'rtl-layout' : ''}`
+    } dir={language === 'dv' ? 'rtl' : 'ltr'}>
       {toast ? (
         <div className="fixed left-1/2 -translate-x-1/2 top-4 z-[2000] bg-gray-900 text-white text-sm px-4 py-2 rounded-2xl shadow-lg">
           {toast}
         </div>
       ) : null}
 
-      <div className="gradient-header px-4 pt-12 pb-6 rounded-b-3xl">
-        <div className="flex items-center justify-between">
+      <div className="absolute inset-0 z-0">
+        <MapContainer center={mapCenter} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom={false}>
+          <MapRefCapture />
+          <TileLayer attribution="&copy; OpenStreetMap contributors" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+          {resolvedOrigin ? <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} icon={pickupIcon} /> : null}
+          {resolvedDestination ? <Marker position={[resolvedDestination.lat, resolvedDestination.lng]} /> : null}
+          {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
+          {typeof summary?.driverLat === 'number' && typeof summary?.driverLng === 'number' ? (
+            <Marker position={[summary.driverLat, summary.driverLng]} icon={driverIcon} />
+          ) : null}
+        </MapContainer>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/10 to-black/30 pointer-events-none" />
+      </div>
+
+      <div className="absolute left-0 right-0 top-0 z-[1200] px-4 pt-12 pointer-events-none">
+        <div className="flex items-center justify-between pointer-events-auto">
           <Link
             to="/ride"
-            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"
+            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur"
             aria-label="Back"
           >
             <ChevronLeft size={20} className="text-white" />
           </Link>
-          <h1 className={`text-white text-xl font-bold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-            {language === 'dv' ? 'ރައިޑް ސްޓޭޓަސް' : 'My Ride Status'}
-          </h1>
+          <div className={`text-white text-lg font-extrabold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+            {language === 'dv' ? 'ރައިޑް ސްޓޭޓަސް' : 'My Ride'}
+          </div>
           <div className="w-10" />
         </div>
+      </div>
 
-        <div className="mt-4 flex items-center gap-3">
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-            <Car size={22} className="text-white" />
+      <div className="absolute right-4 bottom-32 z-[1200]">
+        <button
+          type="button"
+          onClick={() => {
+            setFollowDriver(true)
+            const lat = summary?.driverLat
+            const lng = summary?.driverLng
+            if (typeof lat === 'number' && typeof lng === 'number') {
+              mapRef.current?.setView([lat, lng], 16, { animate: true } as any)
+              return
+            }
+            if (routePoints.length >= 2) {
+              mapRef.current?.fitBounds(routePoints as any, { padding: [30, 30] } as any)
+            }
+          }}
+          className="w-11 h-11 rounded-2xl bg-white shadow-lg border border-gray-200 flex items-center justify-center"
+          aria-label="Recenter"
+        >
+          <LocateFixed size={18} className="text-gray-800" />
+        </button>
+      </div>
+
+      <BottomSheet open={true} disableBackdropClose initialSnap={0.55} snapPoints={[0.35, 0.55, 0.88]}>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-medical-50 flex items-center justify-center border border-medical-100">
+            <Car size={22} className="text-medical-700" />
           </div>
           <div className="min-w-0">
-            <div className={`text-white text-lg font-extrabold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+            <div className={`text-gray-900 text-lg font-extrabold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
               {language === 'dv' ? 'އަދި އަލަށް އަންނަނީ' : 'Updates every few seconds'}
             </div>
-            <div className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+            <div className={`text-gray-500 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
               {language === 'dv' ? 'ޑްރައިވަރު އެކްސެޕްޓް ކުރަން ނުވަތަ' : 'Wait for a driver to accept'}
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="px-4 mt-5">
-        {loading ? (
-          <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-            {language === 'dv' ? 'ލޯޑް ވަނީ...' : 'Loading...'}
-          </div>
-        ) : error ? (
-          <div className="text-sm text-red-600">{error}</div>
-        ) : !summary ? (
-          <div className="card p-4">
-            <div className={`font-bold text-gray-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? 'ރައިޑް ރިކުއެސްޓެއް ނެތް' : 'No active ride request'}
+        <div className="mt-4">
+          {loading ? (
+            <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? 'ލޯޑް ވަނީ...' : 'Loading...'}
             </div>
-            <div className="mt-2">
-              <Link to="/ride/book" className="btn-primary inline-flex">
-                {language === 'dv' ? 'ރައިޑް ހޯދާ' : 'Book a Ride'}
-              </Link>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-3">
+          ) : error ? (
+            <div className="text-sm text-red-600">{error}</div>
+          ) : !summary ? (
             <div className="card p-4">
-              <div className="text-sm text-gray-600">
-                {language === 'dv' ? 'ސްޓޭޓަސް' : 'Status'}:{' '}
-                <span className="font-bold text-gray-900">{String(summary.status || '').toUpperCase()}</span>
+              <div className={`font-bold text-gray-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                {language === 'dv' ? 'ރައިޑް ރިކުއެސްޓެއް ނެތް' : 'No active ride request'}
               </div>
+              <div className="mt-2">
+                <Link to="/ride/book" className="btn-primary inline-flex">
+                  {language === 'dv' ? 'ރައިޑް ހޯދާ' : 'Book a Ride'}
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <RideStatusStepper status={String(summary.status || '')} language={language as any} />
 
               {state?.trip?.delay_reason ? (
-                <div className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2">
+                <div className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2">
                   {language === 'dv' ? 'ޑްރައިވަރު ލަސް ވާ ސަބަބު:' : 'Driver delay reason:'}{' '}
                   <span className="font-semibold">{String(state.trip.delay_reason)}</span>
                 </div>
               ) : null}
 
               {String(summary.status) === 'accepted' && summary.enRouteAt ? (
-                <div className="mt-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl p-2">
+                <div className="text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl p-2">
                   {language === 'dv' ? 'ޑްރައިވަރު ނަގާ ތަނަށް ދަންނަވަނީ' : 'Driver is on the way to pickup'}
                 </div>
               ) : null}
 
               {String(summary.status) === 'accepted' && !(typeof summary.driverLat === 'number' && typeof summary.driverLng === 'number') ? (
-                <div className="mt-2 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-xl p-2">
-                  {language === 'dv'
-                    ? 'ޑްރައިވަރު ލޮކޭޝަން ލޯޑް ވަނީ...'
-                    : 'Waiting for driver location...'}
+                <div className="text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-xl p-2">
+                  {language === 'dv' ? 'ޑްރައިވަރު ލޮކޭޝަން ލޯޑް ވަނީ...' : 'Waiting for driver location...'}
                 </div>
               ) : null}
 
-              <div className="mt-3 grid grid-cols-2 gap-3">
+              <div className="card p-4">
                 <div className="text-sm text-gray-600">
-                  {language === 'dv' ? 'ނަގާ' : 'Pickup'}
-                  <div className="font-bold text-gray-900 truncate">{summary.origin}</div>
+                  {language === 'dv' ? 'ސްޓޭޓަސް' : 'Status'}:{' '}
+                  <span className="font-bold text-gray-900">{String(summary.status || '').toUpperCase()}</span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  {language === 'dv' ? 'ދާން' : 'Destination'}
-                  <div className="font-bold text-gray-900 truncate">{summary.destination}</div>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {language === 'dv' ? 'ވެހިކަލް' : 'Vehicle'}
-                  <div className="font-bold text-gray-900">{String(summary.vehicleType || '').toUpperCase()}</div>
-                </div>
-                <div className="text-sm text-gray-600">
-                  {language === 'dv' ? 'ފީ' : 'Fare'}
-                  <div className="font-bold text-gray-900">{summary.fare}</div>
-                </div>
-              </div>
 
-              {summary.driverName ? (
-                <div className="mt-4 pt-3 border-t">
-                  <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                    {language === 'dv' ? 'ޑްރައިވަރު' : 'Driver'}
+                <div className="mt-3 grid grid-cols-2 gap-3">
+                  <div className="text-sm text-gray-600">
+                    {language === 'dv' ? 'ނަގާ' : 'Pickup'}
+                    <div className="font-bold text-gray-900 truncate">{summary.origin}</div>
                   </div>
-                  <div className="mt-1 font-extrabold text-gray-900">{summary.driverName}</div>
-                  <div className="mt-1 text-sm text-gray-600">
-                    {summary.vehicleNumber ? `${language === 'dv' ? 'ނަންބަރ:' : 'Number:'} ${summary.vehicleNumber}` : null}
+                  <div className="text-sm text-gray-600">
+                    {language === 'dv' ? 'ދާން' : 'Destination'}
+                    <div className="font-bold text-gray-900 truncate">{summary.destination}</div>
                   </div>
-                  {summary.driverPhone ? (
-                    <a className="mt-3 btn-secondary inline-flex" href={`tel:${summary.driverPhone}`}>
-                      {language === 'dv' ? 'ކޯލް' : 'Call'}
-                    </a>
-                  ) : null}
+                  <div className="text-sm text-gray-600">
+                    {language === 'dv' ? 'ވެހިކަލް' : 'Vehicle'}
+                    <div className="font-bold text-gray-900">{String(summary.vehicleType || '').toUpperCase()}</div>
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    {language === 'dv' ? 'ފީ' : 'Fare'}
+                    <div className="font-bold text-gray-900">{summary.fare}</div>
+                  </div>
                 </div>
-              ) : null}
 
-              {String(summary.status) === 'open' ? (
-                <button
-                  onClick={onCancel}
-                  disabled={cancelling}
-                  className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-gray-800 text-sm font-semibold border border-gray-200"
-                >
-                  <X size={16} className="text-gray-700" />
-                  {cancelling ? (language === 'dv' ? 'ކެންސަލް...' : 'Cancelling...') : (language === 'dv' ? 'ކެންސަލް' : 'Cancel Request')}
-                </button>
-              ) : null}
-            </div>
+                {summary.driverName ? (
+                  <div className="mt-4 pt-3 border-t">
+                    <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+                      {language === 'dv' ? 'ޑްރައިވަރު' : 'Driver'}
+                    </div>
+                    <div className="mt-1 font-extrabold text-gray-900">{summary.driverName}</div>
+                    <div className="mt-1 text-sm text-gray-600">
+                      {summary.vehicleNumber ? `${language === 'dv' ? 'ނަންބަރ:' : 'Number:'} ${summary.vehicleNumber}` : null}
+                    </div>
+                    {summary.driverPhone ? (
+                      <a className="mt-3 btn-secondary inline-flex" href={`tel:${summary.driverPhone}`}>
+                        {language === 'dv' ? 'ކޯލް' : 'Call'}
+                      </a>
+                    ) : null}
+                  </div>
+                ) : null}
 
-            {resolvedOrigin ? (
-              <div className="card p-3">
-                <div className="w-full h-64 rounded-xl overflow-hidden relative">
-                  <MapContainer
-                    center={[resolvedOrigin.lat, resolvedOrigin.lng]}
-                    zoom={13}
-                    style={{ height: '100%', width: '100%' }}
-                    scrollWheelZoom={false}
+                {String(summary.status) === 'open' ? (
+                  <button
+                    onClick={onCancel}
+                    disabled={cancelling}
+                    className="mt-4 inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-gray-800 text-sm font-semibold border border-gray-200"
                   >
-                    <MapRefCapture />
-                    <TileLayer
-                      attribution="&copy; OpenStreetMap contributors"
-                      url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    />
-                    <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} icon={pickupIcon} />
-                    {resolvedDestination ? (
-                      <>
-                        <Marker position={[resolvedDestination.lat, resolvedDestination.lng]} />
-                        {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
-                      </>
-                    ) : null}
-                    {typeof summary.driverLat === 'number' && typeof summary.driverLng === 'number' ? (
-                      <Marker position={[summary.driverLat, summary.driverLng]} icon={driverIcon} />
-                    ) : null}
-                  </MapContainer>
+                    <X size={16} className="text-gray-700" />
+                    {cancelling ? (language === 'dv' ? 'ކެންސަލް...' : 'Cancelling...') : (language === 'dv' ? 'ކެންސަލް' : 'Cancel Request')}
+                  </button>
+                ) : null}
 
-                  <div className="absolute right-3 bottom-3 z-[1000]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setFollowDriver(true)
-                        const lat = summary.driverLat
-                        const lng = summary.driverLng
-                        if (typeof lat === 'number' && typeof lng === 'number') {
-                          mapRef.current?.setView([lat, lng], 16, { animate: true } as any)
-                          return
-                        }
-                        if (routePoints.length >= 2) {
-                          mapRef.current?.fitBounds(routePoints as any, { padding: [30, 30] } as any)
-                        }
-                      }}
-                      className="w-11 h-11 rounded-2xl bg-white shadow-lg border border-gray-200 flex items-center justify-center"
-                      aria-label="Recenter"
-                    >
-                      <LocateFixed size={18} className="text-gray-800" />
-                    </button>
-                  </div>
-                </div>
+                {['accepted', 'arrived', 'started'].includes(String(summary.status)) ? (
+                  <button
+                    onClick={() => setShowSosConfirm(true)}
+                    className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-600 text-white text-sm font-bold"
+                  >
+                    <AlertTriangle size={18} />
+                    {language === 'dv' ? 'SOS - އެމާޖެންސީ' : 'SOS - Emergency'}
+                  </button>
+                ) : null}
               </div>
-            ) : null}
+            </div>
+          )}
+        </div>
+
+        {showSosConfirm && (
+          <div className="fixed inset-0 z-[2000] bg-black/60 flex items-center justify-center p-4">
+            <div className="bg-white rounded-2xl p-6 max-w-sm w-full">
+              <div className="flex items-center gap-3 text-red-600 mb-4">
+                <AlertTriangle size={28} />
+                <h3 className="text-lg font-bold">
+                  {language === 'dv' ? 'އެމާޖެންސީ ކޯލް' : 'Emergency Call'}
+                </h3>
+              </div>
+              <p className="text-gray-600 text-sm mb-6">
+                {language === 'dv'
+                  ? 'މިއީ އެމާޖެންސީ ކޯލެއް. ފޯނުން 999 އަށް ގުޅާނަން. އަދި އެޑްމިނަށް އެލާޓް ދެވޭ.'
+                  : 'This will call emergency number 999 and alert the admin. Continue?'}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setShowSosConfirm(false)}
+                  className="flex-1 px-4 py-2 rounded-xl bg-gray-100 text-gray-700 text-sm font-semibold"
+                >
+                  {language === 'dv' ? 'ކެންސަލް' : 'Cancel'}
+                </button>
+                <button
+                  onClick={onSos}
+                  disabled={sosSubmitting}
+                  className="flex-1 px-4 py-2 rounded-xl bg-red-600 text-white text-sm font-bold"
+                >
+                  {sosSubmitting
+                    ? (language === 'dv' ? 'ފޮނުވަނީ...' : 'Sending...')
+                    : (language === 'dv' ? 'ކޯލް 999' : 'Call 999')}
+                </button>
+              </div>
+            </div>
           </div>
         )}
-      </div>
+      </BottomSheet>
     </div>
   )
 }
