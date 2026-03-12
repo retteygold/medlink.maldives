@@ -218,6 +218,48 @@ Install MedLink as a mobile app for quick access and offline support.
 
 - Faster loading
 - Works offline with cached data
+
+---
+
+## Medlink Ride
+
+Medlink Ride lets riders request a pickup and drivers accept requests. After a driver accepts, the rider can see the driver moving on the map.
+
+### Rider Flow
+
+1. Go to **Ride**
+2. Book a ride by entering:
+   - Pickup location
+   - Destination
+3. You will be taken to **My Ride Status**
+4. Once a driver accepts, the status becomes **ACCEPTED**
+5. When the driver taps **On the way**, you will see:
+   - “Driver is on the way to pickup”
+   - Driver marker moving on the map (live GPS updates)
+6. When the driver arrives, the status becomes **ARRIVED**
+7. When the trip starts, the status becomes **STARTED**
+8. When the trip ends, the status becomes **FINISHED**
+
+### Driver Flow
+
+1. Go to **Driver Dashboard**
+2. If your driver profile is approved, you will see **open ride requests**
+3. Tap **Accept** to accept a request
+4. After accepting:
+   - Tap **On the way** to notify the rider you are heading to pickup
+   - Your GPS location is sent periodically so the rider can see movement
+5. At the pickup point, tap **Arrived**
+6. When the rider is picked up, tap **Start**
+7. At destination, tap **Finish & Cash**
+
+### Live Tracking & Notifications
+
+- The rider status page updates every few seconds.
+- If notifications are enabled in the browser, the rider can get toast/notification messages for:
+  - Driver accepted
+  - Driver on the way
+  - Driver arrived
+  - Ride finished
 - No browser bars
 - Full-screen experience
 

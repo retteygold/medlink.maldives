@@ -1723,6 +1723,22 @@ export async function getDriverActiveTrip(): Promise<(RideTrip & { request?: Rid
   }
 }
 
+export async function markRideTripEnRoute(tripId: string): Promise<boolean> {
+  try {
+    const now = new Date().toISOString()
+    const { error } = await supabase
+      .from('ride_trips')
+      .update({ en_route_at: now })
+      .eq('id', tripId)
+      .is('en_route_at', null)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('Error marking trip en-route:', err)
+    return false
+  }
+}
+
 export async function updateRideTripStatus(
   tripId: string,
   status: 'arrived' | 'started' | 'finished' | 'cancelled',

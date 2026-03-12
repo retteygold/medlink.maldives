@@ -35,6 +35,12 @@
   - Admin access is controlled by `admin_users` table
 - **📱 PWA Ready** – installable as a mobile app
 
+- **🚕 Medlink Ride (Rider + Driver)**
+  - Rider can request a ride (pickup + destination)
+  - Drivers can see open requests and accept
+  - Driver marks **On the way** to pickup (notifies rider)
+  - Rider can see driver live location updates on the map
+
 ## 🛠️ Tech Stack
 
 - **Frontend**: React 18 + TypeScript + Vite
@@ -389,3 +395,21 @@ _“Connecting you to healthcare since 2019 – Made with ❤️ in Maldives”_
 
 - `USER_MANUAL.md` – step-by-step user + admin guide
 - `VIDEO_SCRIPT.md` – demo walkthrough script
+
+## 🚕 Medlink Ride – Setup Notes
+
+- **Database schema**
+  - Ride feature tables/policies are defined in `medlink_ride_schema.sql`.
+  - Run it in Supabase SQL Editor.
+
+- **Core ride flow**
+  - Rider creates a ride request (`ride_requests`) with `status='open'`.
+  - Driver accepts a request:
+    - Request `status` becomes `matched`.
+    - A trip is created in `ride_trips` with `status='accepted'`.
+  - Driver taps **On the way**:
+    - `ride_trips.en_route_at` is set.
+    - Rider sees “Driver is on the way to pickup”.
+  - Driver GPS updates:
+    - Driver app sends `ride_trips.driver_lat/lng` updates periodically.
+    - Rider status page shows the driver marker moving.

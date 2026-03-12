@@ -7,6 +7,7 @@ import {
   getDriverActiveTrip,
   getDriverOpenRideRequests,
   getMyRideDriverProfile,
+  markRideTripEnRoute,
   setRideTripDelayReason,
   updateDriverTripLocation,
   updateRideTripStatus
@@ -91,6 +92,27 @@ export default function RideDriverDashboardPage() {
     } catch (err: any) {
       setError(err?.message || 'Failed to load dashboard')
     } finally {
+      setLoading(false)
+    }
+  }
+
+  async function onEnRoute() {
+    if (!activeTrip?.id) return
+    try {
+      setLoading(true)
+      const ok = await markRideTripEnRoute(activeTrip.id)
+      await load()
+      if (ok) emitToast(language === 'dv' ? 'ނަގާ ތަނަށް ދަންނަވަނީ' : 'On the way to pickup')
+      const openNav = window.confirm(language === 'dv' ? 'Google Maps އެކަށައިގެން ނަގާ ތަނަށް ދަންނަވާ؟' : 'Open Google Maps directions to pickup?')
+      if (openNav) {
+        openGoogleMapsDirections({
+          lat: resolvedOrigin?.lat ?? null,
+          lng: resolvedOrigin?.lng ?? null,
+          text: activeTrip?.request?.origin_text || ''
+        })
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to update')
       setLoading(false)
     }
   }
@@ -644,6 +666,16 @@ export default function RideDriverDashboardPage() {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-2">
+              {String(activeTrip.status) === 'accepted' ? (
+                <button
+                  onClick={onEnRoute}
+                  disabled={Boolean(activeTrip?.en_route_at)}
+                  className="btn-primary justify-center"
+                >
+                  <Car size={18} /> {language === 'dv' ? 'ދަންނަވާ' : 'On the way'}
+                </button>
+              ) : null}
+
               {String(activeTrip.status) === 'accepted' ? (
                 <button onClick={() => onStatus('arrived')} className="btn-primary justify-center">
                   <CheckCircle2 size={18} /> {language === 'dv' ? 'އަރައިވް' : 'Arrived'}

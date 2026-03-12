@@ -139,6 +139,7 @@ export interface RideTrip {
   driver_user_id: string
   status: 'accepted' | 'arrived' | 'started' | 'finished' | 'cancelled'
   accepted_at: string
+  en_route_at?: string | null
   arrived_at?: string | null
   started_at?: string | null
   finished_at?: string | null

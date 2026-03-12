@@ -95,6 +95,7 @@ CREATE TABLE IF NOT EXISTS public.ride_trips (
   driver_user_id uuid NOT NULL,
   status public.ride_trip_status NOT NULL DEFAULT 'accepted',
   accepted_at timestamptz NOT NULL DEFAULT now(),
+  en_route_at timestamptz,
   arrived_at timestamptz,
   started_at timestamptz,
   finished_at timestamptz,
@@ -108,6 +109,9 @@ CREATE TABLE IF NOT EXISTS public.ride_trips (
   rider_rating int,
   rider_rating_comment text
 );
+
+ALTER TABLE public.ride_trips
+ADD COLUMN IF NOT EXISTS en_route_at timestamptz;
 
 ALTER TABLE public.ride_trips
 ADD COLUMN IF NOT EXISTS driver_lat double precision;

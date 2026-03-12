@@ -19,6 +19,7 @@ export default function RideStatusPage() {
   const [toast, setToast] = useState<string | null>(null)
   const lastToastRef = useRef<string>('')
   const lastStatusRef = useRef<string>('')
+  const lastEnRouteRef = useRef<string>('')
 
   const mapRef = useRef<L.Map | null>(null)
   const [followDriver, setFollowDriver] = useState(true)
@@ -94,6 +95,7 @@ export default function RideStatusPage() {
       driverPhone: trip?.driver?.phone || null,
       vehicleNumber: trip?.driver?.vehicle_number || null,
       tripId: trip?.id || null,
+      enRouteAt: trip?.en_route_at || null,
       driverLat: trip?.driver_lat,
       driverLng: trip?.driver_lng
     }
@@ -119,6 +121,29 @@ export default function RideStatusPage() {
       if (s === 'finished') emitToast('Ride finished')
     }
   }, [summary?.status])
+
+  useEffect(() => {
+    const cur = summary?.enRouteAt
+    const v = cur ? String(cur) : ''
+    const tripId = summary?.tripId
+    if (!tripId) {
+      lastEnRouteRef.current = ''
+      return
+    }
+
+    if (!lastEnRouteRef.current) {
+      lastEnRouteRef.current = v
+      return
+    }
+
+    if (!lastEnRouteRef.current && v) {
+      lastEnRouteRef.current = v
+      emitToast(language === 'dv' ? 'ޑްރައިވަރު ނަގާ ތަނަށް ދަންނަވަނީ' : 'Driver is on the way to pickup')
+      return
+    }
+
+    lastEnRouteRef.current = v
+  }, [summary?.tripId, summary?.enRouteAt, language])
 
   const resolvedOrigin = useMemo(() => {
     if (typeof summary?.originLat === 'number' && typeof summary?.originLng === 'number') {
@@ -394,6 +419,12 @@ export default function RideStatusPage() {
                 <div className="mt-2 text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-xl p-2">
                   {language === 'dv' ? 'ޑްރައިވަރު ލަސް ވާ ސަބަބު:' : 'Driver delay reason:'}{' '}
                   <span className="font-semibold">{String(state.trip.delay_reason)}</span>
+                </div>
+              ) : null}
+
+              {String(summary.status) === 'accepted' && summary.enRouteAt ? (
+                <div className="mt-2 text-xs text-emerald-800 bg-emerald-50 border border-emerald-200 rounded-xl p-2">
+                  {language === 'dv' ? 'ޑްރައިވަރު ނަގާ ތަނަށް ދަންނަވަނީ' : 'Driver is on the way to pickup'}
                 </div>
               ) : null}
 
