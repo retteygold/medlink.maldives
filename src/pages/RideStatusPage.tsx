@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { ChevronLeft, Car, X, LocateFixed, Phone, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, Car, X, LocateFixed, AlertTriangle } from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import { cancelMyOpenRideRequest, getMyLatestRideState, createSosAlert } from '../lib/dataService'
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'

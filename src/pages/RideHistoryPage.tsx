@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Clock, MapPin, Car, Star, Receipt } from 'lucide-react'
+import { ArrowLeft, MapPin, Car, Star, Receipt } from 'lucide-react'
 import { getMyRideHistory } from '../lib/dataService'
 import type { RideRequest, RideTrip, RideDriverProfile } from '../types'
 import { useLanguage } from '../lib/languageContext'

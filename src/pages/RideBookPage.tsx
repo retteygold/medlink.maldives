@@ -43,7 +43,6 @@ export default function RideBookPage() {
 
   const [zones, setZones] = useState<RideZone[]>([])
   const [fareRules, setFareRules] = useState<RideFareRule[]>([])
-  const [zonesLoaded, setZonesLoaded] = useState(false)
 
   // Load zones and fare rules on mount
   useEffect(() => {
@@ -52,7 +51,6 @@ export default function RideBookPage() {
       if (!mounted) return
       setZones(z)
       setFareRules(f)
-      setZonesLoaded(true)
     })
     return () => { mounted = false }
   }, [])

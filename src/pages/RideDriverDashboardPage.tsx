@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link } from 'react-router-dom'
-import { ChevronLeft, Car, CheckCircle2, MapPin, Play, Flag, Star, LocateFixed } from 'lucide-react'
+import { Link, useNavigate } from 'react-router-dom'
+import { 
+  Menu, X, Car, CheckCircle2, MapPin, Play, Flag, Star, LocateFixed, 
+  Settings, Wallet, Clock, HelpCircle, LogOut,
+  User, Bell, Gift, Users, Calendar, Zap, PhoneCall
+} from 'lucide-react'
 import { useLanguage } from '../lib/languageContext'
 import {
   acceptRideRequest,
@@ -14,22 +18,29 @@ import {
 } from '../lib/dataService'
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from 'react-leaflet'
 import L from 'leaflet'
+import BottomSheet from '../components/BottomSheet'
 
 export default function RideDriverDashboardPage() {
   const { language } = useLanguage()
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [, setLoading] = useState(true)
+  const [, setError] = useState<string | null>(null)
 
   const [profile, setProfile] = useState<any>(null)
   const [requests, setRequests] = useState<any[]>([])
   const [activeTrip, setActiveTrip] = useState<any>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [isOnline, setIsOnline] = useState(true)
+  const [onlineTime] = useState('1h 44m')
+  const [stats] = useState({ trips: 315, rating: 4.9, days: 272, earnings: 0, completedToday: 0 })
+
+  const navigate = useNavigate()
 
   const [rating, setRating] = useState('5')
   const [ratingComment, setRatingComment] = useState('')
   const [savingFinish, setSavingFinish] = useState(false)
 
   const [myPos, setMyPos] = useState<{ lat: number; lng: number } | null>(null)
-  const [myAccuracy, setMyAccuracy] = useState<number | null>(null)
+  const [, setMyAccuracy] = useState<number | null>(null)
   const lastSentRef = useRef<number>(0)
   const lastSentPosRef = useRef<{ lat: number; lng: number } | null>(null)
   const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
@@ -40,7 +51,7 @@ export default function RideDriverDashboardPage() {
   const [toast, setToast] = useState<string | null>(null)
   const lastToastRef = useRef<string>('')
   const lastTripStatusRef = useRef<string>('')
-  const [lastLocationSentAt, setLastLocationSentAt] = useState<number | null>(null)
+  const [, setLastLocationSentAt] = useState<number | null>(null)
 
   const [pickupEtaSeconds, setPickupEtaSeconds] = useState<number | null>(null)
   const askedDelayRef = useRef(false)
@@ -130,10 +141,6 @@ export default function RideDriverDashboardPage() {
       setLoading(false)
     }
   }
-
-  const driverStatus = useMemo(() => String(profile?.status || ''), [profile?.status])
-  const canDrive = useMemo(() => driverStatus === 'approved', [driverStatus])
-  const isSuspended = useMemo(() => driverStatus === 'suspended', [driverStatus])
 
   const pickupIcon = useMemo(() => {
     const svg = `
@@ -544,282 +551,257 @@ export default function RideDriverDashboardPage() {
     }
   }
 
-  return (
-    <div className={`min-h-screen pb-24 ${language === 'dv' ? 'rtl-layout' : ''}`} dir={language === 'dv' ? 'rtl' : 'ltr'}>
-      <div className="gradient-header px-4 pt-12 pb-6 rounded-b-3xl">
-        <div className="flex items-center justify-between">
-          <Link
-            to="/ride"
-            className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center"
-            aria-label="Back"
-          >
-            <ChevronLeft size={20} className="text-white" />
-          </Link>
-          <h1 className={`text-white text-xl font-bold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-            {language === 'dv' ? 'ޑްރައިވަރ ޑޭޝްބޯރޑް' : 'Driver Dashboard'}
-          </h1>
-          <div className="w-10" />
-        </div>
+  const mapCenter = useMemo<[number, number]>(() => {
+    if (myPos) return [myPos.lat, myPos.lng]
+    return [4.1755, 73.5093]
+  }, [myPos])
 
-        <div className="mt-4 flex items-center gap-3">
-          <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-            <Car size={22} className="text-white" />
-          </div>
-          <div className="min-w-0">
-            <div className={`text-white text-lg font-extrabold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {profile?.id
-                ? (isSuspended
-                  ? (language === 'dv' ? 'ސަސްޕެންޑް' : 'Suspended')
-                  : (canDrive ? (language === 'dv' ? 'އެޕްރޫވް' : 'Approved') : (language === 'dv' ? 'ޕެންޑިންގ' : 'Pending approval')))
-                : (language === 'dv' ? 'ރަޖިސްޓަރ ކުރޭ' : 'Register first')}
-            </div>
-            <div className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {profile?.id
-                ? (language === 'dv' ? 'ރައިޑް ރިކުއެސްޓް ބަލާ' : 'Accept ride requests')
-                : (language === 'dv' ? 'ޕްރޮފައިލް ހަދާ' : 'Create your driver profile')}
-            </div>
+  if (!profile?.id) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <div className="bg-medical-600 text-white px-4 pt-12 pb-6">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/ride')} className="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center">
+              <X size={20} />
+            </button>
+            <h1 className="text-xl font-bold">{language === 'dv' ? 'ޑްރައިވަރު' : 'Driver'}</h1>
           </div>
         </div>
-      </div>
-
-      <div className="px-4 mt-5 space-y-3">
-        {toast ? (
-          <div className="fixed left-1/2 -translate-x-1/2 top-4 z-[2000] bg-gray-900 text-white text-sm px-4 py-2 rounded-2xl shadow-lg">
-            {toast}
-          </div>
-        ) : null}
-
-        {!profile?.id ? (
-          <div className="card p-4">
-            <div className={`font-bold text-gray-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? 'ޑްރައިވަރު ޕްރޮފައިލެއް ނެތް' : 'No driver profile found'}
-            </div>
-            <Link to="/ride/driver/signup" className="btn-primary inline-flex mt-3">
-              {language === 'dv' ? 'ރަޖިސްޓަރ' : 'Register'}
+        <div className="p-4">
+          <div className="bg-white rounded-xl p-4 shadow-sm">
+            <p className="text-gray-600">{language === 'dv' ? 'ޑްރައިވަރު ޕްރޮފައިލެއް ނެތް' : 'No driver profile found'}</p>
+            <Link to="/ride/driver/signup" className="mt-3 inline-flex items-center px-4 py-2 bg-medical-600 text-white rounded-xl font-medium">
+              {language === 'dv' ? 'ރަޖިސްޓަރީ' : 'Register as Driver'}
             </Link>
           </div>
-        ) : null}
+        </div>
+      </div>
+    )
+  }
 
-        {error ? <div className="text-sm text-red-600">{error}</div> : null}
+  return (
+    <div className="min-h-screen bg-gray-50 relative overflow-hidden">
+      {/* Toast */}
+      {toast && (
+        <div className="fixed left-1/2 -translate-x-1/2 top-4 z-[2000] bg-gray-900 text-white text-sm px-4 py-2 rounded-2xl shadow-lg">
+          {toast}
+        </div>
+      )}
 
-        {isSuspended ? (
-          <div className="card p-4 border border-amber-200 bg-amber-50">
-            <div className={`font-extrabold text-amber-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? 'ސަސްޕެންޑް' : 'Suspended'}
-            </div>
-            <div className={`mt-1 text-sm text-amber-900/90 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? 'އެޑްމިން ސަސްޕެންޑް ކުރީ. ދެން ރީ-އެކްޓިވޭޓް ކުރާނެ.' : 'Admin suspended your driver account. You cannot accept rides until reactivated.'}
-            </div>
-            {profile?.suspended_reason ? (
-              <div className="mt-2 text-sm text-amber-900">
-                {language === 'dv' ? 'ސަބަބު:' : 'Reason:'} <span className="font-semibold">{String(profile.suspended_reason)}</span>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-
-        {loading ? (
-          <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-            {language === 'dv' ? 'ލޯޑް ވަނީ...' : 'Loading...'}
-          </div>
-        ) : activeTrip?.id ? (
-          <div className="card p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                  {language === 'dv' ? 'އެކްޓިވް ރައިޑް' : 'Active trip'}
+      {/* Side Drawer */}
+      {drawerOpen && (
+        <>
+          <div className="fixed inset-0 bg-black/50 z-[1500]" onClick={() => setDrawerOpen(false)} />
+          <div className={`fixed top-0 h-full w-[280px] bg-white z-[1600] shadow-2xl ${language === 'dv' ? 'right-0' : 'left-0'}`}>
+            <div className="p-4 border-b">
+              <div className="flex items-center gap-3">
+                <div className="w-14 h-14 rounded-full bg-gray-200 overflow-hidden">
+                  {profile?.driver_image_path ? (
+                    <img src={`${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/driver-documents/${profile.driver_image_path}`} alt="" className="w-full h-full object-cover" />
+                  ) : (
+                    <div className="w-full h-full bg-medical-100 flex items-center justify-center"><User size={24} className="text-medical-600" /></div>
+                  )}
                 </div>
-                <div className="mt-1 font-extrabold text-gray-900">{String(activeTrip.status).toUpperCase()}</div>
-              </div>
-              <div className="text-right">
-                <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>{language === 'dv' ? 'އަގު' : 'Fare'}</div>
-                <div className="text-xl font-extrabold tabular-nums">{activeTrip.request?.fare}</div>
-              </div>
-            </div>
-
-            <div className="mt-3 space-y-2 text-sm text-gray-700">
-              <div className="flex items-center gap-2">
-                <MapPin size={16} className="text-medical-700" />
-                <span className="font-semibold">{language === 'dv' ? 'ނަގާ' : 'Pickup'}:</span>
-                <span className="truncate">{activeTrip.request?.origin_text}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin size={16} className="text-medical-700" />
-                <span className="font-semibold">{language === 'dv' ? 'ދާން' : 'Destination'}:</span>
-                <span className="truncate">{activeTrip.request?.destination_text}</span>
-              </div>
-            </div>
-
-            {resolvedOrigin ? (
-              <div className="mt-4 w-full h-64 rounded-xl overflow-hidden relative">
-                <MapContainer
-                  center={[resolvedOrigin.lat, resolvedOrigin.lng]}
-                  zoom={13}
-                  style={{ height: '100%', width: '100%' }}
-                  scrollWheelZoom={false}
-                >
-                  <MapRefCapture />
-                  <TileLayer
-                    attribution="&copy; OpenStreetMap contributors"
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                  />
-                  <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} icon={pickupIcon} />
-                  {resolvedDestination ? (
-                    <>
-                      <Marker position={[resolvedDestination.lat, resolvedDestination.lng]} />
-                      {routePoints.length >= 2 ? <Polyline positions={routePoints} /> : null}
-                    </>
-                  ) : null}
-
-                  {myPos ? (
-                    <Marker position={[myPos.lat, myPos.lng]} icon={driverIcon} />
-                  ) : typeof activeTrip.driver_lat === 'number' && typeof activeTrip.driver_lng === 'number' ? (
-                    <Marker position={[activeTrip.driver_lat, activeTrip.driver_lng]} icon={driverIcon} />
-                  ) : null}
-                </MapContainer>
-
-                <div className="absolute right-3 bottom-3 z-[1000]">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setFollowMe(true)
-                      const lat = myPos?.lat
-                      const lng = myPos?.lng
-                      if (typeof lat === 'number' && typeof lng === 'number') {
-                        mapRef.current?.setView([lat, lng], 16, { animate: true } as any)
-                        return
-                      }
-                      if (routePoints.length >= 2) {
-                        mapRef.current?.fitBounds(routePoints as any, { padding: [30, 30] } as any)
-                      }
-                    }}
-                    className="w-11 h-11 rounded-2xl bg-white shadow-lg border border-gray-200 flex items-center justify-center"
-                    aria-label="Recenter"
-                  >
-                    <LocateFixed size={18} className="text-gray-800" />
-                  </button>
-                </div>
-              </div>
-            ) : null}
-
-            <div className="mt-3 text-xs text-gray-500">
-              {language === 'dv' ? 'GPS:' : 'GPS:'}{' '}
-              <span className="font-semibold text-gray-700">{myPos ? 'ON' : 'OFF'}</span>
-              {typeof myAccuracy === 'number' ? (
-                <>
-                  {' '}• {language === 'dv' ? 'އެކިއުރެސީ' : 'Accuracy'}:{' '}
-                  {Math.round(myAccuracy)}m
-                </>
-              ) : null}
-              {lastLocationSentAt ? (
-                <>
-                  {' '}• {language === 'dv' ? 'އެންމެ ފަހު ސެންޑް' : 'Last sent'}:{' '}
-                  {new Date(lastLocationSentAt).toLocaleTimeString()}
-                </>
-              ) : null}
-            </div>
-
-            <div className="mt-4 grid grid-cols-2 gap-2">
-              {String(activeTrip.status) === 'accepted' ? (
-                <button
-                  onClick={onEnRoute}
-                  disabled={Boolean(activeTrip?.en_route_at)}
-                  className="btn-primary justify-center"
-                >
-                  <Car size={18} /> {language === 'dv' ? 'ދަންނަވާ' : 'On the way'}
-                </button>
-              ) : null}
-
-              {String(activeTrip.status) === 'accepted' ? (
-                <button onClick={() => onStatus('arrived')} className="btn-primary justify-center">
-                  <CheckCircle2 size={18} /> {language === 'dv' ? 'އަރައިވް' : 'Arrived'}
-                </button>
-              ) : null}
-              {String(activeTrip.status) === 'arrived' ? (
-                <button onClick={() => onStatus('started')} className="btn-primary justify-center">
-                  <Play size={18} /> {language === 'dv' ? 'ފެށޭ' : 'Start'}
-                </button>
-              ) : null}
-
-              {String(activeTrip.status) === 'started' ? (
-                <button onClick={onFinish} disabled={savingFinish} className="btn-primary justify-center col-span-2">
-                  <Flag size={18} /> {savingFinish ? (language === 'dv' ? 'ނިންމަނީ...' : 'Finishing...') : (language === 'dv' ? 'ނިންމާ' : 'Finish & Cash')}
-                </button>
-              ) : null}
-            </div>
-
-            {String(activeTrip.status) === 'started' ? (
-              <div className="mt-4 pt-3 border-t space-y-2">
-                <div className={`text-sm font-semibold text-gray-800 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                  {language === 'dv' ? 'ޔޫސަރ ރޭޓް' : 'Rate rider'}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Star size={16} className="text-yellow-500 fill-yellow-500" />
-                  <select value={rating} onChange={(e) => setRating(e.target.value)} className="px-3 py-2 rounded-xl border border-gray-200 bg-white">
-                    <option value="5">5</option>
-                    <option value="4">4</option>
-                    <option value="3">3</option>
-                    <option value="2">2</option>
-                    <option value="1">1</option>
-                  </select>
-                </div>
-                <textarea
-                  value={ratingComment}
-                  onChange={(e) => setRatingComment(e.target.value)}
-                  className="w-full px-3 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:outline-none"
-                  rows={3}
-                  placeholder={language === 'dv' ? 'ކޮމެންޓް...' : 'Comment (optional)'}
-                />
-              </div>
-            ) : null}
-          </div>
-        ) : canDrive ? (
-          <div className="space-y-3">
-            <div className="card p-4">
-              <div className={`font-extrabold text-gray-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                {language === 'dv' ? 'ރައިޑް ރިކުއެސްޓް' : 'Ride requests'}
-              </div>
-              <div className={`text-sm text-gray-500 mt-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                {language === 'dv' ? 'ތިބާގެ ވާހަން އަށް' : `For your vehicle: ${String(profile?.vehicle_type).toUpperCase()}`}
-              </div>
-            </div>
-
-            {requests.length === 0 ? (
-              <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-                {language === 'dv' ? 'ރިކުއެސްޓެއް ނެތް' : 'No open requests'}
-              </div>
-            ) : (
-              requests.map((r) => (
-                <div key={r.id} className="card p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0">
-                      <div className="text-sm text-gray-500">{String(r.vehicle_type).toUpperCase()}</div>
-                      <div className="mt-1 font-extrabold text-gray-900 truncate">{r.origin_text}</div>
-                      <div className="mt-1 text-sm text-gray-600 truncate">{r.destination_text}</div>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <div className="text-sm text-gray-500">{language === 'dv' ? 'އަގު' : 'Fare'}</div>
-                      <div className="text-xl font-extrabold tabular-nums">{r.fare}</div>
-                    </div>
+                <div>
+                  <h3 className="font-bold text-gray-900">{profile?.full_name || 'Driver'}</h3>
+                  <div className="flex items-center gap-1 text-sm text-gray-500">
+                    <Star size={14} className="text-yellow-500 fill-yellow-500" />
+                    <span>{stats.rating.toFixed(1)}</span>
                   </div>
-                  <button onClick={() => onAccept(r.id)} className="btn-primary w-full justify-center mt-3">
-                    <CheckCircle2 size={18} /> {language === 'dv' ? 'އެކްސެޕްޓް' : 'Accept'}
-                  </button>
                 </div>
-              ))
+              </div>
+            </div>
+            <div className="py-2">
+              <MenuItem icon={<Car size={20} />} label={language === 'dv' ? 'ޑްރައިވާ' : 'Drive'} active onClick={() => setDrawerOpen(false)} />
+              <MenuItem icon={<Clock size={20} />} label={language === 'dv' ? 'ޓްރިޕްސް' : 'Trips'} onClick={() => { navigate('/ride/history'); setDrawerOpen(false) }} />
+              <MenuItem icon={<Wallet size={20} />} label={language === 'dv' ? 'ވޮލެޓް' : 'Wallet'} onClick={() => setDrawerOpen(false)} />
+              <MenuItem icon={<Calendar size={20} />} label={language === 'dv' ? 'ޝެޑިއުލްޑް ޓްރިޕްސް' : 'Scheduled Trips'} onClick={() => setDrawerOpen(false)} />
+              <div className="border-t my-2" />
+              <MenuItem icon={<Gift size={20} />} label={language === 'dv' ? 'ޕްރޮމޯޝަންސް' : 'Promotions'} onClick={() => setDrawerOpen(false)} />
+              <MenuItem icon={<Users size={20} />} label={language === 'dv' ? 'މައި ރެފެރަލްސް' : 'My Referrals'} onClick={() => setDrawerOpen(false)} />
+              <MenuItem icon={<Bell size={20} />} label={language === 'dv' ? 'ނޮޓިފިކޭޝަންސް' : 'Notifications'} onClick={() => setDrawerOpen(false)} />
+              <div className="border-t my-2" />
+              <MenuItem icon={<PhoneCall size={20} />} label={language === 'dv' ? 'ކޯލް ފޯރ ހެލްޕް' : 'Call for help'} onClick={() => window.location.href = 'tel:999'} />
+              <MenuItem icon={<HelpCircle size={20} />} label={language === 'dv' ? 'ސަޕޯރޓް' : 'Support'} onClick={() => setDrawerOpen(false)} />
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 border-t">
+              <button onClick={() => setDrawerOpen(false)} className="flex items-center gap-3 w-full px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-xl">
+                <LogOut size={20} />
+                <span className="font-medium">{language === 'dv' ? 'ލޮގް އައުޓް' : 'Log Out'}</span>
+              </button>
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Main Content */}
+      <div className="absolute inset-0 flex flex-col">
+        {/* Header Stats Bar */}
+        <div className="bg-white px-4 pt-12 pb-3 shadow-sm z-[1000]">
+          <div className="flex items-center justify-between">
+            <button onClick={() => setDrawerOpen(true)} className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+              <Menu size={20} className="text-gray-700" />
+            </button>
+            <div className="flex items-center gap-4">
+              <div className="text-center">
+                <div className="text-xs text-gray-500">{language === 'dv' ? 'އާނިންގްސް' : 'Earnings'}</div>
+                <div className="font-bold text-gray-900">ރ{stats.earnings}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-gray-500">{language === 'dv' ? 'ޓްރިޕްސް' : 'Trips'}</div>
+                <div className="font-bold text-gray-900">{stats.completedToday}</div>
+              </div>
+              <div className="flex items-center gap-1 bg-gray-100 px-3 py-1 rounded-full">
+                <div className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`} />
+                <span className="text-sm font-medium text-gray-700">{isOnline ? onlineTime : 'Offline'}</span>
+              </div>
+            </div>
+            <button onClick={() => navigate('/ride')} className="w-10 h-10 bg-gray-100 rounded-xl flex items-center justify-center">
+              <X size={20} className="text-gray-700" />
+            </button>
+          </div>
+        </div>
+
+        {/* Map Container */}
+        <div className="flex-1 relative">
+          <MapContainer center={mapCenter} zoom={14} style={{ height: '100%', width: '100%' }} zoomControl={false}>
+            <MapRefCapture />
+            <TileLayer attribution="&copy; OpenStreetMap" url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {myPos && <Marker position={[myPos.lat, myPos.lng]} icon={driverIcon} />}
+            {resolvedOrigin && <Marker position={[resolvedOrigin.lat, resolvedOrigin.lng]} icon={pickupIcon} />}
+            {resolvedDestination && <Marker position={[resolvedDestination.lat, resolvedDestination.lng]} />}
+            {routePoints.length >= 2 && <Polyline positions={routePoints} color="#0f766e" />}
+          </MapContainer>
+          <div className="absolute right-4 top-4 z-[1000] flex flex-col gap-2">
+            <button onClick={() => setFollowMe(true)} className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center">
+              <LocateFixed size={20} className="text-gray-700" />
+            </button>
+          </div>
+          <div className="absolute bottom-32 left-1/2 -translate-x-1/2 z-[1000]">
+            <button onClick={() => setIsOnline(!isOnline)} className={`flex items-center gap-2 px-6 py-3 rounded-full font-bold shadow-lg transition-all ${isOnline ? 'bg-green-500 text-white shadow-green-500/40' : 'bg-gray-800 text-white'}`}>
+              <Zap size={20} className={isOnline ? 'fill-white' : ''} />
+              {isOnline ? (language === 'dv' ? 'އޮންލައިން' : 'Online') : (language === 'dv' ? 'އޮފްލައިން' : 'Go Online')}
+            </button>
+          </div>
+        </div>
+
+        {/* Bottom Sheet */}
+        <BottomSheet open={true} disableBackdropClose initialSnap={0.4} snapPoints={[0.25, 0.4, 0.7]}>
+          <div className="space-y-4">
+            {!activeTrip?.id && isOnline && (
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-10 h-10 rounded-full bg-medical-50 flex items-center justify-center">
+                    <Settings size={20} className="text-medical-600" />
+                  </div>
+                  <span className="font-semibold text-gray-900">{language === 'dv' ? 'ރައިޑް ރިކުއެސްޓްސް ހޯދަނީ...' : 'Finding ride requests...'}</span>
+                </div>
+                {requests.length > 0 ? (
+                  <div className="space-y-3">
+                    {requests.map((r) => (
+                      <div key={r.id} className="bg-gray-50 rounded-xl p-3">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <MapPin size={14} className="text-medical-600" />
+                              <span className="text-sm font-medium text-gray-900 truncate">{r.origin_text}</span>
+                            </div>
+                            <div className="flex items-center gap-2 mt-1 ml-5">
+                              <MapPin size={14} className="text-gray-400" />
+                              <span className="text-sm text-gray-500 truncate">{r.destination_text}</span>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-lg font-bold text-gray-900">ރ{r.fare}</div>
+                            <div className="text-xs text-gray-500">{String(r.vehicle_type).toUpperCase()}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => onAccept(r.id)} className="w-full mt-3 py-2 bg-medical-600 text-white rounded-xl font-medium">{language === 'dv' ? 'އެކްސެޕްޓް' : 'Accept'}</button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">{language === 'dv' ? 'ރިކުއެސްޓްސް ނެތް' : 'No requests nearby'}</div>
+                )}
+              </div>
+            )}
+            {activeTrip?.id && (
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <div className="text-sm text-gray-500">{language === 'dv' ? 'އެކްޓިވް ޓްރިޕް' : 'Active Trip'}</div>
+                    <div className="text-lg font-bold text-gray-900">{String(activeTrip.status).toUpperCase()}</div>
+                  </div>
+                  <div className="text-2xl font-bold text-gray-900">ރ{activeTrip.request?.fare}</div>
+                </div>
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2"><MapPin size={16} className="text-medical-600" /><span className="text-sm font-medium">{activeTrip.request?.origin_text}</span></div>
+                  <div className="flex items-center gap-2"><MapPin size={16} className="text-gray-400" /><span className="text-sm text-gray-600">{activeTrip.request?.destination_text}</span></div>
+                </div>
+                <div className="flex gap-2">
+                  {String(activeTrip.status) === 'accepted' && !activeTrip?.en_route_at && (
+                    <button onClick={onEnRoute} className="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium flex items-center justify-center gap-2"><Car size={18} />{language === 'dv' ? 'އެން ރޫޓް' : 'En Route'}</button>
+                  )}
+                  {String(activeTrip.status) === 'accepted' && activeTrip?.en_route_at && (
+                    <button onClick={() => onStatus('arrived')} className="flex-1 py-3 bg-medical-600 text-white rounded-xl font-medium flex items-center justify-center gap-2"><CheckCircle2 size={18} />{language === 'dv' ? 'އަރައިވްޑް' : 'Arrived'}</button>
+                  )}
+                  {String(activeTrip.status) === 'arrived' && (
+                    <button onClick={() => onStatus('started')} className="flex-1 py-3 bg-green-600 text-white rounded-xl font-medium flex items-center justify-center gap-2"><Play size={18} />{language === 'dv' ? 'ސްޓާޓް' : 'Start Trip'}</button>
+                  )}
+                  {String(activeTrip.status) === 'started' && (
+                    <button onClick={onFinish} disabled={savingFinish} className="flex-1 py-3 bg-gray-900 text-white rounded-xl font-medium flex items-center justify-center gap-2"><Flag size={18} />{savingFinish ? (language === 'dv' ? 'ފިނިޝިންގ...' : 'Finishing...') : (language === 'dv' ? 'ފިނިޝް' : 'Finish')}</button>
+                  )}
+                </div>
+                {String(activeTrip.status) === 'started' && (
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="text-sm font-medium text-gray-700 mb-2">{language === 'dv' ? 'ރޭޓް ރައިޑަރު' : 'Rate Rider'}</div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <Star size={16} className="text-yellow-500 fill-yellow-500" />
+                      <select value={rating} onChange={(e) => setRating(e.target.value)} className="px-3 py-1 rounded-lg border border-gray-200">{[5,4,3,2,1].map(n => <option key={n} value={n}>{n}</option>)}</select>
+                    </div>
+                    <textarea value={ratingComment} onChange={(e) => setRatingComment(e.target.value)} placeholder={language === 'dv' ? 'ކޮމެންޓް...' : 'Comment (optional)'} className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm" rows={2} />
+                  </div>
+                )}
+              </div>
+            )}
+            {!isOnline && !activeTrip?.id && (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3"><Zap size={24} className="text-gray-400" /></div>
+                <p className="text-gray-500">{language === 'dv' ? 'އޮންލައިން ވެއްޖެން ރިކުއެސްޓްސް ދައްކާ' : 'Go online to see requests'}</p>
+              </div>
             )}
           </div>
-        ) : profile?.id ? (
-          <div className="card p-4">
-            <div className={`font-bold text-gray-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? 'އެޕްރޫވަލް ބޭނުން' : 'Waiting for admin approval'}
+        </BottomSheet>
+
+        {/* Bottom Stats Bar */}
+        <div className="bg-white border-t px-4 py-3 z-[1000]">
+          <div className="flex items-center justify-around">
+            <div className="text-center">
+              <div className="text-xs text-gray-500">{language === 'dv' ? 'ކޮމްޕްލީޓް' : 'Completed'}</div>
+              <div className="font-bold text-gray-900">{stats.completedToday}</div>
             </div>
-            <div className={`text-sm text-gray-500 mt-1 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
-              {language === 'dv' ? 'އެޑްމިން ހަދާނެ' : 'You can drive after approval'}
+            <div className="w-px h-8 bg-gray-200" />
+            <div className="text-center">
+              <div className="text-xs text-gray-500">{language === 'dv' ? 'ޓުޑޭސް' : 'Earnings'}</div>
+              <div className="font-bold text-gray-900">ރ{stats.earnings}</div>
+            </div>
+            <div className="w-px h-8 bg-gray-200" />
+            <div className="text-center">
+              <div className="text-xs text-gray-500">{language === 'dv' ? 'ޓައިމް' : 'Time'}</div>
+              <div className="font-bold text-gray-900">{onlineTime}</div>
             </div>
           </div>
-        ) : null}
+        </div>
       </div>
     </div>
+  )
+}
+
+function MenuItem({ icon, label, active, onClick }: { icon: React.ReactNode; label: string; active?: boolean; onClick: () => void }) {
+  return (
+    <button onClick={onClick} className={`flex items-center gap-3 w-full px-4 py-3 text-left transition-colors ${active ? 'bg-medical-50 text-medical-600' : 'text-gray-700 hover:bg-gray-50'}`}>
+      {icon}
+      <span className="font-medium">{label}</span>
+    </button>
   )
 }
