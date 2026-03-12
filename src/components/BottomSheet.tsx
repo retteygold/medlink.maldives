@@ -74,27 +74,27 @@ export default function BottomSheet(props: {
   }, [props.open, snap])
 
   return (
-    <div className={clsx('fixed inset-0 z-[1500]', props.open ? 'pointer-events-auto' : 'pointer-events-none')}>
-      <div
-        className={clsx(
-          'absolute inset-0 bg-black/30 transition-opacity duration-200',
-          props.open ? 'opacity-100' : 'opacity-0'
-        )}
-        onMouseDown={() => {
-          if (!props.open) return
-          if (props.disableBackdropClose) return
-          props.onClose?.()
-        }}
-        onTouchStart={() => {
-          if (!props.open) return
-          if (props.disableBackdropClose) return
-          props.onClose?.()
-        }}
-      />
+    <div className={clsx('fixed inset-0 z-[1500]', props.open ? 'pointer-events-none' : 'pointer-events-none')}>
+      {!props.disableBackdropClose && (
+        <div
+          className={clsx(
+            'absolute inset-0 bg-black/30 transition-opacity duration-200',
+            props.open ? 'opacity-100' : 'opacity-0'
+          )}
+          onMouseDown={() => {
+            if (!props.open) return
+            props.onClose?.()
+          }}
+          onTouchStart={() => {
+            if (!props.open) return
+            props.onClose?.()
+          }}
+        />
+      )}
 
       <div
         className={clsx(
-          'absolute left-0 right-0 bottom-0 rounded-t-3xl bg-white shadow-2xl border border-gray-200/60',
+          'absolute left-0 right-0 bottom-0 rounded-t-3xl bg-white shadow-2xl border border-gray-200/60 pointer-events-auto',
           'transition-transform duration-200',
           dragging ? 'duration-0' : '',
           props.className
