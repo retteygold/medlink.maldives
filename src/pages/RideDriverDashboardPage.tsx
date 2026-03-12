@@ -635,7 +635,7 @@ export default function RideDriverDashboardPage() {
       )}
 
       {/* Main Content */}
-      <div className="absolute inset-0 flex flex-col">
+      <div className="h-screen flex flex-col">
         {/* Header Stats Bar */}
         <div className="bg-white px-4 pt-12 pb-3 shadow-sm z-[1000]">
           <div className="flex items-center justify-between">
