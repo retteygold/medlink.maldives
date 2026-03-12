@@ -112,8 +112,10 @@ export interface RideDriverProfile {
   driver_image_path?: string | null
   license_image_path?: string | null
   vehicle_image_path?: string | null
-  status: 'pending' | 'approved' | 'rejected'
+  status: 'pending' | 'approved' | 'rejected' | 'suspended'
   rejection_reason?: string | null
+  suspended_reason?: string | null
+  suspended_at?: string | null
   created_at: string
   updated_at: string
 }

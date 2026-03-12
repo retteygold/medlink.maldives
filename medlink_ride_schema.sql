@@ -14,6 +14,13 @@ EXCEPTION
   WHEN duplicate_object THEN null;
 END $$;
 
+DO $$
+BEGIN
+  ALTER TYPE public.ride_driver_status ADD VALUE IF NOT EXISTS 'suspended';
+EXCEPTION
+  WHEN duplicate_object THEN null;
+END $$;
+
 DO $$ BEGIN
   CREATE TYPE public.ride_request_status AS ENUM ('open', 'matched', 'cancelled');
 EXCEPTION
@@ -43,12 +50,20 @@ CREATE TABLE IF NOT EXISTS public.ride_driver_profiles (
   vehicle_image_path text,
   status public.ride_driver_status NOT NULL DEFAULT 'pending',
   rejection_reason text,
+  suspended_reason text,
+  suspended_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 ALTER TABLE public.ride_driver_profiles
 ADD COLUMN IF NOT EXISTS rejection_reason text;
+
+ALTER TABLE public.ride_driver_profiles
+ADD COLUMN IF NOT EXISTS suspended_reason text;
+
+ALTER TABLE public.ride_driver_profiles
+ADD COLUMN IF NOT EXISTS suspended_at timestamptz;
 
 ALTER TABLE public.ride_driver_profiles
 ADD COLUMN IF NOT EXISTS vehicle_image_path text;

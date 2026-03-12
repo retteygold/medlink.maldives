@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { CheckCircle2, XCircle, User, ArrowLeft } from 'lucide-react'
+import { CheckCircle2, XCircle, User, ArrowLeft, PauseCircle, Trash2 } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 export default function AdminRideDrivers() {
@@ -44,6 +44,21 @@ export default function AdminRideDrivers() {
     }
   }
 
+  async function deleteDriver(id: string) {
+    try {
+      const ok = window.confirm('Delete this driver profile permanently?')
+      if (!ok) return
+      const { error } = await supabase
+        .from('ride_driver_profiles')
+        .delete()
+        .eq('id', id)
+      if (error) throw error
+      await load()
+    } catch (err: any) {
+      setError(err?.message || 'Failed to delete')
+    }
+  }
+
   async function getSignedUrl(path?: string | null): Promise<string | null> {
     if (!path) return null
     try {
@@ -55,11 +70,27 @@ export default function AdminRideDrivers() {
     }
   }
 
-  async function setStatus(id: string, status: 'approved' | 'rejected', rejectionReason?: string) {
+  async function setStatus(
+    id: string,
+    status: 'approved' | 'rejected' | 'suspended',
+    opts?: { rejectionReason?: string; suspendedReason?: string }
+  ) {
     try {
       const payload: any = { status }
-      if (status === 'approved') payload.rejection_reason = null
-      if (status === 'rejected') payload.rejection_reason = (rejectionReason || '').trim() || null
+      if (status === 'approved') {
+        payload.rejection_reason = null
+        payload.suspended_reason = null
+        payload.suspended_at = null
+      }
+      if (status === 'rejected') {
+        payload.rejection_reason = (opts?.rejectionReason || '').trim() || null
+        payload.suspended_reason = null
+        payload.suspended_at = null
+      }
+      if (status === 'suspended') {
+        payload.suspended_reason = (opts?.suspendedReason || '').trim() || null
+        payload.suspended_at = new Date().toISOString()
+      }
 
       const { error } = await supabase
         .from('ride_driver_profiles')
@@ -121,25 +152,63 @@ export default function AdminRideDrivers() {
                       Rejection reason: <span className="font-semibold">{d.rejection_reason}</span>
                     </div>
                   ) : null}
+                  {d.status === 'suspended' ? (
+                    <div className="mt-2 text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-2">
+                      Suspended{d.suspended_reason ? (
+                        <>: <span className="font-semibold">{d.suspended_reason}</span></>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               </div>
 
               <div className="flex flex-col gap-2 shrink-0">
                 <button
                   onClick={() => setStatus(d.id, 'approved')}
-                  className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold"
+                  disabled={String(d.status) === 'approved'}
+                  className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-white text-sm font-semibold ${String(d.status) === 'approved' ? 'bg-green-600/50 cursor-not-allowed' : 'bg-green-600'}`}
                 >
                   <CheckCircle2 size={16} /> Approve
                 </button>
                 <button
                   onClick={() => {
                     const reason = window.prompt('Reason for rejecting this driver? (optional)') || ''
-                    setStatus(d.id, 'rejected', reason)
+                    setStatus(d.id, 'rejected', { rejectionReason: reason })
                   }}
                   className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-gray-800 text-sm font-semibold border border-gray-200"
                 >
                   <XCircle size={16} /> Reject
                 </button>
+
+                {String(d.status) === 'approved' ? (
+                  <button
+                    onClick={() => {
+                      const reason = window.prompt('Reason for suspension? (optional)') || ''
+                      setStatus(d.id, 'suspended', { suspendedReason: reason })
+                    }}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-600 text-white text-sm font-semibold"
+                  >
+                    <PauseCircle size={16} /> Suspend
+                  </button>
+                ) : null}
+
+                {String(d.status) === 'suspended' ? (
+                  <button
+                    onClick={() => setStatus(d.id, 'approved')}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-green-600 text-white text-sm font-semibold"
+                  >
+                    <CheckCircle2 size={16} /> Reactivate
+                  </button>
+                ) : null}
+
+                {String(d.status) === 'approved' || String(d.status) === 'rejected' || String(d.status) === 'suspended' ? (
+                  <button
+                    onClick={() => deleteDriver(String(d.id))}
+                    className="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white text-red-700 text-sm font-semibold border border-red-200"
+                  >
+                    <Trash2 size={16} /> Delete
+                  </button>
+                ) : null}
               </div>
             </div>
 

@@ -117,7 +117,9 @@ export default function RideDriverDashboardPage() {
     }
   }
 
-  const canDrive = useMemo(() => String(profile?.status) === 'approved', [profile?.status])
+  const driverStatus = useMemo(() => String(profile?.status || ''), [profile?.status])
+  const canDrive = useMemo(() => driverStatus === 'approved', [driverStatus])
+  const isSuspended = useMemo(() => driverStatus === 'suspended', [driverStatus])
 
   const pickupIcon = useMemo(() => {
     const svg = `
@@ -538,7 +540,9 @@ export default function RideDriverDashboardPage() {
           <div className="min-w-0">
             <div className={`text-white text-lg font-extrabold ${language === 'dv' ? 'dhivehi-font' : ''}`}>
               {profile?.id
-                ? (canDrive ? (language === 'dv' ? 'އެޕްރޫވް' : 'Approved') : (language === 'dv' ? 'ޕެންޑިންގ' : 'Pending approval'))
+                ? (isSuspended
+                  ? (language === 'dv' ? 'ސަސްޕެންޑް' : 'Suspended')
+                  : (canDrive ? (language === 'dv' ? 'އެޕްރޫވް' : 'Approved') : (language === 'dv' ? 'ޕެންޑިންގ' : 'Pending approval')))
                 : (language === 'dv' ? 'ރަޖިސްޓަރ ކުރޭ' : 'Register first')}
             </div>
             <div className={`text-white/80 text-sm ${language === 'dv' ? 'dhivehi-font' : ''}`}>
@@ -569,6 +573,22 @@ export default function RideDriverDashboardPage() {
         ) : null}
 
         {error ? <div className="text-sm text-red-600">{error}</div> : null}
+
+        {isSuspended ? (
+          <div className="card p-4 border border-amber-200 bg-amber-50">
+            <div className={`font-extrabold text-amber-900 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? 'ސަސްޕެންޑް' : 'Suspended'}
+            </div>
+            <div className={`mt-1 text-sm text-amber-900/90 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
+              {language === 'dv' ? 'އެޑްމިން ސަސްޕެންޑް ކުރީ. ދެން ރީ-އެކްޓިވޭޓް ކުރާނެ.' : 'Admin suspended your driver account. You cannot accept rides until reactivated.'}
+            </div>
+            {profile?.suspended_reason ? (
+              <div className="mt-2 text-sm text-amber-900">
+                {language === 'dv' ? 'ސަބަބު:' : 'Reason:'} <span className="font-semibold">{String(profile.suspended_reason)}</span>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
 
         {loading ? (
           <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>

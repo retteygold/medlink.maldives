@@ -1526,6 +1526,59 @@ export async function createRideDriverProfile(payload: {
   }
 }
 
+export async function updateMyRideDriverProfile(payload: {
+  full_name: string
+  phone: string
+  vehicle_type: RideVehicleType
+  vehicle_brand: string
+  vehicle_color: string
+  vehicle_number: string
+  license_number: string
+  annual_fee: number
+  driver_image_path?: string | null
+  license_image_path?: string | null
+  vehicle_image_path?: string | null
+}): Promise<RideDriverProfile | undefined> {
+  try {
+    const { data: sessionData, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) throw sessionError
+    const user = sessionData.session?.user
+    if (!user) throw new Error('Not authenticated')
+
+    const updatePayload: any = {
+      full_name: payload.full_name.trim(),
+      phone: payload.phone.trim(),
+      vehicle_type: payload.vehicle_type,
+      vehicle_brand: payload.vehicle_brand.trim(),
+      vehicle_color: payload.vehicle_color.trim(),
+      vehicle_number: payload.vehicle_number.trim(),
+      license_number: payload.license_number.trim(),
+      annual_fee: typeof payload.annual_fee === 'number' ? payload.annual_fee : 0
+    }
+
+    if (payload.driver_image_path !== undefined) updatePayload.driver_image_path = payload.driver_image_path
+    if (payload.license_image_path !== undefined) updatePayload.license_image_path = payload.license_image_path
+    if (payload.vehicle_image_path !== undefined) updatePayload.vehicle_image_path = payload.vehicle_image_path
+
+    updatePayload.status = 'pending'
+    updatePayload.rejection_reason = null
+    updatePayload.suspended_reason = null
+    updatePayload.suspended_at = null
+
+    const { data, error } = await supabase
+      .from('ride_driver_profiles')
+      .update(updatePayload)
+      .eq('user_id', user.id)
+      .select('*')
+      .maybeSingle()
+    if (error) throw error
+    return (data || undefined) as any
+  } catch (err) {
+    console.error('Error updating ride driver profile:', err)
+    return undefined
+  }
+}
+
 export async function createRideRequest(payload: {
   origin_text: string
   origin_lat?: number | null

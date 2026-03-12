@@ -5,6 +5,7 @@ import { useLanguage } from '../lib/languageContext'
 import {
   createRideDriverProfile,
   getMyRideDriverProfile,
+  updateMyRideDriverProfile,
   uploadRideDriverImage
 } from '../lib/dataService'
 
@@ -16,6 +17,7 @@ export default function RideDriverSignupPage() {
 
   const [loading, setLoading] = useState(true)
   const [existing, setExisting] = useState<any>(null)
+  const [reapplyMode, setReapplyMode] = useState(false)
 
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
@@ -42,6 +44,7 @@ export default function RideDriverSignupPage() {
     try {
       const me = await getMyRideDriverProfile()
       setExisting(me)
+      setReapplyMode(false)
       if (me) {
         setFullName(me.full_name || '')
         setPhone(me.phone || '')
@@ -63,6 +66,7 @@ export default function RideDriverSignupPage() {
     const s = String(existing?.status || 'pending')
     if (s === 'approved') return language === 'dv' ? 'އެޕްރޫވް' : 'Approved'
     if (s === 'rejected') return language === 'dv' ? 'ރިޖެކްޓް' : 'Rejected'
+    if (s === 'suspended') return language === 'dv' ? 'ސަސްޕެންޑް' : 'Suspended'
     return language === 'dv' ? 'ޕެންޑިންގ' : 'Pending approval'
   }, [existing?.status, language])
 
@@ -72,7 +76,7 @@ export default function RideDriverSignupPage() {
     setError(null)
 
     try {
-      if (existing?.id) {
+      if (existing?.id && String(existing.status) !== 'rejected') {
         navigate('/ride/driver/dashboard')
         return
       }
@@ -81,21 +85,37 @@ export default function RideDriverSignupPage() {
       const licenseImagePath = licenseImage ? await uploadRideDriverImage(licenseImage, 'license') : null
       const vehicleImagePath = vehicleImage ? await uploadRideDriverImage(vehicleImage, 'vehicle') : null
 
-      const created = await createRideDriverProfile({
-        full_name: fullName,
-        phone,
-        vehicle_type: vehicleType,
-        vehicle_brand: vehicleBrand,
-        vehicle_color: vehicleColor,
-        vehicle_number: vehicleNumber,
-        license_number: licenseNumber,
-        annual_fee: annualFee ? Number(annualFee) : 0,
-        driver_image_path: driverImagePath,
-        license_image_path: licenseImagePath,
-        vehicle_image_path: vehicleImagePath
-      })
+      const annual = annualFee ? Number(annualFee) : 0
 
-      if (!created?.id) throw new Error('Failed to register driver')
+      const saved = existing?.id
+        ? await updateMyRideDriverProfile({
+            full_name: fullName,
+            phone,
+            vehicle_type: vehicleType,
+            vehicle_brand: vehicleBrand,
+            vehicle_color: vehicleColor,
+            vehicle_number: vehicleNumber,
+            license_number: licenseNumber,
+            annual_fee: annual,
+            driver_image_path: driverImagePath,
+            license_image_path: licenseImagePath,
+            vehicle_image_path: vehicleImagePath
+          })
+        : await createRideDriverProfile({
+            full_name: fullName,
+            phone,
+            vehicle_type: vehicleType,
+            vehicle_brand: vehicleBrand,
+            vehicle_color: vehicleColor,
+            vehicle_number: vehicleNumber,
+            license_number: licenseNumber,
+            annual_fee: annual,
+            driver_image_path: driverImagePath,
+            license_image_path: licenseImagePath,
+            vehicle_image_path: vehicleImagePath
+          })
+
+      if (!saved?.id) throw new Error(existing?.id ? 'Failed to re-apply' : 'Failed to register driver')
       navigate('/ride/driver/dashboard', { replace: true })
     } catch (err: any) {
       setError(err?.message || 'Failed to register')
@@ -141,7 +161,7 @@ export default function RideDriverSignupPage() {
           <div className={`text-sm text-gray-500 ${language === 'dv' ? 'dhivehi-font' : ''}`}>
             {language === 'dv' ? 'ލޯޑް ވަނީ...' : 'Loading...'}
           </div>
-        ) : existing?.id ? (
+        ) : existing?.id && !(String(existing?.status) === 'rejected' && reapplyMode) ? (
           <div className="card p-4">
             <div className="flex items-center gap-2">
               <ShieldCheck size={18} className="text-medical-700" />
@@ -158,9 +178,28 @@ export default function RideDriverSignupPage() {
                 <span className="font-semibold">{existing.rejection_reason}</span>
               </div>
             ) : null}
+            {String(existing?.status) === 'suspended' ? (
+              <div className="mt-3 text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3">
+                {language === 'dv' ? 'ސަސްޕެންޑް' : 'Suspended'}
+                {existing?.suspended_reason ? (
+                  <>
+                    {': '}<span className="font-semibold">{String(existing.suspended_reason)}</span>
+                  </>
+                ) : null}
+              </div>
+            ) : null}
             <Link to="/ride/driver/dashboard" className="btn-primary inline-flex mt-4">
               {language === 'dv' ? 'ޑޭޝްބޯރޑް' : 'Go to dashboard'}
             </Link>
+            {String(existing?.status) === 'rejected' ? (
+              <button
+                type="button"
+                onClick={() => setReapplyMode(true)}
+                className="btn-secondary inline-flex mt-3"
+              >
+                {language === 'dv' ? 'ރީ-އެޕްލައި' : 'Re-apply'}
+              </button>
+            ) : null}
           </div>
         ) : (
           <form onSubmit={onSubmit} className="space-y-3">
