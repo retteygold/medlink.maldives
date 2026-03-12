@@ -29,7 +29,9 @@ export default function RideDriverDashboardPage() {
   const [savingFinish, setSavingFinish] = useState(false)
 
   const [myPos, setMyPos] = useState<{ lat: number; lng: number } | null>(null)
+  const [myAccuracy, setMyAccuracy] = useState<number | null>(null)
   const lastSentRef = useRef<number>(0)
+  const lastSentPosRef = useRef<{ lat: number; lng: number } | null>(null)
   const [routePoints, setRoutePoints] = useState<Array<[number, number]>>([])
 
   const [geoOrigin, setGeoOrigin] = useState<{ lat: number; lng: number } | null>(null)
@@ -46,6 +48,18 @@ export default function RideDriverDashboardPage() {
   const mapRef = useRef<L.Map | null>(null)
   const [followMe, setFollowMe] = useState(true)
   const hasFittedRef = useRef(false)
+
+  function distanceMeters(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+    const R = 6371000
+    const dLat = ((b.lat - a.lat) * Math.PI) / 180
+    const dLng = ((b.lng - a.lng) * Math.PI) / 180
+    const lat1 = (a.lat * Math.PI) / 180
+    const lat2 = (b.lat * Math.PI) / 180
+    const s1 = Math.sin(dLat / 2)
+    const s2 = Math.sin(dLng / 2)
+    const h = s1 * s1 + Math.cos(lat1) * Math.cos(lat2) * s2 * s2
+    return 2 * R * Math.asin(Math.min(1, Math.sqrt(h)))
+  }
 
   function MapRefCapture() {
     const map = useMap()
@@ -220,12 +234,26 @@ export default function RideDriverDashboardPage() {
         if (stopped) return
         const lat = pos.coords.latitude
         const lng = pos.coords.longitude
+        const acc = typeof pos.coords.accuracy === 'number' ? pos.coords.accuracy : null
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) return
         setMyPos({ lat, lng })
+        setMyAccuracy(acc)
+
+        if (typeof acc === 'number' && acc > 150) {
+          return
+        }
 
         const now = Date.now()
-        if (now - lastSentRef.current < 3000) return
+        if (now - lastSentRef.current < 5000) return
+
+        const nextPos = { lat, lng }
+        const lastPos = lastSentPosRef.current
+        if (lastPos) {
+          const moved = distanceMeters(lastPos, nextPos)
+          if (moved < 15) return
+        }
         lastSentRef.current = now
+        lastSentPosRef.current = nextPos
         const ok = await updateDriverTripLocation(tripId, lat, lng)
         if (ok) {
           setLastLocationSentAt(Date.now())
@@ -235,7 +263,7 @@ export default function RideDriverDashboardPage() {
       },
       () => {
       },
-      { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+      { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 }
     )
 
     return () => {
@@ -677,6 +705,12 @@ export default function RideDriverDashboardPage() {
             <div className="mt-3 text-xs text-gray-500">
               {language === 'dv' ? 'GPS:' : 'GPS:'}{' '}
               <span className="font-semibold text-gray-700">{myPos ? 'ON' : 'OFF'}</span>
+              {typeof myAccuracy === 'number' ? (
+                <>
+                  {' '}• {language === 'dv' ? 'އެކިއުރެސީ' : 'Accuracy'}:{' '}
+                  {Math.round(myAccuracy)}m
+                </>
+              ) : null}
               {lastLocationSentAt ? (
                 <>
                   {' '}• {language === 'dv' ? 'އެންމެ ފަހު ސެންޑް' : 'Last sent'}:{' '}
